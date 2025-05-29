@@ -1,0 +1,58 @@
+.mat-toolbar {
+  background-color: #efefe7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 24px;
+  height: 64px;
+}
+
+.example-icon {
+  color: #666666;
+  transition: color 0.3s ease;
+}
+
+.example-icon:hover {
+  color: #1976d2;
+}
+
+.favorite-icon {
+  margin: 0 8px;
+}
+
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+span {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333333;
+  margin-left: 16px;
+}
+
+button {
+  margin: 0 4px;
+}
+
+.palette-badge {
+  position: relative;
+}
+.theme-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  pointer-events: none;
+}
+.theme-sample {
+  display: inline-block;
+  width: 24px;
+  height: 12px;
+  border-radius: 6px;
+  margin-left: 12px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}

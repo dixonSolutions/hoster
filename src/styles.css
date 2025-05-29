@@ -1,4 +1,56 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
+   
+        /* You can use other color formats too: */
+        /* background-color: lightblue; */
+        /* background-color: rgb(240, 248, 255); */
+        /* background-color: hsl(210, 100%, 98%); */
+      }
+
+/* Theme: Rose & Red */
+body[data-theme='rose-red'] {
+  --primary-bg: #fff1f2;
+  --primary-fg: #b71c1c;
+  --accent: #e57373;
+  --toolbar-bg: #fff1f2;
+  --toolbar-fg: #b71c1c;
+}
+
+/* Theme: Azure & Blue */
+body[data-theme='azure-blue'] {
+  --primary-bg: #e3f2fd;
+  --primary-fg: #0d47a1;
+  --accent: #90caf9;
+  --toolbar-bg: #e3f2fd;
+  --toolbar-fg: #0d47a1;
+}
+
+/* Theme: Magenta & Violet */
+body[data-theme='magenta-violet'] {
+  --primary-bg: #f3e5f5;
+  --primary-fg: #4a148c;
+  --accent: #8e24aa;
+  --toolbar-bg: #f3e5f5;
+  --toolbar-fg: #4a148c;
+}
+
+/* Theme: Cyan & Orange */
+body[data-theme='cyan-orange'] {
+  --primary-bg: #e0f7fa;
+  --primary-fg: #ff6f00;
+  --accent: #008b8b;
+  --toolbar-bg: #e0f7fa;
+  --toolbar-fg: #ff6f00;
+}
+
+body {
+  background: var(--primary-bg, #efefe7);
+  color: var(--primary-fg, #333);
+}
+
+.mat-toolbar {
+  background: var(--toolbar-bg, #efefe7) !important;
+  color: var(--toolbar-fg, #333) !important;
+}

@@ -1,3 +1,45 @@
-<mat-toolbar-row>
-    <span>Custom Toolbar</span>
-</mat-toolbar-row>
+<mat-toolbar>
+    <button mat-icon-button [matMenuTriggerFor]="appMenu" aria-label="Open menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <mat-menu #appMenu="matMenu">
+        <button mat-menu-item (click)="navigateToOrderHistory()">
+          <mat-icon>history</mat-icon>
+          <span>History</span>
+        </button>
+        <button mat-menu-item (click)="openSimpleDialog()">
+          <mat-icon>info</mat-icon>
+          <span>About</span>
+        </button>
+      </mat-menu>
+    <div>
+        <h2>Car Washing Crew!</h2>
+    </div>
+    <span class="example-spacer"></span>
+
+    <!-- Palette Icon with Badge and Theme Menu -->
+    <button mat-icon-button [matMenuTriggerFor]="themeMenu" matBadge=" " [matBadgeOverlap]="false" class="palette-badge" aria-label="Select theme">
+        <mat-icon>palette</mat-icon>
+        <span class="theme-badge" [ngStyle]="{ 'background-color': selectedTheme?.badgeColor }"></span>
+    </button>
+    <mat-menu #themeMenu="matMenu">
+        <ng-container *ngFor="let option of themeOptions">
+            <button mat-menu-item (click)="selectTheme(option)">
+                <mat-icon *ngIf="selectedTheme?.value === option.value">radio_button_checked</mat-icon>
+                <mat-icon *ngIf="selectedTheme?.value !== option.value">radio_button_unchecked</mat-icon>
+                <span>{{ option.name }}</span>
+                <span class="theme-sample" [ngStyle]="{ 'background-color': option.badgeColor }"></span>
+            </button>
+        </ng-container>
+    </mat-menu>
+
+    <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+        <mat-icon (click)="navigateToProfile()">person</mat-icon>    </button>
+    <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">
+        <mat-icon (click)="navigateToShoppingCart()">shopping_cart</mat-icon>    </button>
+        <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">
+            <mat-icon (click)="navigateToHome()">home</mat-icon>    </button>
+
+  </mat-toolbar>
+  
