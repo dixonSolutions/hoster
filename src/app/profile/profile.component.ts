@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { TopbarComponent } from '../topbar/topbar.component';
+
 @Component({
   selector: 'app-profile',
-  imports: [TopbarComponent],
+  standalone: true,
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
