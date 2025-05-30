@@ -1,6 +1,77 @@
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .example-card {
-    max-width: 250px;
-  }
-  .button {
-    background-color: #eceade; /* Green */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.example-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+mat-card-header {
+  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 4px 4px 0 0;
+}
+
+.example-header-image {
+  background-size: cover;
+  background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 16px;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+mat-card-subtitle {
+  color: #34495e;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+mat-card-content {
+  flex-grow: 1;
+  padding: 16px;
+  color: #666;
+}
+
+mat-card-actions {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+}
+
+
+
+.button:hover {
+  opacity: 0.9;
+}
+
+mat-icon {
+  color: #666;
+  transition: color 0.2s;
+}
+
+mat-icon:hover {
+  color: #764ba2;
 }

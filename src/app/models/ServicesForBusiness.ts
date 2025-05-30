@@ -6,4 +6,5 @@ export interface ServicesForBusiness {
         serviceEstimatedTime: string | undefined;
         servicePrice :number | undefined;
         servicePriceCurrencyUnit: string | undefined;
+        serviceImageUrl: string | undefined;
 }
