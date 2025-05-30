@@ -58,6 +58,12 @@ export class TopbarComponent implements OnInit {
               console.error('Error fetching business info:', error);
             }
           });
+          this.dataService.getServicesForBusiness(this.dataService.businessID, this.dataService.JWTtoken).subscribe({
+            next: (response) => {
+              this.dataService.services = response;
+              console.log(this.dataService.services);
+            }
+          });
         }
       },
       error: (error) => {

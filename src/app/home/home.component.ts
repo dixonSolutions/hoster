@@ -7,6 +7,7 @@ import { AboutUsPopupComponent } from '../about-us-popup/about-us-popup.componen
 import { MatDialog } from '@angular/material/dialog';
 import { DataServiceService } from '../data-service.service';
 import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -16,16 +17,18 @@ import { HttpClientModule } from '@angular/common/http';
     MatCardModule, 
     MatButtonModule, 
     MatIconModule, 
-    HttpClientModule
+    HttpClientModule,
+    CommonModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
-  private dataService = inject(DataServiceService);
+  public dataService = inject(DataServiceService);
   private dialog = inject(MatDialog);
 
   constructor() {
+    console.log(this.dataService.services);
     
   }
   
