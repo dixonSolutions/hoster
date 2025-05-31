@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BussinessBasicInfo } from './models/BussinessBasicInfo';
 import { ServicesForBusiness } from './models/ServicesForBusiness';
+import { User } from './models/user';
 
 export interface CartItem {
   service: ServicesForBusiness;
@@ -38,6 +39,9 @@ export class DataServiceService {
   userID: string = "52127991-3353-4251-b731-6da879272ab1";
   URLforJWTtoken: string = "https://localhost:44327/api/User/GetUserById/";
   UrlforBusinessBasicInfo: string = 'https://localhost:44327/api/Business/GetBusinessByBusinessID?businessID=';
+  private apiUrl = 'http://localhost:3000/api'; // Adjust this to your API URL
+  user: User = {} as User;
+  private authToken: string = '';
 
   constructor(private http: HttpClient) { }
 
@@ -98,5 +102,30 @@ export class DataServiceService {
   getQuanityOfServiceInCart(service: ServicesForBusiness) {
     const item = this.CartItems.find(item => item.service.serviceID === service.serviceID);
     return item ? item.quantity : 0;
+  }
+
+  setAuthToken(token: string) {
+    this.authToken = token;
+  }
+
+  getAuthToken(): string {
+    return this.authToken;
+  }
+
+  createUser(user: User): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users`, user);
+  }
+
+  generateSecurityCode(length: number): string {
+    const characters = '0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  SendVerificationEmail(email: string, subject: string, message: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/send-email`, { email, subject, message });
   }
 }

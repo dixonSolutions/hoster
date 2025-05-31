@@ -1,1 +1,129 @@
-<p>profile works!</p>
+<div class="cards-container" *ngIf="isHiddenSignUpMessage">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <mat-card-title>Sign Up</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="form-container">
+        <form [formGroup]="profileFormForSignUp" (ngSubmit)="onSubmitSignUp()">
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter your name">
+            <mat-error *ngIf="profileFormForSignUp.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Enter your email">
+            <mat-error *ngIf="profileFormForSignUp.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="profileFormForSignUp.get('email')?.hasError('email')">
+              Please enter a valid email address
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="!profileFormForSignUp.valid">
+            Sign Up With Verification Code
+          </button>
+
+          <div class="divider">
+            <span>OR</span>
+          </div>
+
+          <div>
+            Already have an account? <button mat-button (click)="isHiddenSignUpMessage = true; isHiddenSignInMessage = false;">Sign In</button>
+          </div>
+
+
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="profile-card" *ngIf="!isHiddenSignInMessage">
+    <mat-card-header>
+      <mat-card-title>Sign In</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="form-container">
+        <form [formGroup]="profileFormForSignIn" (ngSubmit)="onSubmitSignIn()">
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter your name">
+            <mat-error *ngIf="profileFormForSignIn.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="Enter your email">
+            <mat-error *ngIf="profileFormForSignIn.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="profileFormForSignIn.get('email')?.hasError('email')">
+              Please enter a valid email address
+            </mat-error>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="!profileFormForSignIn.valid">
+            Sign In With Verification Code
+          </button>
+
+          <div class="divider">
+            <span>OR</span>
+          </div>
+
+          <div>
+            Don't have an account? <button mat-button (click)="isHiddenSignInMessage = true; isHiddenSignUpMessage = false;">Sign Up</button>
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+<div id="google-signin-container" class="google-signin-container">
+    <!--    <div id="g_id_onload"
+         [attr.data-client_id]="'763839777363-2tclimqvmlkkagk6j5d14me4ec4iq2hl.apps.googleusercontent.com'"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false"
+         data-use_fedcm_for_prompt="true">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left">
+    </div>--->
+
+ 
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <div id="g_id_onload"
+        data-client_id="763839777363-2tclimqvmlkkagk6j5d14me4ec4iq2hl.apps.googleusercontent.com"
+        data-login_uri="http://localhost:4200/profile"
+        data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+
+    
+  </div>
+<div id="user-info" *ngIf="!isHiddenWelcomeMessage">
+  <p>Welcome, {{ dataService.user.name }}!</p>
+</div>
+  
+  
+
