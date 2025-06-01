@@ -1,10 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Account } from './models/account';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BussinessBasicInfo } from './models/BussinessBasicInfo';
 import { ServicesForBusiness } from './models/ServicesForBusiness';
 import { User } from './models/user';
+import {
+  MatSnackBar,
+  MatSnackBarAction,
+  MatSnackBarActions,
+  MatSnackBarLabel,
+  MatSnackBarRef,
+} from '@angular/material/snack-bar';
 
 export interface CartItem {
   service: ServicesForBusiness;
@@ -28,6 +35,7 @@ interface TokenResponse {
   providedIn: 'root'
 })
 export class DataServiceService {
+  private _snackBar = inject(MatSnackBar);
   User: Account | undefined;
   JWTtoken: string | undefined;
   itemsInCart: number = 0;
@@ -127,6 +135,14 @@ export class DataServiceService {
   }
 
   SendVerificationEmail(email: string, subject: string, message: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/send-email`, { email, subject, message });
+    return this.http.post(`https://localhost:44327/api/UserVerification/send-verification-email`, { email, subject, message });
+  }
+  verifyUserViaGoogle(idToken: string): Observable<any> {
+    return this.http.post('https://localhost:44327/api/User/verify-user-via-google', idToken);
+  }
+  openSnackBar(component: any, duration: number, firstButton: string, secondButton: string) {
+    this._snackBar.open(firstButton, secondButton, {
+      duration: duration,
+    });
   }
 }

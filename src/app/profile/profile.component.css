@@ -150,3 +150,20 @@ button {
   font-weight: 600;
   color: #1976d2;
 }
+
+.signed-in-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.user-details {
+  margin-top: 16px;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.user-details p {
+  margin: 4px 0;
+}

@@ -34,8 +34,14 @@
         </ng-container>
     </mat-menu>
 
-    <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-        <mat-icon (click)="navigateToProfile()">person</mat-icon>    </button>
+    <button matIconButton class="example-icon favorite-icon profile-badge-btn" aria-label="Example icon-button with heart icon"
+      matBadge="signed in" matBadgeColor="accent" matBadgePosition="above after" *ngIf="dataService.user.name" (click)="navigateToProfile()">
+        <mat-icon>person</mat-icon>
+    </button>
+    <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon"
+      *ngIf="!dataService.user.name" (click)="navigateToProfile()">
+        <mat-icon>person</mat-icon>
+    </button>
     <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">
         <mat-icon (click)="navigateToShoppingCart()" matBadge="{{this.dataService.itemsInCart}}">shopping_cart</mat-icon>    </button>
         <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">

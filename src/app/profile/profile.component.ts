@@ -70,6 +70,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    if(this.dataService.user.name !== undefined) {
+      this.dataService.openSnackBar(this, 5000, 'You are signed in as ' + this.dataService.user.name + '!', 'OK');
+      this.isHiddenWelcomeMessage = false;
+    }
     if (this.dataService.user.name == undefined) {
       this.isHiddenWelcomeMessage = true;
       this.cdr.detectChanges();
@@ -142,6 +146,14 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleCredentialResponse(response: { credential: string }) {
     try {
+      this.dataService.verifyUserViaGoogle(response.credential).subscribe({
+        next: (response: any) => {
+          console.log('User verified successfully:', response);
+        },
+        error: (error: Error) => {
+          console.error('Error verifying user:', error);
+        }
+      });
       const decodedCredential = this.parseJwt(response.credential);
       console.log('Decoded credential:', decodedCredential);
       
@@ -154,12 +166,14 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       
       // Create user object
       const user: User = {
-        googleAccountId: decodedCredential.sub,
+        userID: decodedCredential.sub,
         name: decodedCredential.name,
         email: decodedCredential.email
       };
-      
+      console.log('User:', user);
       this.dataService.user = user;
+      this.dataService.openSnackBar(this, 5000, 'You are signed in as ' + user.name + '!', 'OK');
+      
       this.isHiddenWelcomeMessage = false;
       
       // Create user in backend
