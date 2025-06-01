@@ -18,6 +18,19 @@ import {MatInputModule} from '@angular/material/input';
 })
 export class ShoppingCartComponent {
   public dataService = inject(DataServiceService);
+  CheckOutPessed(){
+    if(this.dataService.CartItems.length == 0){
+      this.dataService.openSnackBar(this, 5000, 'Your cart is empty, you need to add some services to checkout', 'OK');
+    }
+    else{
+      if(this.dataService.user.name == undefined){
+        this.dataService.openSnackBar(this, 5000, 'You need to sign in to checkout', 'OK');
+      }else{
+        this.dataService.openSnackBar(this, 5000, 'Checkout successful', 'OK');
+      }
+
+    }
+  }
   myFilter = (d: Date | null): boolean => {
     if (!d) return false;
     const today = new Date();
