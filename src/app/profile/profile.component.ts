@@ -108,13 +108,26 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       console.log('Attempting to initialize Google Sign-In');
       
-      // Initialize Google Sign-In with minimal configuration
+      // Initialize Google Sign-In
       window.google.accounts.id.initialize({
         client_id: this.CLIENT_ID,
         callback: window.handleCredentialResponse,
         auto_select: false,
         cancel_on_tap_outside: true
       });
+
+      // Render the button
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-signin-container'),
+        { 
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'rectangular',
+          logo_alignment: 'left'
+        }
+      );
 
       this.isInitialized = true;
       this.showGoogleButton = true;
@@ -130,11 +143,16 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   handleCredentialResponse(response: { credential: string }) {
     try {
       const decodedCredential = this.parseJwt(response.credential);
+      console.log('Decoded credential:', decodedCredential);
+      
       this.userData = decodedCredential;
       
+      // Store the token
       localStorage.setItem('google_token', response.credential);
+      console.log('Google token stored:', response.credential);
       this.dataService.setAuthToken(response.credential);
       
+      // Create user object
       const user: User = {
         googleAccountId: decodedCredential.sub,
         name: decodedCredential.name,
@@ -144,15 +162,20 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       this.dataService.user = user;
       this.isHiddenWelcomeMessage = false;
       
+      // Create user in backend
       this.dataService.createUser(user).subscribe({
         next: (response: any) => {
           console.log('User created successfully:', response);
-          this.dataService.setAuthToken(response.token);
-          localStorage.setItem('jwt_token', response.token);
+          if (response.token) {
+            this.dataService.setAuthToken(response.token);
+            localStorage.setItem('jwt_token', response.token);
+          }
           this.router.navigate(['/contact']);
         },
         error: (error: Error) => {
           console.error('Error creating user:', error);
+          // Still show welcome message even if backend creation fails
+          this.isHiddenWelcomeMessage = false;
         }
       });
     } catch (error) {
@@ -197,5 +220,12 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     // Initialize component
+    this.isHiddenSignInMessage = false;  // Show sign in card by default
+    this.isHiddenSignUpMessage = true;   // Hide sign up card by default
+  }
+
+  toggleForms() {
+    this.isHiddenSignInMessage = !this.isHiddenSignInMessage;
+    this.isHiddenSignUpMessage = !this.isHiddenSignUpMessage;
   }
 }

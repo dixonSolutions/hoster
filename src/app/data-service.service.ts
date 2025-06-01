@@ -113,7 +113,8 @@ export class DataServiceService {
   }
 
   createUser(user: User): Observable<any> {
-    return this.http.post(`${this.apiUrl}/users`, user);
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    return this.http.post(`${this.apiUrl}/auth/google`, user, { headers });
   }
 
   generateSecurityCode(length: number): string {
