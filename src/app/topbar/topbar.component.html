@@ -35,7 +35,7 @@
     </mat-menu>
 
     <button matIconButton class="example-icon favorite-icon profile-badge-btn" aria-label="Example icon-button with heart icon"
-      matBadge="signed in" matBadgeColor="accent" matBadgePosition="above after" *ngIf="dataService.user.name" (click)="navigateToProfile()">
+      matBadge="signed in" matBadgeColor="accent" matBadgePosition="above after" *ngIf="dataService.theClient?.name" (click)="navigateToProfile()">
         <mat-icon>person</mat-icon>
     </button>
     <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon"

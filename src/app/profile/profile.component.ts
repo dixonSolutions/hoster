@@ -10,7 +10,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { DataServiceService } from '../../app/data-service.service';
 import { User } from '../../app/models/user';
-
+import { CookieService } from 'ngx-cookie-service';
+import { Inject } from '@angular/core';
+import { BusinessClientsInWebsite } from '../models/BusinessClientsInWebsite';
 declare global {
   interface Window {
     google: any;
@@ -53,7 +55,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     private fb: FormBuilder,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    public dataService: DataServiceService
+    public dataService: DataServiceService,
+    private cookie: CookieService
   ) {
     this.profileFormForSignUp = this.fb.group({
       name: ['', [Validators.required]],
@@ -149,46 +152,81 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleCredentialResponse(response: { credential: string }) {
+    console.log("Credential response:", response);
+    const responseVariable = response;
+    const decodedCredential = this.parseJwt(response.credential);
+    console.log('Decoded credential:', decodedCredential);
     
+    this.userData = decodedCredential;
     
-      const decodedCredential = this.parseJwt(response.credential);
-      console.log('Decoded credential:', decodedCredential);
-      
-      this.userData = decodedCredential;
-      
-      // Store the token
-      localStorage.setItem('google_token', response.credential);
-      console.log('Google token stored:', response.credential);
-      this.dataService.setAuthToken(response.credential);
-      
-      // Create user object
-      const user: User = {
-        userID: decodedCredential.sub,
-        name: decodedCredential.name,
-        email: decodedCredential.email
-      };
-      console.log('User:', user);
-      this.dataService.user = user;
-      console.log("ABout to execute method to register client in business");
-      this.dataService.RegisterClientInBusiness({businessId: this.dataService.businessID, userId: this.dataService.user.userID, email: this.dataService.user.email, name: this.dataService.user.name}).subscribe({
+    // Store the token
+    localStorage.setItem('google_token', response.credential);
+    console.log('Google token stored:', response.credential);
+    this.dataService.setAuthToken(response.credential);
+    
+    // Create user object
+    const user: User = {
+      userID: decodedCredential.sub,
+      name: decodedCredential.name,
+      email: decodedCredential.email
+    };
+    console.log('User:', user);
+    this.dataService.user = user;
+
+    // Register client using Google token
+    if(this.isHiddenSignInMessage == true) {
+      this.dataService.registerClientWithGoogle(responseVariable.credential, this.dataService.businessID).subscribe({
         next: (response: any) => {
-          console.log('Client registered successfully:', response);
+          console.log('Full registration response:', response);
           this.dataService.theClient = response;
+          // Set JWT token from response
+          if (response.token) {
+            console.log('Setting JWT token from registration:', response.token);
+            this.dataService.JWTtoken = response.token;
+            localStorage.setItem('jwt_token', response.token);
+            // Store user ID in cookie
+            if (response.userId) {
+              this.cookie.set('User ID', response.userId, 365);
+            }
+          } else {
+            console.warn('No token found in registration response');
+          }
           this.dataService.openSnackBar(this, 5000, 'Client registered successfully!', 'OK');
           this.isHiddenWelcomeMessage = false;
         },
         error: (error: any) => {
           console.error('Error registering client:', error);
-          // Extract the error message from the error response
           const errorMessage = error.error?.message || error.error || 'Unknown error occurred';
           this.dataService.openSnackBar(this, 5000, errorMessage, 'OK');
         }
       });
-      
-      
-      // Create user in backend
-      
-
+    } else {
+      this.dataService.SignInClientWithGoogle(responseVariable.credential, this.dataService.businessID).subscribe({
+        next: (response: any) => {
+          console.log('Full sign-in response:', response);
+          this.dataService.theClient = response;
+          // Set JWT token from response
+          if (response.token) {
+            console.log('Setting JWT token from sign-in:', response.token);
+            this.dataService.JWTtoken = response.token;
+            localStorage.setItem('jwt_token', response.token);
+            // Store user ID in cookie
+            if (response.userId) {
+              this.cookie.set('User ID', response.userId, 365);
+            }
+          } else {
+            console.warn('No token found in sign-in response');
+          }
+          this.dataService.openSnackBar(this, 5000, 'Client signed in successfully!', 'OK');
+          this.isHiddenWelcomeMessage = false;
+        },
+        error: (error: any) => {
+          console.error('Error signing in client:', error);
+          const errorMessage = error.error?.message || error.error || 'Unknown error occurred';
+          this.dataService.openSnackBar(this, 5000, errorMessage, 'OK');
+        }
+      });
+    }
   }
 
   private parseJwt(token: string) {
@@ -230,6 +268,33 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
     // Initialize component
     this.isHiddenSignInMessage = false;  // Show sign in card by default
     this.isHiddenSignUpMessage = true;   // Hide sign up card by default
+
+    // Wait for token to be available
+    const checkToken = () => {
+      if (this.dataService.JWTtoken) {
+        const UserIDInCookie = this.cookie.get('User ID');
+        if (UserIDInCookie) {
+          this.dataService.getClientById(UserIDInCookie).subscribe({
+            next: (response: BusinessClientsInWebsite) => {
+              console.log('Client retrieved successfully:', response);
+              this.dataService.theClient = response;
+              this.isHiddenWelcomeMessage = false;
+            },
+            error: (error: any) => {
+              console.error('Error getting client:', error);
+              const errorMessage = error.error?.message || error.error || 'Unknown error occurred';
+              this.dataService.openSnackBar(this, 5000, errorMessage, 'OK');
+            }
+          });
+        }
+      } else {
+        // If token is not available yet, check again after a short delay
+        setTimeout(checkToken, 100);
+      }
+    };
+
+    // Start checking for token
+    checkToken();
   }
 
   toggleForms() {

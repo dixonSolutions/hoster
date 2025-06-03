@@ -31,6 +31,10 @@ interface TokenResponse {
   asyncState: any;
   isFaulted: boolean;
 }
+interface GoogleClientRegistrationRequest {
+  googleToken: string;
+  businessId: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -99,6 +103,36 @@ export class DataServiceService {
       client,
       { headers }
     );  }
+    SignInClientWithGoogle(googleToken: string, businessId: string) {
+      console.log('Signing in client with Google token:', { googleToken, businessId });
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.JWTtoken}`
+      });
+    
+      const requestBody: GoogleClientRegistrationRequest = {
+        googleToken: googleToken,
+        businessId: businessId
+      };
+    
+      return this.http.post<BusinessClientsInWebsite>(
+        'https://localhost:44327/api/BusinessWebsite/signin-client-google',
+        requestBody,
+        { headers }
+      );
+    }
+    getClientById(userId: string) {
+      console.log('Getting client by ID:', { userId });
+
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${this.JWTtoken}`
+      });
+    
+      return this.http.get<BusinessClientsInWebsite>(
+        `https://localhost:44327/api/BusinessWebsite/client/${userId}`,
+        { headers }
+      );
+    }
 
   RemoveFromCart(service: ServicesForBusiness) {
     this.CartItems = this.CartItems.filter(item => item.service.serviceID !== service.serviceID);
@@ -161,5 +195,23 @@ export class DataServiceService {
     this._snackBar.open(firstButton, secondButton, {
       duration: duration,
     });
+  }
+  registerClientWithGoogle(googleToken: string, businessId: string) {
+    console.log('Registering client with Google token:', { googleToken, businessId });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.JWTtoken}`
+    });
+  
+    const requestBody: GoogleClientRegistrationRequest = {
+      googleToken: googleToken,
+      businessId: businessId
+    };
+  
+    return this.http.post<BusinessClientsInWebsite>(
+      'https://localhost:44327/api/BusinessWebsite/register-client-google',
+      requestBody,
+      { headers }
+    );
   }
 }
