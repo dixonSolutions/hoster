@@ -78,6 +78,10 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isHiddenWelcomeMessage = true;
       this.cdr.detectChanges();
       
+
+
+
+
       // Start initialization attempts
       this.initInterval = setInterval(() => {
         this.attemptGoogleSignInInitialization();
@@ -145,15 +149,8 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleCredentialResponse(response: { credential: string }) {
-    try {
-      this.dataService.verifyUserViaGoogle(response.credential).subscribe({
-        next: (response: any) => {
-          console.log('User verified successfully:', response);
-        },
-        error: (error: Error) => {
-          console.error('Error verifying user:', error);
-        }
-      });
+    
+    
       const decodedCredential = this.parseJwt(response.credential);
       console.log('Decoded credential:', decodedCredential);
       
@@ -172,29 +169,26 @@ export class ProfileComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       console.log('User:', user);
       this.dataService.user = user;
-      this.dataService.openSnackBar(this, 5000, 'You are signed in as ' + user.name + '!', 'OK');
-      
-      this.isHiddenWelcomeMessage = false;
-      
-      // Create user in backend
-      this.dataService.createUser(user).subscribe({
+      console.log("ABout to execute method to register client in business");
+      this.dataService.RegisterClientInBusiness({businessId: this.dataService.businessID, userId: this.dataService.user.userID, email: this.dataService.user.email, name: this.dataService.user.name}).subscribe({
         next: (response: any) => {
-          console.log('User created successfully:', response);
-          if (response.token) {
-            this.dataService.setAuthToken(response.token);
-            localStorage.setItem('jwt_token', response.token);
-          }
-          this.router.navigate(['/contact']);
-        },
-        error: (error: Error) => {
-          console.error('Error creating user:', error);
-          // Still show welcome message even if backend creation fails
+          console.log('Client registered successfully:', response);
+          this.dataService.theClient = response;
+          this.dataService.openSnackBar(this, 5000, 'Client registered successfully!', 'OK');
           this.isHiddenWelcomeMessage = false;
+        },
+        error: (error: any) => {
+          console.error('Error registering client:', error);
+          // Extract the error message from the error response
+          const errorMessage = error.error?.message || error.error || 'Unknown error occurred';
+          this.dataService.openSnackBar(this, 5000, errorMessage, 'OK');
         }
       });
-    } catch (error) {
-      console.error('Error handling credential response:', error);
-    }
+      
+      
+      // Create user in backend
+      
+
   }
 
   private parseJwt(token: string) {

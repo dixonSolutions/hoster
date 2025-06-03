@@ -12,6 +12,7 @@ import {
   MatSnackBarLabel,
   MatSnackBarRef,
 } from '@angular/material/snack-bar';
+import { BusinessClientsInWebsite } from './models/BusinessClientsInWebsite';
 
 export interface CartItem {
   service: ServicesForBusiness;
@@ -38,6 +39,7 @@ export class DataServiceService {
   private _snackBar = inject(MatSnackBar);
   User: Account | undefined;
   JWTtoken: string | undefined;
+  theClient: BusinessClientsInWebsite | undefined;
   itemsInCart: number = 0;
   CartItems: CartItem[] = [];
   BasicBusinessInfo: BussinessBasicInfo | undefined;
@@ -47,6 +49,7 @@ export class DataServiceService {
   userID: string = "52127991-3353-4251-b731-6da879272ab1";
   URLforJWTtoken: string = "https://localhost:44327/api/User/GetUserById/";
   UrlforBusinessBasicInfo: string = 'https://localhost:44327/api/Business/GetBusinessByBusinessID?businessID=';
+  UrlForBusinessClientRegistration: string = 'https://localhost:44327/api/BusinessWebsite/register-client'
   private apiUrl = 'http://localhost:3000/api'; // Adjust this to your API URL
   user: User = {} as User;
   private authToken: string = '';
@@ -82,6 +85,20 @@ export class DataServiceService {
     }
     this.updateItemsInCart();
   }
+
+  RegisterClientInBusiness(client: BusinessClientsInWebsite) {
+    console.log("About to register client in business", client);
+    console.log("JWT token", this.JWTtoken);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.JWTtoken}`
+    });
+  
+    return this.http.post<BusinessClientsInWebsite>(
+      'https://localhost:44327/api/BusinessWebsite/register-client',
+      client,
+      { headers }
+    );  }
 
   RemoveFromCart(service: ServicesForBusiness) {
     this.CartItems = this.CartItems.filter(item => item.service.serviceID !== service.serviceID);
