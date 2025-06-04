@@ -18,7 +18,13 @@ export interface CartItem {
   service: ServicesForBusiness;
   quantity: number;
 }
-
+interface EmailVerificationRequest {
+  to: string;
+  from: string;
+  email: string;
+  subject: string;
+  message:string;
+}
 interface TokenResponse {
   result: string;
   id: number;
@@ -45,6 +51,7 @@ export class DataServiceService {
   JWTtoken: string | undefined;
   theClient: BusinessClientsInWebsite | undefined;
   itemsInCart: number = 0;
+  code:string | undefined;
   CartItems: CartItem[] = [];
   BasicBusinessInfo: BussinessBasicInfo | undefined;
   services: ServicesForBusiness[] | undefined;
@@ -79,6 +86,12 @@ export class DataServiceService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<ServicesForBusiness[]>(`${this.urlForServicesForBusiness}${businessId}`, { headers });
   }
+  generateSecureCode(length: number = 6): string {
+    const array = new Uint8Array(length);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, byte => byte % 10).join('');
+  }
+ 
 
   AddToCart(service: ServicesForBusiness) {
     const existing = this.CartItems.find(item => item.service.serviceID === service.serviceID);
@@ -185,12 +198,21 @@ export class DataServiceService {
     return result;
   }
 
-  SendVerificationEmail(email: string, subject: string, message: string): Observable<any> {
-    return this.http.post(`https://localhost:44327/api/UserVerification/send-verification-email`, { email, subject, message });
+  SendVerificationEmail(messageDetails: EmailVerificationRequest): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.JWTtoken}`
+    });
+    return this.http.post(
+      `https://localhost:44327/api/UserVerification/send-verification-email`,
+      messageDetails,
+      { 
+        headers,
+        responseType: 'text'  // Expect text response instead of JSON
+      }
+    );
   }
-  verifyUserViaGoogle(idToken: string): Observable<any> {
-    return this.http.post('https://localhost:44327/api/User/verify-user-via-google', idToken);
-  }
+
   openSnackBar(component: any, duration: number, firstButton: string, secondButton: string) {
     this._snackBar.open(firstButton, secondButton, {
       duration: duration,
