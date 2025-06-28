@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Account } from './models/account';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import { BussinessBasicInfo } from './models/BussinessBasicInfo';
 import { ServicesForBusiness } from './models/ServicesForBusiness';
 import { User } from './models/user';
@@ -13,6 +14,31 @@ import {
   MatSnackBarRef,
 } from '@angular/material/snack-bar';
 import { BusinessClientsInWebsite } from './models/BusinessClientsInWebsite';
+
+// New imports for business operations
+import { 
+  BusinessRegistrationRequest, 
+  BusinessRegistrationResponse,
+  BusinessRegistrationFullResponse
+} from './models/BusinessRegistration';
+import { BusinessScheduleRequest } from './models/BusinessSchedule';
+import { 
+  CreateOrderRequest, 
+  OrderResponse, 
+  OrderDetails 
+} from './models/Order';
+import { 
+  PaymentLinkRequest, 
+  PaymentLinkResponse,
+  StripeWebhookPayload 
+} from './models/Payment';
+import { 
+  ApiResponse, 
+  PaginatedResponse, 
+  ErrorResponse, 
+  ApiError,
+  HttpOptions 
+} from './models/ApiResponse';
 
 export interface CartItem {
   service: ServicesForBusiness;
@@ -55,13 +81,20 @@ export class DataServiceService {
   CartItems: CartItem[] = [];
   BasicBusinessInfo: BussinessBasicInfo | undefined;
   services: ServicesForBusiness[] | undefined;
-  businessID: string = "626700fc-6db7-48c3-ad6e-20c6e7c97b9d";
-  urlForServicesForBusiness: string = 'https://localhost:44327/api/Marketplace/GetServicesForBusiness?businessId=';
-  userID: string = "52127991-3353-4251-b731-6da879272ab1";
-  URLforJWTtoken: string = "https://localhost:44327/api/User/GetUserById/";
-  UrlforBusinessBasicInfo: string = 'https://localhost:44327/api/Business/GetBusinessByBusinessID?businessID=';
-  UrlForBusinessClientRegistration: string = 'https://localhost:44327/api/BusinessWebsite/register-client'
-  private apiUrl = 'http://localhost:3000/api'; // Adjust this to your API URL
+  businessID: string = "BUS_31f5ebdc-df3f-4027-a914-c5a980b3df34";
+  urlForServicesForBusiness: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/Marketplace/GetServicesForBusiness?businessId=';
+  userID: string = "52127991-3353-4251-b731-6da879272ab1                                                                ";
+  URLforJWTtoken: string = "https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/User/GetUserById/";
+  UrlforBusinessBasicInfo: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/Business/GetBusinessByBusinessID?businessID=';
+  UrlForBusinessClientRegistration: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client'
+  private apiUrl = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api'; // Updated to Azure API URL
+  
+  // New API endpoints for business operations
+  private businessRegistryUrl = `${this.apiUrl}/BusinessRegistry`;
+  private managesBusinessesUrl = `${this.apiUrl}/ManagesBusinesses`;
+  private orderUrl = `${this.apiUrl}/Order`;
+  private subscriptionUrl = `${this.apiUrl}/Subscription`;
+  private stripeWebhookUrl = `${this.apiUrl}/StripeWebhook`;
   user: User = {} as User;
   private authToken: string = '';
 
@@ -112,7 +145,7 @@ export class DataServiceService {
     });
   
     return this.http.post<BusinessClientsInWebsite>(
-      'https://localhost:44327/api/BusinessWebsite/register-client',
+      'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client',
       client,
       { headers }
     );  }
@@ -129,7 +162,7 @@ export class DataServiceService {
       };
     
       return this.http.post<BusinessClientsInWebsite>(
-        'https://localhost:44327/api/BusinessWebsite/signin-client-google',
+        'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/signin-client-google',
         requestBody,
         { headers }
       );
@@ -142,7 +175,7 @@ export class DataServiceService {
       });
     
       return this.http.get<BusinessClientsInWebsite>(
-        `https://localhost:44327/api/BusinessWebsite/client/${userId}`,
+        `https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/client/${userId}`,
         { headers }
       );
     }
@@ -204,7 +237,7 @@ export class DataServiceService {
       'Authorization': `Bearer ${this.JWTtoken}`
     });
     return this.http.post(
-      `https://localhost:44327/api/UserVerification/send-verification-email`,
+      `https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/UserVerification/send-verification-email`,
       messageDetails,
       { 
         headers,
@@ -231,9 +264,252 @@ export class DataServiceService {
     };
   
     return this.http.post<BusinessClientsInWebsite>(
-      'https://localhost:44327/api/BusinessWebsite/register-client-google',
+      'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client-google',
       requestBody,
       { headers }
+    );
+  }
+
+  // ==================== BUSINESS REGISTRATION OPERATIONS ====================
+
+  /**
+   * Register a complete business with all details
+   */
+  registerCompleteBusiness(businessData: BusinessRegistrationRequest): Observable<BusinessRegistrationResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<BusinessRegistrationResponse>(
+      `${this.businessRegistryUrl}/RegisterCompleteBusiness`,
+      businessData,
+      { headers }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Get business registration details
+   */
+  getBusinessRegistration(businessId: string): Observable<BusinessRegistrationFullResponse> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('businessId', businessId);
+    return this.http.get<BusinessRegistrationFullResponse>(
+      `${this.businessRegistryUrl}/GetBusinessRegistration`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Update business registration
+   */
+  updateBusinessRegistration(businessId: string, businessData: BusinessRegistrationRequest): Observable<BusinessRegistrationResponse> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('businessId', businessId);
+    return this.http.put<BusinessRegistrationResponse>(
+      `${this.businessRegistryUrl}/UpdateBusinessRegistration`,
+      businessData,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ==================== BUSINESS SCHEDULE OPERATIONS ====================
+
+  /**
+   * Register business schedule
+   */
+  registerBusinessSchedule(businessId: string, scheduleData: BusinessScheduleRequest): Observable<ApiResponse> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('businessId', businessId);
+    return this.http.post<ApiResponse>(
+      `${this.businessRegistryUrl}/RegisterBusinessSchedule`,
+      scheduleData,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Get business schedule with exceptions
+   */
+  getBusinessSchedule(businessId: string): Observable<BusinessScheduleRequest> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('businessId', businessId);
+    return this.http.get<BusinessScheduleRequest>(
+      `${this.managesBusinessesUrl}/GetBusinessScheduleWithExceptions`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ==================== ORDER MANAGEMENT OPERATIONS ====================
+
+  /**
+   * Create a new order
+   */
+  createOrder(orderData: CreateOrderRequest): Observable<OrderResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<OrderResponse>(
+      `${this.orderUrl}/CreateOrder`,
+      orderData,
+      { headers }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Get order details
+   */
+  getOrder(orderId: string): Observable<OrderDetails> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('orderId', orderId);
+    return this.http.get<OrderDetails>(
+      `${this.orderUrl}/GetOrder`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ==================== PAYMENT PROCESSING OPERATIONS ====================
+
+  /**
+   * Generate payment link for Stripe
+   */
+  generatePaymentLink(paymentData: PaymentLinkRequest): Observable<PaymentLinkResponse> {
+    const headers = this.getAuthHeaders();
+    return this.http.post<PaymentLinkResponse>(
+      `${this.subscriptionUrl}/GeneratePaymentLink`,
+      paymentData,
+      { headers }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Process Stripe webhook
+   */
+  processStripeWebhook(webhookPayload: StripeWebhookPayload, signature: string): Observable<ApiResponse> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Stripe-Signature': signature
+    });
+    return this.http.post<ApiResponse>(
+      `${this.stripeWebhookUrl}/ProcessWebhook`,
+      webhookPayload,
+      { headers }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ==================== USER BUSINESS MANAGEMENT ====================
+
+  /**
+   * Get all businesses for a user
+   */
+  getAllBusinessesForUser(userId: string): Observable<BusinessRegistrationRequest[]> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('userId', userId);
+    return this.http.get<BusinessRegistrationRequest[]>(
+      `${this.managesBusinessesUrl}/GetAllBusinessesForUser`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Delete a business
+   */
+  deleteBusiness(businessId: string): Observable<ApiResponse> {
+    const headers = this.getAuthHeaders();
+    const params = new HttpParams().set('businessId', businessId);
+    return this.http.delete<ApiResponse>(
+      `${this.managesBusinessesUrl}/DeleteBusiness`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ==================== UTILITY METHODS ====================
+
+  /**
+   * Get authentication headers
+   */
+  private getAuthHeaders(): HttpHeaders {
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.JWTtoken || this.authToken}`,
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9'
+    });
+  }
+
+  /**
+   * Handle API errors
+   */
+  private handleError = (error: any): Observable<never> => {
+    let errorMessage = 'An error occurred';
+    let apiError: ApiError = {
+      type: 'server_error',
+      message: errorMessage,
+      statusCode: error.status,
+      timestamp: new Date().toISOString()
+    };
+
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = error.error.message;
+      apiError.type = 'network_error';
+    } else {
+      // Server-side error
+      if (error.status === 401) {
+        apiError.type = 'authentication';
+        errorMessage = 'Authentication failed. Please log in again.';
+      } else if (error.status === 403) {
+        apiError.type = 'authorization';
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (error.status === 404) {
+        apiError.type = 'not_found';
+        errorMessage = 'The requested resource was not found.';
+      } else if (error.status === 400) {
+        apiError.type = 'validation';
+        errorMessage = 'Invalid request data.';
+        if (error.error?.errors) {
+          apiError.details = error.error.errors.map((err: string) => ({
+            field: 'unknown',
+            message: err
+          }));
+        }
+      } else {
+        errorMessage = error.error?.message || `Server error: ${error.status}`;
+      }
+    }
+
+    apiError.message = errorMessage;
+    console.error('API Error:', apiError);
+    
+    // Show error message to user
+    this.openSnackBar(null, 5000, errorMessage, 'Close');
+    
+    return throwError(() => apiError);
+  };
+
+  /**
+   * Retry failed requests
+   */
+  private retryRequest<T>(request: Observable<T>, retries: number = 3): Observable<T> {
+    return request.pipe(
+      retry(retries),
+      catchError(this.handleError)
     );
   }
 }
