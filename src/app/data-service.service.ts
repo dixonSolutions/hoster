@@ -13,7 +13,6 @@ import {
   MatSnackBarLabel,
   MatSnackBarRef,
 } from '@angular/material/snack-bar';
-import { BusinessClientsInWebsite } from './models/BusinessClientsInWebsite';
 
 // New imports for business operations
 import { 
@@ -44,6 +43,7 @@ export interface CartItem {
   service: ServicesForBusiness;
   quantity: number;
 }
+
 interface EmailVerificationRequest {
   to: string;
   from: string;
@@ -51,6 +51,7 @@ interface EmailVerificationRequest {
   subject: string;
   message:string;
 }
+
 interface TokenResponse {
   result: string;
   id: number;
@@ -63,6 +64,7 @@ interface TokenResponse {
   asyncState: any;
   isFaulted: boolean;
 }
+
 interface GoogleClientRegistrationRequest {
   googleToken: string;
   businessId: string;
@@ -75,18 +77,15 @@ export class DataServiceService {
   private _snackBar = inject(MatSnackBar);
   User: Account | undefined;
   JWTtoken: string | undefined;
-  theClient: BusinessClientsInWebsite | undefined;
   itemsInCart: number = 0;
-  code:string | undefined;
   CartItems: CartItem[] = [];
   BasicBusinessInfo: BussinessBasicInfo | undefined;
   services: ServicesForBusiness[] | undefined;
   businessID: string = "BUS_31f5ebdc-df3f-4027-a914-c5a980b3df34";
   urlForServicesForBusiness: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/Marketplace/GetServicesForBusiness?businessId=';
-  userID: string = "52127991-3353-4251-b731-6da879272ab1                                                                ";
+  userID: string = "52127991-3353-4251-b731-6da879272ab1";
   URLforJWTtoken: string = "https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/User/GetUserById/";
   UrlforBusinessBasicInfo: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/Business/GetBusinessByBusinessID?businessID=';
-  UrlForBusinessClientRegistration: string = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client'
   private apiUrl = 'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api'; // Updated to Azure API URL
   
   // New API endpoints for business operations
@@ -134,50 +133,6 @@ export class DataServiceService {
       this.CartItems.push({ service, quantity: 1 });
     }
     this.updateItemsInCart();
-  }
-
-  RegisterClientInBusiness(client: BusinessClientsInWebsite) {
-    console.log("About to register client in business", client);
-    console.log("JWT token", this.JWTtoken);
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.JWTtoken}`
-    });
-  
-    return this.http.post<BusinessClientsInWebsite>(
-      'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client',
-      client,
-      { headers }
-    );  }
-    SignInClientWithGoogle(googleToken: string, businessId: string) {
-      console.log('Signing in client with Google token:', { googleToken, businessId });
-      const headers = new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.JWTtoken}`
-      });
-    
-      const requestBody: GoogleClientRegistrationRequest = {
-        googleToken: googleToken,
-        businessId: businessId
-      };
-    
-      return this.http.post<BusinessClientsInWebsite>(
-        'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/signin-client-google',
-        requestBody,
-        { headers }
-      );
-    }
-    getClientById(userId: string) {
-      console.log('Getting client by ID:', { userId });
-
-      const headers = new HttpHeaders({
-        'Authorization': `Bearer ${this.JWTtoken}`
-      });
-    
-      return this.http.get<BusinessClientsInWebsite>(
-        `https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/client/${userId}`,
-        { headers }
-      );
     }
 
   RemoveFromCart(service: ServicesForBusiness) {
@@ -231,43 +186,10 @@ export class DataServiceService {
     return result;
   }
 
-  SendVerificationEmail(messageDetails: EmailVerificationRequest): Observable<any> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.JWTtoken}`
-    });
-    return this.http.post(
-      `https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/UserVerification/send-verification-email`,
-      messageDetails,
-      { 
-        headers,
-        responseType: 'text'  // Expect text response instead of JSON
-      }
-    );
-  }
-
   openSnackBar(component: any, duration: number, firstButton: string, secondButton: string) {
     this._snackBar.open(firstButton, secondButton, {
       duration: duration,
     });
-  }
-  registerClientWithGoogle(googleToken: string, businessId: string) {
-    console.log('Registering client with Google token:', { googleToken, businessId });
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.JWTtoken}`
-    });
-  
-    const requestBody: GoogleClientRegistrationRequest = {
-      googleToken: googleToken,
-      businessId: businessId
-    };
-  
-    return this.http.post<BusinessClientsInWebsite>(
-      'https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/BusinessWebsite/register-client-google',
-      requestBody,
-      { headers }
-    );
   }
 
   // ==================== BUSINESS REGISTRATION OPERATIONS ====================

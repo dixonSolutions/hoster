@@ -1,52 +1,20 @@
-<mat-toolbar>
-    <button mat-icon-button [matMenuTriggerFor]="appMenu" aria-label="Open menu">
-        <mat-icon>menu</mat-icon>
-      </button>
-      
-      <mat-menu #appMenu="matMenu">
-        <button mat-menu-item (click)="navigateToOrderHistory()">
-          <mat-icon>history</mat-icon>
-          <span>History</span>
-        </button>
-        <button mat-menu-item (click)="openSimpleDialog()">
-          <mat-icon>info</mat-icon>
-          <span>About</span>
-        </button>
-      </mat-menu>
-    <div>
-        <h2>{{this.dataService.BasicBusinessInfo?.bussinessName}}</h2>
-    </div>
-    <span class="example-spacer"></span>
-
-    <!-- Palette Icon with Badge and Theme Menu -->
-    <button mat-icon-button [matMenuTriggerFor]="themeMenu" matBadge=" " [matBadgeOverlap]="false" class="palette-badge" aria-label="Select theme">
-        <mat-icon>palette</mat-icon>
-        <span class="theme-badge" [ngStyle]="{ 'background-color': selectedTheme?.badgeColor }"></span>
-    </button>
-    <mat-menu #themeMenu="matMenu">
-        <ng-container *ngFor="let option of themeOptions">
-            <button mat-menu-item (click)="selectTheme(option)">
-                <mat-icon *ngIf="selectedTheme?.value === option.value">radio_button_checked</mat-icon>
-                <mat-icon *ngIf="selectedTheme?.value !== option.value">radio_button_unchecked</mat-icon>
-                <span>{{ option.name }}</span>
-                <span class="theme-sample" [ngStyle]="{ 'background-color': option.badgeColor }"></span>
-            </button>
-        </ng-container>
-    </mat-menu>
-
-    <button matIconButton class="example-icon favorite-icon profile-badge-btn" aria-label="Example icon-button with heart icon"
-      matBadge="signed in" matBadgeColor="accent" matBadgePosition="above after" *ngIf="dataService.theClient?.name" (click)="navigateToProfile()">
-        <mat-icon>person</mat-icon>
-    </button>
-    <button matIconButton class="example-icon favorite-icon" aria-label="Example icon-button with heart icon"
-      *ngIf="!dataService.user.name" (click)="navigateToProfile()">
-        <mat-icon>person</mat-icon>
-    </button>
-    <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">
-        <mat-icon (click)="navigateToShoppingCart()" matBadge="{{this.dataService.itemsInCart}}">shopping_cart</mat-icon>    </button>
-        <button matIconButton class="example-icon" aria-label="Example icon-button with share icon">
-            <mat-icon (click)="navigateToHome()" >home</mat-icon>    </button>
-            <button matIconButton (click)="navigateToContactUs()" class="example-icon" aria-label="Example icon-button with share icon">            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24px' viewBox='0 -960 960 960' width='24px' fill='black'%3E%3Cpath d='M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z'/%3E%3C/svg%3E" alt="Document icon" width="24" height="24">
-            </button>
-  </mat-toolbar>
+<div class="topbar-container">
+  <p-toolbar styleClass="topbar-toolbar">
+    <ng-template pTemplate="start">
+      <div class="flex items-center gap-2">
+        <span class="topbar-title">{{ this.dataService.BasicBusinessInfo?.bussinessName || 'Business Name' }}</span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="center">
+      <!-- Center content can be added here if needed -->
+    </ng-template>
+    <ng-template pTemplate="end">
+      <div class="flex items-center gap-2">
+        <p-button icon="pi pi-home" class="topbar-btn" (onClick)="navigateToHome()" [ngClass]="{'active-section': activeSection === 'home'}" text plain />
+        <p-button icon="pi pi-shopping-cart" class="topbar-btn" (onClick)="navigateToShoppingCart()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'shopping-cart'}" text plain />
+        <p-dropdown [options]="themeOptions" [(ngModel)]="selectedTheme" optionLabel="name" placeholder="Theme" styleClass="theme-dropdown" (onChange)="selectTheme($event.value)" [showClear]="true" (onClear)="clearTheme()"></p-dropdown>
+      </div>
+    </ng-template>
+  </p-toolbar>
+</div>
   

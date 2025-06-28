@@ -1,71 +1,246 @@
-.mat-toolbar {
-  background-color: #efefe7;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 0 24px;
-  height: 64px;
+.topbar-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.example-icon {
-  color: #666666;
-  transition: color 0.3s ease;
+.custom-menubar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0 !important;
 }
 
-.example-icon:hover {
-  color: #1976d2;
+.custom-menubar .p-menubar-root-list {
+  background: transparent !important;
 }
 
-.favorite-icon {
-  margin: 0 8px;
+.custom-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
+  color: white !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
 }
 
-.example-spacer {
-  flex: 1 1 auto;
+.custom-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px) !important;
 }
 
-span {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #333333;
-  margin-left: 16px;
+.business-brand {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
 }
 
-button {
-  margin: 0 4px;
+.business-name {
+  color: white !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
 }
 
-.palette-badge {
-  position: relative;
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
 }
-.theme-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
+
+/* Theme Dropdown Styling */
+.theme-dropdown {
+  min-width: 140px;
+}
+
+.theme-dropdown .p-dropdown {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px !important;
+  color: var(--text-color, #2c3e50) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-dropdown .p-dropdown:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-dropdown .p-dropdown-trigger {
+  color: var(--text-color, #2c3e50) !important;
+}
+
+.theme-dropdown .p-dropdown-label {
+  color: var(--text-color, #2c3e50) !important;
+  font-weight: 500 !important;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.theme-color {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-  pointer-events: none;
-}
-.theme-sample {
-  display: inline-block;
-  width: 24px;
-  height: 12px;
-  border-radius: 6px;
-  margin-left: 12px;
-  border: 1px solid #ccc;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.profile-badge-btn .mat-badge-content {
-  left: 50% !important;
-  right: auto !important;
-  top: 10px !important;
-  transform: translate(-50%, -60%) !important;
-  min-width: 48px !important;
-  text-align: center;
-  font-size: 0.75rem;
-  padding: 0 4px;
+/* Button Styling */
+.cart-button,
+.home-button,
+.contact-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+  width: 48px !important;
+  height: 48px !important;
 }
 
-/* Optionally, reduce the badge font size and padding for a better fit */
+.cart-button:hover,
+.home-button:hover,
+.contact-button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.cart-button .p-button-icon,
+.home-button .p-button-icon,
+.contact-button .p-button-icon {
+  font-size: 1.2rem !important;
+  color: white !important;
+}
+
+/* Badge Styling */
+.p-badge {
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  border-radius: 9px !important;
+}
+
+.p-badge-danger {
+  background: #ef4444 !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .business-name {
+    font-size: 1.2rem !important;
+  }
+  
+  .topbar-actions {
+    gap: 0.5rem;
+  }
+  
+  .theme-dropdown {
+    min-width: 120px;
+  }
+  
+  .cart-button,
+  .home-button,
+  .contact-button {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-name {
+    font-size: 1rem !important;
+  }
+  
+  .topbar-actions {
+    gap: 0.25rem;
+  }
+  
+  .theme-dropdown {
+    display: none;
+  }
+}
+
+/* Animation for smooth transitions */
+.topbar-container {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.topbar-toolbar {
+  background: transparent !important;
+  border: none !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 !important;
+}
+
+.topbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color, #2c3e50) !important;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.topbar-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--text-color, #2c3e50) !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.topbar-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.topbar-btn .p-button-icon,
+.topbar-btn .pi {
+  color: var(--text-color, #2c3e50) !important;
+  font-size: 1.2rem !important;
+}
+
+.active-section {
+  background: var(--p-primary-color, #3b82f6) !important;
+  color: white !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3) !important;
+  border: 1px solid var(--p-primary-color, #3b82f6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.active-section .p-button-icon,
+.active-section .pi {
+  color: white !important;
+}
