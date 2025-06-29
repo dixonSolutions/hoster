@@ -1,17 +1,23 @@
 <div class="topbar-container">
-  <p-toolbar styleClass="topbar-toolbar">
+  <p-toolbar styleClass="topbar-toolbar glassmorphism" [style]="{ 'border-radius': '2rem', 'padding': '0.5rem 1.5rem', 'background': '#fff', 'box-shadow': '0 4px 24px rgba(0,0,0,0.07)' }">
     <ng-template pTemplate="start">
-      <div class="flex items-center gap-2">
+      <div class="topbar-left">
         <span class="topbar-title">{{ this.dataService.BasicBusinessInfo?.bussinessName || 'Business Name' }}</span>
       </div>
     </ng-template>
     <ng-template pTemplate="center">
-      <!-- Center content can be added here if needed -->
+      <div class="topbar-center">
+        <span class="search-wrapper">
+          <i class="pi pi-search search-icon"></i>
+          <input type="text" pInputText placeholder="Search" class="search-input" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
+        </span>
+      </div>
     </ng-template>
     <ng-template pTemplate="end">
-      <div class="flex items-center gap-2">
+      <div class="topbar-actions">
         <p-button icon="pi pi-home" class="topbar-btn" (onClick)="navigateToHome()" [ngClass]="{'active-section': activeSection === 'home'}" text plain />
-        <p-button icon="pi pi-shopping-cart" class="topbar-btn" (onClick)="navigateToShoppingCart()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'shopping-cart'}" text plain />
+        <p-button icon="pi pi-shopping-cart" class="topbar-btn cart-btn-prominent" (onClick)="navigateToShoppingCart()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'shopping-cart'}" text plain />
+        <p-button value="Grocery Store" icon="pi pi-shopping-bag" class="topbar-btn" text plain />
         <p-dropdown [options]="themeOptions" [(ngModel)]="selectedTheme" optionLabel="name" placeholder="Theme" styleClass="theme-dropdown" (onChange)="selectTheme($event.value)" [showClear]="true" (onClear)="clearTheme()"></p-dropdown>
       </div>
     </ng-template>

@@ -11,6 +11,7 @@ import {MatInputModule} from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CookieService } from 'ngx-cookie-service';
 
 interface CustomerDetails {
   name: string;
@@ -45,7 +46,8 @@ interface OrderData {
     ReactiveFormsModule
   ],
   templateUrl: './shopping-cart.component.html',
-  styleUrl: './shopping-cart.component.css'
+  styleUrl: './shopping-cart.component.css',
+  providers: [CookieService]
 })
 export class ShoppingCartComponent {
   public dataService = inject(DataServiceService);
@@ -53,7 +55,7 @@ export class ShoppingCartComponent {
   showCustomerForm = false;
   selectedDate: Date | null = null;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private cookieService: CookieService) {
     this.customerForm = this.fb.group({
       name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
@@ -69,12 +71,71 @@ export class ShoppingCartComponent {
     if (this.dataService.CartItems.length == 0) {
       this.dataService.openSnackBar(this, 5000, 'Your cart is empty, you need to add some services to checkout', 'OK');
     } else {
-      // Autofill from localStorage if available
-      const userInfo = localStorage.getItem('userInfo');
-      if (userInfo) {
-        this.customerForm.patchValue(JSON.parse(userInfo));
-      }
+      // Autofill from cookies if available
+      const name = this.cookieService.get('customerName');
+      const email = this.cookieService.get('customerEmail');
+      const phone = this.cookieService.get('customerPhone');
+      const address = this.cookieService.get('customerAddress');
+      const city = this.cookieService.get('customerCity');
+      const state = this.cookieService.get('customerState');
+      const postalCode = this.cookieService.get('customerPostalCode');
+      console.log('Patching form from cookies:', { name, email, phone, address, city, state, postalCode });
+      this.customerForm.patchValue({ name, email, phone, address, city, state, postalCode });
+      this.customerForm.updateValueAndValidity();
       this.showCustomerForm = true;
+      // Try to get browser location and patch address fields
+      this.tryPatchAddressFromLocation();
+    }
+  }
+
+  // Try to get browser location and patch address fields
+  tryPatchAddressFromLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          console.log('Geolocation success:', { lat, lng });
+          // Placeholder: Replace with real reverse geocoding API call
+          this.reverseGeocode(lat, lng).then(addr => {
+            console.log('Patching form from geolocation:', addr);
+            this.customerForm.patchValue(addr);
+            this.customerForm.updateValueAndValidity();
+          });
+        },
+        (error) => {
+          console.log('Geolocation error:', error);
+        }
+      );
+    }
+  }
+
+  // Real reverse geocoding using Nominatim (OpenStreetMap) API
+  async reverseGeocode(lat: number, lng: number): Promise<any> {
+    console.log('Reverse geocoding for:', { lat, lng });
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      const data = await response.json();
+      const address = data.address || {};
+      return {
+        address: [address.road, address.house_number].filter(Boolean).join(' ') || '',
+        city: address.city || address.town || address.village || '',
+        state: address.state || '',
+        postalCode: address.postcode || ''
+      };
+    } catch (e) {
+      console.error('Reverse geocoding failed:', e);
+      return {
+        address: '',
+        city: '',
+        state: '',
+        postalCode: ''
+      };
     }
   }
 
@@ -92,6 +153,17 @@ export class ShoppingCartComponent {
         totalPrice: this.totalPrice
       };
       
+      // Save name, email, phone, and address fields as cookies with 1000-year expiration
+      const expires = new Date();
+      expires.setFullYear(expires.getFullYear() + 1000);
+      this.cookieService.set('customerName', customerDetails.name, expires, '/');
+      this.cookieService.set('customerEmail', customerDetails.email, expires, '/');
+      this.cookieService.set('customerPhone', customerDetails.phone, expires, '/');
+      this.cookieService.set('customerAddress', customerDetails.address, expires, '/');
+      this.cookieService.set('customerCity', customerDetails.city, expires, '/');
+      this.cookieService.set('customerState', customerDetails.state, expires, '/');
+      this.cookieService.set('customerPostalCode', customerDetails.postalCode, expires, '/');
+
       console.log('Order submitted:', orderData);
       this.dataService.openSnackBar(this, 5000, 'Order submitted successfully!', 'OK');
       

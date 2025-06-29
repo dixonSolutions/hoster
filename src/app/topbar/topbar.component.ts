@@ -48,6 +48,8 @@ export class TopbarComponent implements OnInit {
   businessName: string | undefined;
   menuItems: MenuItem[] = [];
   activeSection: string = '';
+  searchText: string = '';
+  searchResult: any = null;
 
   constructor(
     private router: Router, 
@@ -155,5 +157,34 @@ export class TopbarComponent implements OnInit {
   navigateToOrderHistory() {
     this.activeSection = 'order-history';
     this.router.navigate(['/order-history']);
+  }
+
+  onSearchChange() {
+    const query = this.searchText.trim().toLowerCase();
+    if (!query || !this.dataService.services) {
+      this.searchResult = null;
+      return;
+    }
+    // Find the best match by name or description (simple scoring)
+    let bestScore = 0;
+    let bestMatch = null;
+    for (const service of this.dataService.services) {
+      const name = (service.serviceName || '').toLowerCase();
+      const desc = (service.serviceDescription || '').toLowerCase();
+      let score = 0;
+      if (name.includes(query)) score += 2;
+      if (desc.includes(query)) score += 1;
+      if (name === query) score += 3; // exact name match
+      if (desc === query) score += 2; // exact desc match
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = service;
+      }
+    }
+    this.searchResult = bestMatch;
+    // For now, just log the result
+    if (bestMatch) {
+      console.log('Best service match:', bestMatch);
+    }
   }
 }

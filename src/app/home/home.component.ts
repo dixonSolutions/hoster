@@ -11,14 +11,17 @@ import { CommonModule } from '@angular/common';
 import { BusinessRegistrationRequest } from '../models/BusinessRegistration';
 import { ServicesForBusiness } from '../models/ServicesForBusiness';
 import { switchMap } from 'rxjs/operators';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    MatCardModule, 
-    MatButtonModule, 
-    MatIconModule, 
+    CardModule,
+    ButtonModule,
+    PanelModule,
     HttpClientModule,
     CommonModule
   ],
@@ -66,7 +69,7 @@ export class HomeComponent implements OnInit {
       }
     });
   }
-
+  
   openDialog() {
     const dialogRef = this.dialog.open(AboutUsPopupComponent, {
       data: { title: 'This product is a good product', message: 'Product ingredients: ----' },

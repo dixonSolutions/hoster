@@ -2,94 +2,49 @@
 <div *ngIf="error" class="error">{{ error }}</div>
 
 <div *ngIf="businessDetails && !loading && !error">
-  <mat-card class="business-details-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>{{ businessDetails.basicInfo?.businessName || 'Business Details' }}</mat-card-title>
-      <mat-card-subtitle>ID: {{ businessDetails.basicInfo?.businessID }}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <h2>Business Info</h2>
-      <div><strong>Name:</strong> {{ businessDetails.basicInfo?.businessName || 'N/A' }}</div>
-      <div><strong>Description:</strong> {{ businessDetails.basicInfo?.businessDescription || 'N/A' }}</div>
-      <div><strong>Phone:</strong> {{ businessDetails.basicInfo?.phone || 'N/A' }}</div>
-      <div><strong>Email:</strong> {{ businessDetails.basicInfo?.email || 'N/A' }}</div>
-      <div *ngIf="businessDetails.basicInfo?.ownerEmail"><strong>Owner Email:</strong> {{ businessDetails.basicInfo.ownerEmail }}</div>
-
-      <h3>Addresses</h3>
-      <ul *ngIf="businessDetails.specificAddresses?.length; else noAddresses">
-        <li *ngFor="let addr of businessDetails.specificAddresses">
-          {{ addr.streetAddress }}, {{ addr.city }}, {{ addr.state }}, {{ addr.country }} {{ addr.postalCode }}
-        </li>
-      </ul>
-      <ng-template #noAddresses><li>No addresses available.</li></ng-template>
-
-      <h3>Service Areas</h3>
-      <ul *ngIf="businessDetails.areaSpecifications?.length; else noAreas">
-        <li *ngFor="let area of businessDetails.areaSpecifications">
-          {{ area.country }}<span *ngIf="area.state">, {{ area.state }}</span><span *ngIf="area.city">, {{ area.city }}</span><span *ngIf="area.postalCode">, {{ area.postalCode }}</span>
-        </li>
-      </ul>
-      <ng-template #noAreas><li>No service areas specified.</li></ng-template>
-
-      <h3>Unified Places</h3>
-      <ul *ngIf="businessDetails.unifiedPlaces?.length; else noPlaces">
-        <li *ngFor="let place of businessDetails.unifiedPlaces">
-          <span *ngIf="place.placeType === 'specific'">
-            {{ place.streetAddress }}, {{ place.city }}, {{ place.state }}, {{ place.country }} {{ place.postalCode }}
-          </span>
-          <span *ngIf="place.placeType === 'area'">
-            Area: {{ place.areaCountry }}<span *ngIf="place.areaState">, {{ place.areaState }}</span><span *ngIf="place.areaCity">, {{ place.areaCity }}</span><span *ngIf="place.areaPostalCode">, {{ place.areaPostalCode }}</span>
-          </span>
-        </li>
-      </ul>
-      <ng-template #noPlaces><li>No unified places specified.</li></ng-template>
-
-      <h3>Service-Place Assignments</h3>
-      <ul *ngIf="businessDetails.servicePlaceAssignments?.length; else noAssignments">
-        <li *ngFor="let assignment of businessDetails.servicePlaceAssignments">
-          Service Type: {{ assignment.serviceType }}
-        </li>
-      </ul>
-      <ng-template #noAssignments><li>No service-place assignments.</li></ng-template>
-
-      <h3>Staff</h3>
-      <ul *ngIf="businessDetails.staff?.length; else noStaff">
-        <li *ngFor="let staff of businessDetails.staff">
-          {{ staff.firstName }} {{ staff.lastName }} ({{ staff.role }}) - {{ staff.email }}
-        </li>
-      </ul>
-      <ng-template #noStaff><li>No staff listed.</li></ng-template>
-    </mat-card-content>
-  </mat-card>
-
   <div class="services-grid">
-    <mat-card class="example-card" appearance="outlined" *ngFor="let service of businessDetails.services">
-      <mat-card-header>
-        <div mat-card-avatar ></div>
-        <mat-card-title>{{service.serviceName}}</mat-card-title>
-        <mat-card-subtitle>{{service.serviceDescription}}</mat-card-subtitle>
-        <mat-card-subtitle *ngIf="service.serviceImageUrl"><img [src]="service.serviceImageUrl" alt="Service Image" style="width: 100px; height: 100px;"></mat-card-subtitle>
-        <mat-card-subtitle>{{service.price | currency:service.currency}}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>
-          Duration: {{service.duration}} min
-        </p>
-        <p *ngIf="service.serviceEstimatedTime">
-          Estimated Time: {{service.serviceEstimatedTime}}
-        </p>
-      </mat-card-content>
-      <mat-card-actions>
-          <button mat-button class="button">Review</button>
-          <button mat-raised-button color="primary" (click)="addToCart(service)">
-            <mat-icon>add_shopping_cart</mat-icon>
-            Add to Cart
-          </button>
-          <button mat-icon-button>
-              <mat-icon (click)="openDialog()">info</mat-icon>
-          </button>       
-      </mat-card-actions>
-    </mat-card>
+    <p-card *ngFor="let service of businessDetails.services" class="service-pcard" [ngStyle]="{ 'margin-bottom': '2rem', 'background': '#fff', 'overflow': 'hidden' }">
+      <ng-template pTemplate="header" *ngIf="service.serviceImageUrl">
+        <img [src]="service.serviceImageUrl" alt="Service Image" class="service-image-header" />
+      </ng-template>
+      <ng-template pTemplate="title">
+        <span class="service-title">{{service.serviceName}}</span>
+      </ng-template>
+      <ng-template pTemplate="subtitle">
+        <span class="service-description">{{service.serviceDescription}}</span>
+      </ng-template>
+      <ng-template pTemplate="content">
+        <div class="service-details">
+          <div><b>Price:</b> {{service.price | currency:service.currency}}</div>
+          <div><b>Duration:</b> {{service.duration}} min</div>
+          <div *ngIf="service.serviceEstimatedTime"><b>Estimated Time:</b> {{service.serviceEstimatedTime}}</div>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <div class="service-actions">
+          <p-button label="Review" icon="pi pi-eye" styleClass="p-button-text" class="mr-2" />
+          <p-button label="Add to Cart" icon="pi pi-shopping-cart" (onClick)="addToCart(service)" />
+          <p-button icon="pi pi-info-circle" styleClass="p-button-text" (onClick)="openDialog()" />
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+  <!-- Contact Info and other necessary details at the bottom -->
+  <div class="contact-info-box">
+    <div class="contact-info-heading">Contact Information</div>
+    <div class="contact-details">
+      <div class="contact-detail"><i class="pi pi-phone"></i> <b>Phone:</b> {{ businessDetails.basicInfo?.phone || 'N/A' }}</div>
+      <div class="contact-detail"><i class="pi pi-envelope"></i> <b>Email:</b> {{ businessDetails.basicInfo?.email || 'N/A' }}</div>
+      <div *ngIf="businessDetails.specificAddresses?.length">
+        <div class="contact-detail"><i class="pi pi-map-marker"></i> <b>Address:</b></div>
+        <ul class="contact-address-list">
+          <li *ngFor="let addr of businessDetails.specificAddresses">
+            {{ addr.streetAddress }}, {{ addr.city }}, {{ addr.state }}, {{ addr.country }} {{ addr.postalCode }}
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
 
