@@ -1,1 +1,542 @@
 <p>landing-page works!</p>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Loading Spinner -->
+<div *ngIf="loading" class="loading-container">
+  <p-progressSpinner strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+  <p class="loading-text">Loading business details...</p>
+</div>
+
+<!-- Error Message -->
+<div *ngIf="error" class="error-container">
+  <div class="error-content">
+    <i class="pi pi-exclamation-triangle error-icon"></i>
+    <h3>Error Loading Content</h3>
+    <p>{{ error }}</p>
+    <p-button label="Retry" icon="pi pi-refresh" (onClick)="loadBusinessData()"></p-button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div *ngIf="businessDetails && !loading && !error" class="landing-page">
+  
+  <!-- Hero Section with Card + Button -->
+  <section id="hero" class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="hero-text" [class.animated]="animatedElements['hero']">
+          <h1 class="hero-title">{{ heroTitle }}</h1>
+          <p class="hero-subtitle">{{ heroSubtitle }}</p>
+          <div class="hero-actions">
+            <p-button 
+              label="Get Started" 
+              icon="pi pi-rocket" 
+              styleClass="p-button-primary p-button-lg"
+              (onClick)="scrollToSection('services')">
+            </p-button>
+            <p-button 
+              label="Learn More" 
+              icon="pi pi-info-circle" 
+              styleClass="p-button-outlined p-button-lg"
+              (onClick)="scrollToSection('about')">
+            </p-button>
+          </div>
+        </div>
+        <div class="hero-card" [class.animated]="animatedElements['hero']">
+          <p-card styleClass="hero-card-content">
+            <ng-template pTemplate="header">
+              <div class="hero-card-header">
+                <i class="pi pi-building" style="font-size: 2rem; color: #22c55e;"></i>
+                <h3>Why Choose Us?</h3>
+              </div>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <div class="hero-card-features">
+                <div class="feature-item">
+                  <i class="pi pi-check-circle"></i>
+                  <span>Expert Team</span>
+                </div>
+                <div class="feature-item">
+                  <i class="pi pi-check-circle"></i>
+                  <span>Proven Results</span>
+                </div>
+                <div class="feature-item">
+                  <i class="pi pi-check-circle"></i>
+                  <span>24/7 Support</span>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template pTemplate="footer">
+              <p-button 
+                label="Free Consultation" 
+                icon="pi pi-calendar" 
+                styleClass="p-button-success"
+                (onClick)="openContactDialog()">
+              </p-button>
+            </ng-template>
+          </p-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MegaMenu Section -->
+  <section class="megamenu-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['megamenu']">
+        <h2>Explore Our Solutions</h2>
+        <p>Discover comprehensive services tailored to your business needs</p>
+      </div>
+      <p-megaMenu [model]="megaMenuItems" styleClass="custom-megamenu"></p-megaMenu>
+    </div>
+  </section>
+
+  <!-- Statistics Section with Chips -->
+  <section id="stats" class="stats-section">
+    <div class="container">
+      <div class="stats-header">
+        <h2>Our Impact</h2>
+        <div class="service-chips">
+          <p-chip 
+            *ngFor="let tag of serviceTags" 
+            [label]="tag.label" 
+            [icon]="tag.icon"
+            styleClass="service-chip">
+          </p-chip>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div 
+          *ngFor="let stat of stats; let i = index" 
+          class="stat-item"
+          [class.animated]="animatedElements['stats']"
+          [style.animation-delay]="(i * 0.1) + 's'">
+          <div class="stat-number">{{ stat.number }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section with Card Grid -->
+  <section id="services" class="services-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['services']">
+        <h2>Our Services</h2>
+        <p>Comprehensive solutions tailored to your business needs</p>
+      </div>
+
+      <!-- Service Categories Filter -->
+      <div class="service-filter" [class.animated]="animatedElements['services']">
+        <p-select 
+          [options]="serviceCategories" 
+          [(ngModel)]="selectedCategory"
+          placeholder="Filter by category"
+          (onChange)="filterServices()"
+          styleClass="w-full md:w-20rem">
+        </p-select>
+      </div>
+
+      <!-- Services Card Grid -->
+      <div class="services-card-grid">
+        <p-card 
+          *ngFor="let service of featuredServices; let i = index" 
+          class="service-card-grid-item"
+          [class.animated]="animatedElements['services']"
+          [style.animation-delay]="(i * 0.1) + 's'">
+          <ng-template pTemplate="header" *ngIf="service.serviceImageUrl">
+            <img [src]="service.serviceImageUrl" [alt]="service.serviceName" class="service-image" />
+          </ng-template>
+          <ng-template pTemplate="header" *ngIf="!service.serviceImageUrl">
+            <div class="service-placeholder">
+              <i class="pi pi-star" style="font-size: 2rem; color: #22c55e;"></i>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="title">
+            <div class="service-header">
+              <i [class]="getServiceIcon(service)" class="service-icon"></i>
+              <h3>{{ service.serviceName }}</h3>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="subtitle">
+            <p class="service-description">{{ service.serviceDescription }}</p>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <div class="service-details">
+              <div class="service-price">
+                <span class="price">{{ service.servicePrice | currency:service.servicePriceCurrencyUnit }}</span>
+                <span class="duration">{{ service.serviceEstimatedTime || 'N/A' }}</span>
+              </div>
+              <div *ngIf="service.serviceEstimatedTime" class="service-estimate">
+                <i class="pi pi-clock"></i>
+                <span>{{ service.serviceEstimatedTime }}</span>
+              </div>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <div class="service-actions">
+              <p-button 
+                label="Learn More" 
+                icon="pi pi-eye" 
+                styleClass="p-button-text"
+                (onClick)="navigateToService(service)">
+              </p-button>
+              <p-button 
+                label="Get Quote" 
+                icon="pi pi-send" 
+                styleClass="p-button-primary"
+                (onClick)="openContactDialog()">
+              </p-button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+
+      <!-- View All Services Button -->
+      <div class="view-all-services" [class.animated]="animatedElements['services']">
+        <p-button 
+          label="View All Services" 
+          icon="pi pi-arrow-right" 
+          styleClass="p-button-outlined p-button-lg"
+          routerLink="/services">
+        </p-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section id="timeline" class="timeline-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['timeline']">
+        <h2>Our Process</h2>
+        <p>How we work with you to achieve success</p>
+      </div>
+      <p-timeline [value]="timelineEvents" styleClass="custom-timeline">
+        <ng-template pTemplate="content" let-event>
+          <div class="timeline-content">
+            <h4>{{ event.title }}</h4>
+            <p>{{ event.description }}</p>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="marker" let-event>
+          <div class="timeline-marker" [style.background-color]="event.color">
+            <i [class]="event.icon"></i>
+          </div>
+        </ng-template>
+      </p-timeline>
+    </div>
+  </section>
+
+  <!-- Galleria Section -->
+  <section id="galleria" class="galleria-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['galleria']">
+        <h2>Our Work</h2>
+        <p>See our projects and success stories</p>
+      </div>
+      <p-galleria 
+        [value]="galleriaImages" 
+        [responsiveOptions]="[
+          { breakpoint: '1024px', numVisible: 3 },
+          { breakpoint: '768px', numVisible: 2 },
+          { breakpoint: '560px', numVisible: 1 }
+        ]"
+        [numVisible]="3"
+        [circular]="true"
+        [showItemNavigators]="true"
+        [showThumbnails]="false"
+        styleClass="custom-galleria"
+        (onItemChange)="onGalleriaItemChange($event)">
+        <ng-template pTemplate="item" let-item>
+          <div class="galleria-item">
+            <div class="galleria-placeholder">
+              <i class="pi pi-image" style="font-size: 3rem; color: #22c55e;"></i>
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.alt }}</p>
+            </div>
+          </div>
+        </ng-template>
+      </p-galleria>
+    </div>
+  </section>
+
+  <!-- Testimonials Carousel -->
+  <section id="testimonials" class="testimonials-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['testimonials']">
+        <h2>What Our Clients Say</h2>
+        <p>Don't just take our word for it - hear from our satisfied clients</p>
+      </div>
+
+      <p-carousel 
+        [value]="testimonials" 
+        [numVisible]="3" 
+        [numScroll]="1" 
+        [circular]="true"
+        [autoplayInterval]="5000"
+        [showNavigators]="true"
+        [showIndicators]="true"
+        styleClass="custom-carousel">
+        <ng-template pTemplate="item" let-testimonial>
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <p-rating [ngModel]="testimonial.rating" [readonly]="true"></p-rating>
+              <p class="testimonial-text">"{{ testimonial.content }}"</p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar-placeholder">
+                <i class="pi pi-user" style="font-size: 1.5rem; color: #666;"></i>
+              </div>
+              <div class="author-info">
+                <h4>{{ testimonial.name }}</h4>
+                <p>{{ testimonial.position }}</p>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </p-carousel>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion Section -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['faq']">
+        <h2>Frequently Asked Questions</h2>
+        <p>Get answers to common questions about our services</p>
+      </div>
+      <p-accordion styleClass="custom-accordion">
+        <p-accordionTab 
+          *ngFor="let item of faqItems" 
+          [header]="item.header">
+          <p>{{ item.content }}</p>
+        </p-accordionTab>
+      </p-accordion>
+    </div>
+  </section>
+
+  <!-- PanelMenu Section -->
+  <section id="resources" class="resources-section">
+    <div class="container">
+      <div class="section-header" [class.animated]="animatedElements['resources']">
+        <h2>Resources & Support</h2>
+        <p>Explore our comprehensive resources and support options</p>
+      </div>
+      <div class="panel-menu-container">
+        <p-panelMenu [model]="panelMenuItems" styleClass="custom-panelmenu"></p-panelMenu>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="contact-content">
+        <div class="contact-info" [class.animated]="animatedElements['contact']">
+          <h2>Get In Touch</h2>
+          <p>Ready to transform your business? Let's discuss how we can help you achieve your goals.</p>
+          
+          <div class="contact-details">
+            <div class="contact-item">
+              <i class="pi pi-phone"></i>
+              <div>
+                <h4>Phone</h4>
+                <p>{{ businessDetails.basicInfo && businessDetails.basicInfo.phone ? businessDetails.basicInfo.phone : 'N/A' }}</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="pi pi-envelope"></i>
+              <div>
+                <h4>Email</h4>
+                <p>{{ businessDetails.basicInfo && businessDetails.basicInfo.email ? businessDetails.basicInfo.email : 'N/A' }}</p>
+              </div>
+            </div>
+            <div class="contact-item" *ngIf="businessDetails.specificAddresses && businessDetails.specificAddresses.length > 0">
+              <i class="pi pi-map-marker"></i>
+              <div>
+                <h4>Address</h4>
+                <p *ngFor="let addr of businessDetails.specificAddresses">
+                  {{ addr.streetAddress }}, {{ addr.city }}, {{ addr.state }}, {{ addr.country }} {{ addr.postalCode }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-actions">
+            <p-button 
+              label="Schedule Consultation" 
+              icon="pi pi-calendar" 
+              styleClass="p-button-primary p-button-lg"
+              (onClick)="openContactDialog()">
+            </p-button>
+            <p-button 
+              label="View Full Contact" 
+              icon="pi pi-external-link" 
+              styleClass="p-button-outlined p-button-lg"
+              routerLink="/contact-us">
+            </p-button>
+          </div>
+        </div>
+
+        <div class="contact-form-container" [class.animated]="animatedElements['contact']">
+          <p-card header="Quick Contact Form">
+            <form [formGroup]="contactForm" (ngSubmit)="submitContactForm()">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="name">Full Name *</label>
+                  <input 
+                    id="name"
+                    type="text" 
+                    pInputText 
+                    formControlName="name"
+                    placeholder="Enter your full name"
+                    [class.ng-invalid]="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" />
+                  <small 
+                    *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched"
+                    class="p-error">
+                    Name is required and must be at least 2 characters
+                  </small>
+                </div>
+
+                <div class="form-field">
+                  <label for="email">Email Address *</label>
+                  <input 
+                    id="email"
+                    type="email" 
+                    pInputText 
+                    formControlName="email"
+                    placeholder="Enter your email address"
+                    [class.ng-invalid]="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" />
+                  <small 
+                    *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched"
+                    class="p-error">
+                    Please enter a valid email address
+                  </small>
+                </div>
+
+                <div class="form-field">
+                  <label for="phone">Phone Number *</label>
+                  <input 
+                    id="phone"
+                    type="tel" 
+                    pInputText 
+                    formControlName="phone"
+                    placeholder="Enter your phone number"
+                    [class.ng-invalid]="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched" />
+                  <small 
+                    *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched"
+                    class="p-error">
+                    Please enter a valid phone number
+                  </small>
+                </div>
+
+                <div class="form-field">
+                  <label for="company">Company</label>
+                  <input 
+                    id="company"
+                    type="text" 
+                    pInputText 
+                    formControlName="company"
+                    placeholder="Enter your company name" />
+                </div>
+
+                <div class="form-field full-width">
+                  <label for="service">Service Interest *</label>
+                  <p-select 
+                    id="service"
+                    [options]="services" 
+                    formControlName="service"
+                    optionLabel="serviceName"
+                    placeholder="Select a service"
+                    [class.ng-invalid]="contactForm.get('service')?.invalid && contactForm.get('service')?.touched">
+                  </p-select>
+                  <small 
+                    *ngIf="contactForm.get('service')?.invalid && contactForm.get('service')?.touched"
+                    class="p-error">
+                    Please select a service
+                  </small>
+                </div>
+
+                <div class="form-field full-width">
+                  <label for="message">Message *</label>
+                  <textarea 
+                    id="message"
+                    pInputTextarea 
+                    formControlName="message"
+                    rows="4"
+                    placeholder="Tell us about your project or requirements"
+                    [class.ng-invalid]="contactForm.get('message')?.invalid && contactForm.get('message')?.touched">
+                  </textarea>
+                  <small 
+                    *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
+                    class="p-error">
+                    Message is required and must be at least 10 characters
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <p-button 
+                  type="submit" 
+                  label="Send Message" 
+                  icon="pi pi-send"
+                  [disabled]="contactForm.invalid"
+                  styleClass="p-button-primary">
+                </p-button>
+              </div>
+            </form>
+          </p-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter-section">
+    <div class="container">
+      <div class="newsletter-content">
+        <div class="newsletter-text">
+          <h3>Stay Updated</h3>
+          <p>Subscribe to our newsletter for the latest insights, tips, and industry updates.</p>
+        </div>
+        <div class="newsletter-form">
+          <div class="p-inputgroup">
+            <input 
+              type="email" 
+              pInputText 
+              [(ngModel)]="newsletterEmail"
+              placeholder="Enter your email address" />
+            <p-button 
+              icon="pi pi-send" 
+              (onClick)="subscribeNewsletter()"
+              styleClass="p-button-primary">
+            </p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Contact Dialog -->
+<p-dialog 
+  header="Contact Us" 
+  [(visible)]="contactDialogVisible" 
+  [modal]="true" 
+  [style]="{width: '50vw'}"
+  [draggable]="false" 
+  [resizable]="false">
+  <div class="dialog-content">
+    <p>Thank you for your interest! Our team will get back to you within 24 hours.</p>
+    <p>For immediate assistance, please call us at: <strong>{{ businessDetails && businessDetails.basicInfo && businessDetails.basicInfo.phone ? businessDetails.basicInfo.phone : 'N/A' }}</strong></p>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Close" icon="pi pi-times" (onClick)="closeContactDialog()" styleClass="p-button-text"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Scroll to Top Button -->
+<p-scrollTop></p-scrollTop>

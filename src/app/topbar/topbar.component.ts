@@ -115,18 +115,44 @@ export class TopbarComponent implements OnInit {
   }
 
   setActiveSectionFromUrl(url: string) {
-    if (url.includes('/shopping-cart')) {
+    if (url.includes('/landing-page')) {
+      this.activeSection = 'landing-page';
+    } else if (url.includes('/checkout')) {
+      this.activeSection = 'checkout';
+    } else if (url.includes('/shopping-cart')) {
       this.activeSection = 'shopping-cart';
     } else if (url.includes('/order-history')) {
       this.activeSection = 'order-history';
-    } else {
+    } else if (url.includes('/home')) {
       this.activeSection = 'home';
+    } else {
+      this.activeSection = 'landing-page'; // Default to landing page
     }
+  }
+
+  navigateToLandingPage() {
+    this.activeSection = 'landing-page';
+    this.router.navigate(['/landing-page']);
   }
 
   navigateToHome() {
     this.activeSection = 'home';
     this.router.navigate(['/home']);
+  }
+
+  navigateToCheckout() {
+    this.activeSection = 'checkout';
+    this.router.navigate(['/checkout']);
+  }
+
+  navigateToShoppingCart() {
+    this.activeSection = 'shopping-cart';
+    this.router.navigate(['/shopping-cart']);
+  }
+
+  navigateToOrderHistory() {
+    this.activeSection = 'order-history';
+    this.router.navigate(['/order-history']);
   }
 
   openSimpleDialog(): void {
@@ -147,16 +173,6 @@ export class TopbarComponent implements OnInit {
   clearTheme() {
     this.selectedTheme = null;
     document.body.removeAttribute('data-theme');
-  }
-
-  navigateToShoppingCart() {
-    this.activeSection = 'shopping-cart';
-    this.router.navigate(['/shopping-cart']);
-  }
-
-  navigateToOrderHistory() {
-    this.activeSection = 'order-history';
-    this.router.navigate(['/order-history']);
   }
 
   onSearchChange() {

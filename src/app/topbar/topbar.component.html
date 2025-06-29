@@ -15,9 +15,9 @@
     </ng-template>
     <ng-template pTemplate="end">
       <div class="topbar-actions">
-        <p-button icon="pi pi-home" class="topbar-btn" (onClick)="navigateToHome()" [ngClass]="{'active-section': activeSection === 'home'}" text plain />
-        <p-button icon="pi pi-shopping-cart" class="topbar-btn cart-btn-prominent" (onClick)="navigateToShoppingCart()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'shopping-cart'}" text plain />
-        <p-button value="Grocery Store" icon="pi pi-shopping-bag" class="topbar-btn" text plain />
+        <p-button icon="pi pi-home" class="topbar-btn" (onClick)="navigateToLandingPage()" [ngClass]="{'active-section': activeSection === 'landing-page'}" text plain />
+        <p-button icon="pi pi-shopping-bag" class="topbar-btn" (onClick)="navigateToHome()" [ngClass]="{'active-section': activeSection === 'home'}" text plain />
+        <p-button icon="pi pi-shopping-cart" class="topbar-btn cart-btn-prominent" (onClick)="navigateToCheckout()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'checkout'}" text plain />
         <p-dropdown [options]="themeOptions" [(ngModel)]="selectedTheme" optionLabel="name" placeholder="Theme" styleClass="theme-dropdown" (onChange)="selectTheme($event.value)" [showClear]="true" (onClear)="clearTheme()"></p-dropdown>
       </div>
     </ng-template>
