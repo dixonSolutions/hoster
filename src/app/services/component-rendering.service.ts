@@ -649,10 +649,31 @@ export class ComponentRenderingService {
    * Sanitize URL
    */
   private sanitizeUrl(url: string): string {
-    // Basic URL sanitization
-    if (url.startsWith('javascript:') || url.startsWith('data:') || url.startsWith('vbscript:')) {
+    // Allow data: URLs for images (base64 encoded images)
+    if (url.startsWith('data:image/')) {
+      return url;
+    }
+    
+    // Block potentially dangerous protocols
+    if (url.startsWith('javascript:') || url.startsWith('vbscript:')) {
       return '#';
     }
+    
+    // Allow other data: URLs but validate them
+    if (url.startsWith('data:')) {
+      // For non-image data URLs, be more cautious
+      try {
+        // Basic validation - ensure it's properly formatted
+        const parts = url.split(',');
+        if (parts.length === 2 && parts[0].includes('base64')) {
+          return url;
+        }
+      } catch (error) {
+        console.warn('Invalid data URL:', error);
+        return '#';
+      }
+    }
+    
     return url;
   }
 } 

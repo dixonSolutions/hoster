@@ -122,10 +122,253 @@ export class PageRenderingService {
           <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
           
-          <!-- PrimeNG CSS -->
-          <link rel="stylesheet" href="https://unpkg.com/primeng/resources/themes/saga-blue/theme.css">
-          <link rel="stylesheet" href="https://unpkg.com/primeng/resources/primeng.min.css">
-          <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css">
+          <!-- PrimeNG CSS with working CDN fallbacks -->
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/primeng@17.18.0/resources/themes/saga-blue/theme.css" onerror="this.onerror=null;this.href='https://unpkg.com/primeng@17.18.0/resources/themes/saga-blue/theme.css';">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/primeng@17.18.0/resources/primeng.min.css" onerror="this.onerror=null;this.href='https://unpkg.com/primeng@17.18.0/resources/primeng.min.css';">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" onerror="this.onerror=null;this.href='https://unpkg.com/primeicons@7.0.0/primeicons.css';">
+          
+          <!-- Comprehensive PrimeNG fallback styles -->
+          <style>
+            /* Reset and base styles */
+            * {
+              box-sizing: border-box;
+            }
+            
+            .p-component {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+              font-size: 14px;
+            }
+            
+            /* Card Component */
+            .p-card {
+              background: #ffffff;
+              border: 1px solid #e9ecef;
+              border-radius: 6px;
+              box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+              overflow: hidden;
+              position: relative;
+            }
+            
+            .p-card-body {
+              padding: 1.5rem;
+            }
+            
+            .p-card-title {
+              font-size: 1.5rem;
+              font-weight: 700;
+              margin: 0 0 1rem 0;
+            }
+            
+            .p-card-subtitle {
+              font-weight: 400;
+              margin: 0 0 0.5rem 0;
+              color: #6c757d;
+            }
+            
+            .p-card-content {
+              padding: 0;
+            }
+            
+            .p-card-footer {
+              padding: 1rem 1.5rem;
+              border-top: 1px solid #e9ecef;
+            }
+            
+            /* Button Component */
+            .p-button {
+              background: #2196F3;
+              border: 1px solid #2196F3;
+              color: #ffffff;
+              cursor: pointer;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              padding: 0.75rem 1rem;
+              font-size: 1rem;
+              text-decoration: none;
+              overflow: hidden;
+              position: relative;
+              border-radius: 6px;
+              transition: all 0.2s ease;
+              font-family: inherit;
+              user-select: none;
+              outline: 0 none;
+            }
+            
+            .p-button:not(:disabled):hover {
+              background: #1976D2;
+              border-color: #1976D2;
+              color: #ffffff;
+            }
+            
+            .p-button:not(:disabled):active {
+              background: #1565C0;
+              border-color: #1565C0;
+            }
+            
+            .p-button:focus {
+              outline: 0 none;
+              outline-offset: 0;
+              box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.5);
+            }
+            
+            .p-button:disabled {
+              cursor: default;
+              opacity: 0.6;
+            }
+            
+            .p-button-icon {
+              margin-right: 0.5rem;
+            }
+            
+            .p-button-icon-only .p-button-icon {
+              margin: 0;
+            }
+            
+            .p-button-text {
+              background: transparent;
+              border-color: transparent;
+              color: #2196F3;
+            }
+            
+            .p-button-text:not(:disabled):hover {
+              background: rgba(33, 150, 243, 0.04);
+              border-color: transparent;
+              color: #2196F3;
+            }
+            
+            .p-button-outlined {
+              background: transparent;
+              color: #2196F3;
+              border: 1px solid #2196F3;
+            }
+            
+            .p-button-outlined:not(:disabled):hover {
+              background: #2196F3;
+              color: #ffffff;
+            }
+            
+            .p-button-rounded {
+              border-radius: 2rem;
+            }
+            
+            .p-button-sm {
+              font-size: 0.875rem;
+              padding: 0.5rem 0.75rem;
+            }
+            
+            .p-button-lg {
+              font-size: 1.125rem;
+              padding: 0.875rem 1.25rem;
+            }
+            
+            /* Form Controls */
+            .p-inputtext {
+              font-family: inherit;
+              font-size: 1rem;
+              color: #495057;
+              background: #ffffff;
+              padding: 0.75rem 0.75rem;
+              border: 1px solid #ced4da;
+              transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+              appearance: none;
+              border-radius: 6px;
+            }
+            
+            .p-inputtext:enabled:focus {
+              outline: 0 none;
+              outline-offset: 0;
+              box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
+              border-color: #2196F3;
+            }
+            
+            /* Layout utilities */
+            .p-d-flex { display: flex !important; }
+            .p-flex-column { flex-direction: column !important; }
+            .p-align-items-center { align-items: center !important; }
+            .p-justify-content-center { justify-content: center !important; }
+            .p-justify-content-between { justify-content: space-between !important; }
+            .p-text-center { text-align: center !important; }
+            .p-m-0 { margin: 0 !important; }
+            .p-mt-3 { margin-top: 1rem !important; }
+            .p-mb-3 { margin-bottom: 1rem !important; }
+            .p-p-3 { padding: 1rem !important; }
+            
+            /* PrimeIcons fallback - essential icons */
+            .pi {
+              font-family: 'primeicons';
+              speak: none;
+              font-style: normal;
+              font-weight: normal;
+              font-variant: normal;
+              text-transform: none;
+              line-height: 1;
+              display: inline-block;
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+              font-size: 1rem;
+            }
+            
+            /* When primeicons font fails, use fallback symbols */
+            .pi-check:before { content: "✓"; }
+            .pi-times:before { content: "×"; }
+            .pi-plus:before { content: "+"; }
+            .pi-minus:before { content: "−"; }
+            .pi-image:before { content: "🖼"; }
+            .pi-facebook:before { content: "📘"; }
+            .pi-twitter:before { content: "🐦"; }
+            .pi-linkedin:before { content: "💼"; }
+            .pi-instagram:before { content: "📷"; }
+            .pi-home:before { content: "🏠"; }
+            .pi-user:before { content: "👤"; }
+            .pi-phone:before { content: "📞"; }
+            .pi-envelope:before { content: "✉"; }
+            .pi-star:before { content: "⭐"; }
+            .pi-heart:before { content: "♥"; }
+            .pi-search:before { content: "🔍"; }
+            .pi-shopping-cart:before { content: "🛒"; }
+            .pi-calendar:before { content: "📅"; }
+            .pi-clock:before { content: "🕐"; }
+            .pi-map-marker:before { content: "📍"; }
+            .pi-download:before { content: "⬇"; }
+            .pi-upload:before { content: "⬆"; }
+            .pi-external-link:before { content: "🔗"; }
+            .pi-arrow-right:before { content: "→"; }
+            .pi-arrow-left:before { content: "←"; }
+            .pi-arrow-up:before { content: "↑"; }
+            .pi-arrow-down:before { content: "↓"; }
+            
+            /* Responsive image handling */
+            img {
+              max-width: 100%;
+              height: auto;
+            }
+            
+            /* Basic layout helpers */
+            .container {
+              max-width: 1200px;
+              margin: 0 auto;
+              padding: 0 1rem;
+            }
+            
+            .row {
+              display: flex;
+              flex-wrap: wrap;
+              margin: 0 -0.5rem;
+            }
+            
+            .col {
+              flex: 1;
+              padding: 0 0.5rem;
+            }
+            
+            @media (max-width: 768px) {
+              .col {
+                flex: 100%;
+                margin-bottom: 1rem;
+              }
+            }
+          </style>
           
           <!-- Page styles -->
           ${pageCSS}
@@ -136,7 +379,6 @@ export class PageRenderingService {
         </head>
         <body class="page-body" data-page-id="${page.id}">
           <!-- Skip to main content for accessibility -->
-          <a href="#main-content" class="skip-link">Skip to main content</a>
           
           <!-- Navigation -->
           ${navigationHTML}

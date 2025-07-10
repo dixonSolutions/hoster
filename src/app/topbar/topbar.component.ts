@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { AboutUsPopupComponent } from '../about-us-popup/about-us-popup.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
@@ -21,6 +21,25 @@ interface ThemeOption {
   badgeColor: string;
 }
 
+interface WebsitePage {
+  id: string;
+  name: string;
+  route: string;
+  isDeletable: boolean;
+  components: any[];
+}
+
+interface WebsiteNavigation {
+  logoType: string;
+  logoText: string;
+  logoImage: string;
+  logoShape: string;
+  logoSize: string;
+  backgroundColor: string;
+  textColor: string;
+  showShadow: boolean;
+}
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -37,7 +56,10 @@ interface ThemeOption {
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.css'
 })
-export class TopbarComponent implements OnInit {
+export class TopbarComponent implements OnInit, OnChanges {
+  @Input() websiteData: any = null;
+  @Input() currentPageId: string = 'home';
+
   themeOptions: ThemeOption[] = [
     { name: 'Rose & Red', value: 'rose-red', badgeColor: '#e57373' },
     { name: 'Azure & Blue', value: 'azure-blue', badgeColor: '#90caf9' },
@@ -47,12 +69,15 @@ export class TopbarComponent implements OnInit {
   selectedTheme: ThemeOption | null = null;
   businessName: string | undefined;
   menuItems: MenuItem[] = [];
+  websitePages: WebsitePage[] = [];
+  websiteNavigation: WebsiteNavigation | null = null;
   activeSection: string = '';
   searchText: string = '';
   searchResult: any = null;
 
   constructor(
     private router: Router, 
+    private route: ActivatedRoute,
     private dialog: MatDialog, 
     public dataService: DataServiceService
   ) {
@@ -67,6 +92,7 @@ export class TopbarComponent implements OnInit {
   ngOnInit() {
     this.initializeMenuItems();
     this.setActiveSectionFromUrl(this.router.url);
+    this.parseWebsiteData();
     
     // Get user data and token
     this.dataService.getUserById(this.dataService.userID).subscribe({
@@ -79,7 +105,8 @@ export class TopbarComponent implements OnInit {
           this.dataService.getBusinessByBusinessID(this.dataService.businessID, this.dataService.JWTtoken).subscribe({
             next: (response) => {
               this.dataService.BasicBusinessInfo = response;
-              this.businessName = this.dataService.BasicBusinessInfo?.bussinessName;
+              // Use website navigation business name if available, otherwise use business info
+              this.businessName = this.websiteNavigation?.logoText || this.dataService.BasicBusinessInfo?.bussinessName;
             },
             error: (error) => {
               console.error('Error fetching business info:', error);
@@ -99,7 +126,81 @@ export class TopbarComponent implements OnInit {
     });
   }
 
+  ngOnChanges() {
+    this.parseWebsiteData();
+  }
+
+  private parseWebsiteData() {
+    if (this.websiteData) {
+      try {
+        const parsedData = typeof this.websiteData === 'string' ? JSON.parse(this.websiteData) : this.websiteData;
+        
+        // Extract navigation configuration
+        if (parsedData.builtInNavigation) {
+          this.websiteNavigation = parsedData.builtInNavigation;
+          this.businessName = this.websiteNavigation?.logoText || this.businessName;
+        }
+        
+        // Extract pages
+        if (parsedData.pages && Array.isArray(parsedData.pages)) {
+          this.websitePages = parsedData.pages;
+          this.updateMenuItemsFromWebsite();
+        }
+      } catch (error) {
+        console.error('Error parsing website data:', error);
+      }
+    }
+  }
+
+  private updateMenuItemsFromWebsite() {
+    // Create navigation items from website pages
+    const pageMenuItems: MenuItem[] = this.websitePages.map(page => ({
+      label: page.name,
+      icon: this.getPageIcon(page.id),
+      command: () => this.navigateToPage(page)
+    }));
+
+    // Combine website pages with default menu items
+    this.menuItems = [
+      ...pageMenuItems,
+      {
+        label: 'History',
+        icon: 'pi pi-history',
+        command: () => this.navigateToOrderHistory()
+      },
+      {
+        label: 'About',
+        icon: 'pi pi-info-circle',
+        command: () => this.openSimpleDialog()
+      }
+    ];
+  }
+
+  getPageIcon(pageId: string): string {
+    const iconMap: { [key: string]: string } = {
+      'home': 'pi pi-home',
+      'about': 'pi pi-info-circle',
+      'shop': 'pi pi-shopping-cart',
+      'checkout': 'pi pi-credit-card',
+      'past-orders': 'pi pi-history',
+      'contact': 'pi pi-phone',
+      'services': 'pi pi-briefcase'
+    };
+    return iconMap[pageId] || 'pi pi-file';
+  }
+
+  navigateToPage(page: WebsitePage) {
+    this.activeSection = page.id;
+    // Stay on current website URL, just update the page query parameter
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: page.id },
+      queryParamsHandling: 'merge' // Keep other existing query params
+    });
+  }
+
   private initializeMenuItems() {
+    // Initialize with default items, will be updated when website data is available
     this.menuItems = [
       {
         label: 'History',

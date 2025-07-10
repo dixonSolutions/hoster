@@ -1,24 +1,95 @@
 <div class="topbar-container">
-  <p-toolbar styleClass="topbar-toolbar glassmorphism" [style]="{ 'border-radius': '2rem', 'padding': '0.5rem 1.5rem', 'background': '#fff', 'box-shadow': '0 4px 24px rgba(0,0,0,0.07)' }">
+  <p-toolbar styleClass="topbar-toolbar glassmorphism" [style]="{ 
+    'border-radius': '2rem', 
+    'padding': '0.5rem 1.5rem', 
+    'background': websiteNavigation?.backgroundColor || '#ffffff', 
+    'color': websiteNavigation?.textColor || '#333333',
+    'box-shadow': '0 4px 24px rgba(0,0,0,0.07)',
+    'position': 'fixed',
+    'top': '10px',
+    'left': '10px',
+    'right': '10px',
+    'z-index': '1000'
+  }">
     <ng-template pTemplate="start">
       <div class="topbar-left">
-        <span class="topbar-title">{{ this.dataService.BasicBusinessInfo?.bussinessName || 'Business Name' }}</span>
-      </div>
-    </ng-template>
-    <ng-template pTemplate="center">
-      <div class="topbar-center">
-        <span class="search-wrapper">
-          <i class="pi pi-search search-icon"></i>
-          <input type="text" pInputText placeholder="Search" class="search-input" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
+        <span class="topbar-title" [style]="{ 'color': websiteNavigation?.textColor || '#333333', 'font-weight': '600' }">
+          {{ businessName || 'Website' }}
         </span>
       </div>
     </ng-template>
+    
+    <ng-template pTemplate="center">
+      <div class="topbar-center">
+        <!-- Dynamic website navigation -->
+        <div class="website-navigation" *ngIf="websitePages && websitePages.length > 0">
+          <p-button 
+            *ngFor="let page of websitePages" 
+            [label]="page.name"
+            [icon]="getPageIcon(page.id)"
+            class="nav-btn"
+            [ngClass]="{'active-nav': currentPageId === page.id}"
+            (onClick)="navigateToPage(page)"
+            text
+            plain
+            [style]="{ 'color': websiteNavigation?.textColor || '#333333' }"
+          />
+        </div>
+        
+        <!-- Fallback navigation if no website data -->
+        <div class="fallback-navigation" *ngIf="!websitePages || websitePages.length === 0">
+          <p-button icon="pi pi-home" label="Home" class="nav-btn" (onClick)="navigateToLandingPage()" [ngClass]="{'active-nav': activeSection === 'landing-page'}" text plain />
+          <p-button icon="pi pi-shopping-bag" label="Shop" class="nav-btn" (onClick)="navigateToHome()" [ngClass]="{'active-nav': activeSection === 'home'}" text plain />
+        </div>
+      </div>
+    </ng-template>
+    
     <ng-template pTemplate="end">
       <div class="topbar-actions">
-        <p-button icon="pi pi-home" class="topbar-btn" (onClick)="navigateToLandingPage()" [ngClass]="{'active-section': activeSection === 'landing-page'}" text plain />
-        <p-button icon="pi pi-shopping-bag" class="topbar-btn" (onClick)="navigateToHome()" [ngClass]="{'active-section': activeSection === 'home'}" text plain />
-        <p-button icon="pi pi-shopping-cart" class="topbar-btn cart-btn-prominent" (onClick)="navigateToCheckout()" [badge]="dataService.itemsInCart.toString()" badgeClass="p-badge-danger" [ngClass]="{'active-section': activeSection === 'checkout'}" text plain />
-        <p-select [options]="themeOptions" [(ngModel)]="selectedTheme" optionLabel="name" placeholder="Theme" styleClass="theme-dropdown" (onChange)="selectTheme($event.value)" [showClear]="true" (onClear)="clearTheme()"></p-select>
+        <span class="search-wrapper" *ngIf="dataService.services && dataService.services.length > 0">
+          <i class="pi pi-search search-icon" [style]="{ 'color': websiteNavigation?.textColor || '#666666' }"></i>
+          <input 
+            type="text" 
+            pInputText 
+            placeholder="Search services..." 
+            class="search-input" 
+            [(ngModel)]="searchText" 
+            (ngModelChange)="onSearchChange()"
+            [style]="{ 
+              'border': '1px solid #e9ecef',
+              'background': 'rgba(255,255,255,0.9)',
+              'color': '#333333'
+            }"
+          />
+        </span>
+        
+        <p-button 
+          icon="pi pi-shopping-cart" 
+          class="cart-btn" 
+          (onClick)="navigateToCheckout()" 
+          [badge]="dataService.itemsInCart.toString()" 
+          badgeClass="p-badge-danger" 
+          [ngClass]="{'active-nav': activeSection === 'checkout'}" 
+          text 
+          plain 
+          [style]="{ 'color': websiteNavigation?.textColor || '#333333' }"
+        />
+        
+        <p-select 
+          [options]="themeOptions" 
+          [(ngModel)]="selectedTheme" 
+          optionLabel="name" 
+          placeholder="Theme" 
+          styleClass="theme-dropdown" 
+          (onChange)="selectTheme($event.value)" 
+          [showClear]="true" 
+          (onClear)="clearTheme()"
+          [style]="{ 
+            'background': 'rgba(255,255,255,0.9)',
+            'border': '1px solid #e9ecef'
+          }"
+        >
+        </p-select>
       </div>
     </ng-template>
   </p-toolbar>

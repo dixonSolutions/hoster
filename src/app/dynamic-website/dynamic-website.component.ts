@@ -5,13 +5,21 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 import { WebsiteParserService, WebsiteHostingDto, WorkspaceComponentDto } from '../website-parser.service';
 import { WebsiteRenderingService } from '../services/website-rendering.service';
+import { TopbarComponent } from '../topbar/topbar.component';
 
 @Component({
   selector: 'app-dynamic-website',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TopbarComponent],
   template: `
     <div class="dynamic-website-container">
+      <!-- Include topbar with website data -->
+      <app-topbar 
+        *ngIf="websiteData && parsedWebsiteJson"
+        [websiteData]="parsedWebsiteJson"
+        [currentPageId]="currentPageId">
+      </app-topbar>
+
       <div *ngIf="loading" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Loading website...</p>
@@ -68,7 +76,8 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       padding: 0;
       margin: 0;
       min-height: 100vh;
-      background-color: #f5f5f5;
+      background-color: #ffffff;
+      position: relative;
     }
 
     .loading-container {
@@ -79,6 +88,7 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       min-height: 400px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      margin-top: 80px; /* Account for topbar */
     }
 
     .loading-spinner {
@@ -108,7 +118,7 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
       color: white;
       border-radius: 12px;
-      margin: 40px auto;
+      margin: 120px auto 40px; /* Account for topbar */
       max-width: 600px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
@@ -156,16 +166,18 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       padding: 0;
       box-shadow: none;
       margin: 0;
+      padding-top: 80px; /* Account for fixed topbar */
     }
 
     .rendered-website {
       width: 100%;
-      min-height: 100vh;
+      min-height: calc(100vh - 80px);
       padding: 0;
       margin: 0;
       border-radius: 0;
       background-color: #ffffff;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-shadow: none;
+      position: relative;
     }
 
     .website-debug {
@@ -174,6 +186,7 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       border-radius: 12px;
       margin: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-top: 100px; /* Account for topbar */
     }
 
     .debug-notice {
@@ -203,55 +216,79 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       background-clip: text;
     }
 
+    .website-body {
+      background-color: #f8f9fa;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
     .website-json-content {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 20px;
+      background-color: #ffffff;
+      border: 1px solid #e9ecef;
       border-radius: 8px;
-      margin-bottom: 25px;
-      border: 1px solid #dee2e6;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .website-json-content pre {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      line-height: 1.4;
+      max-height: 400px;
+      overflow-y: auto;
+      color: #495057;
     }
 
     .components-container {
-      margin-top: 30px;
+      background-color: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .components-container h3 {
-      color: #333;
-      font-size: 24px;
+      color: #495057;
+      margin: 0 0 20px 0;
+      font-size: 18px;
       font-weight: 600;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
     }
 
     .component-item {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      background-color: #f8f9fa;
       border: 1px solid #e9ecef;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
       transition: all 0.3s ease;
     }
 
     .component-item:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #667eea;
     }
 
     .component-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #dee2e6;
     }
 
     .component-header strong {
-      color: #333;
+      color: #667eea;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .component-id {
@@ -260,64 +297,78 @@ import { WebsiteRenderingService } from '../services/website-rendering.service';
       background-color: #e9ecef;
       padding: 4px 8px;
       border-radius: 4px;
-      font-weight: 500;
+      font-family: monospace;
     }
 
     .component-details {
+      color: #495057;
       font-size: 14px;
-      color: #555;
-      line-height: 1.6;
     }
 
     .component-details p {
-      margin: 8px 0;
-    }
-
-    .component-details strong {
-      color: #333;
-      font-weight: 600;
+      margin: 5px 0;
+      line-height: 1.4;
     }
 
     .component-parameters {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #dee2e6;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+
+    .component-parameters strong {
+      color: #495057;
+      font-size: 13px;
     }
 
     .component-parameters pre {
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 12px;
-      overflow-x: auto;
+      margin: 5px 0 0 0;
+      padding: 8px;
+      background-color: #f8f9fa;
       border: 1px solid #e9ecef;
-      color: #333;
-    }
-
-    pre {
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 12px;
-      overflow-x: auto;
-      border: 1px solid #e9ecef;
-      color: #333;
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.3;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #495057;
     }
 
     /* Responsive design */
     @media (max-width: 768px) {
       .website-debug {
-        padding: 20px;
         margin: 10px;
+        padding: 20px;
+        margin-top: 90px;
       }
       
-      .website-header h1 {
-        font-size: 24px;
+      .error-container {
+        margin: 100px 20px 20px;
+        padding: 40px 20px;
       }
       
-      .component-item {
-        padding: 15px;
+      .website-content {
+        padding-top: 70px;
       }
+    }
+
+    /* Fix any potential dark elements or chips */
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* Ensure no dark backgrounds leak through */
+    .dynamic-website-container::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #ffffff;
+      z-index: -1;
     }
   `]
 })
@@ -328,6 +379,7 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
   parsedWebsiteJson: any = null;
   renderedPageHtml: string | null = null;
   safeRenderedHtml: SafeHtml | null = null;
+  currentPageId: string = 'home';
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -339,10 +391,23 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Get the website name from the URL segments (original approach)
     this.route.url.pipe(takeUntil(this.destroy$)).subscribe(segments => {
       if (segments.length > 0) {
         const websiteName = segments[0].path;
         this.loadWebsiteData(websiteName);
+      }
+    });
+    
+    // Get the page ID from query parameters and re-render when it changes
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(queryParams => {
+      const newPageId = queryParams['page'] || 'home';
+      if (newPageId !== this.currentPageId) {
+        this.currentPageId = newPageId;
+        // Re-render the page if website is already loaded
+        if (this.websiteData && this.websiteRenderingService.getAllPages().length > 0) {
+          this.renderCurrentPage();
+        }
       }
     });
   }
@@ -392,31 +457,45 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
       
       await this.websiteRenderingService.initializeWebsite(incomingData);
       
-      // Get the first page and render it
+      // Get all pages and render the current page
       const pages = this.websiteRenderingService.getAllPages();
       console.log('📄 Available pages:', pages.map(p => ({ id: p.id, name: p.name })));
       
       if (pages.length > 0) {
-        this.websiteRenderingService.renderPage(pages[0].id)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (html) => {
-              this.renderedPageHtml = html;
-              // Sanitize the HTML but trust it since it's from our rendering service
-              this.safeRenderedHtml = this.sanitizer.bypassSecurityTrustHtml(html);
-              console.log('✅ Website rendered successfully');
-            },
-            error: (error) => {
-              console.error('❌ Failed to render website with new service:', error);
-              // Keep the debug view as fallback
-            }
-          });
+        // Render the current page instead of always the first page
+        this.renderCurrentPage();
       } else {
         console.warn('⚠️ No pages found to render');
       }
     } catch (error) {
       console.error('❌ Failed to initialize website rendering service:', error);
       // Keep the debug view as fallback
+    }
+  }
+
+  private renderCurrentPage() {
+    const pages = this.websiteRenderingService.getAllPages();
+    if (pages.length > 0) {
+      const currentPage = pages.find(p => p.id === this.currentPageId);
+      if (currentPage) {
+        this.websiteRenderingService.renderPage(currentPage.id)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (html) => {
+              this.renderedPageHtml = html;
+              this.safeRenderedHtml = this.sanitizer.bypassSecurityTrustHtml(html);
+              console.log('✅ Current page rendered successfully');
+            },
+            error: (error) => {
+              console.error('❌ Failed to render current page:', error);
+              // Keep the debug view as fallback
+            }
+          });
+      } else {
+        console.warn('⚠️ Current page not found:', this.currentPageId);
+      }
+    } else {
+      console.warn('⚠️ No pages available to render current page:', this.currentPageId);
     }
   }
 

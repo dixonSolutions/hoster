@@ -6,26 +6,17 @@
   padding: 0.5rem 0;
 }
 
-/* Glassmorphism effect for the toolbar */
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.08) !important; /* Made background much more transparent (0.22 -> 0.08) */
-  border-radius: 2rem !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.15) !important; /* Made border more transparent (0.35 -> 0.15) */
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important; /* Slightly reduced shadow opacity for consistency */
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  transition: background 0.3s, box-shadow 0.3s;
-}
-
+/* Clean, modern toolbar styling */
 .topbar-toolbar {
   border-radius: 2rem !important;
   padding: 0.5rem 1.5rem !important;
   min-height: 56px;
   display: flex;
   align-items: center;
-  border: none;
-  background: none;
-  box-shadow: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
 }
 
 .topbar-left {
@@ -37,7 +28,6 @@
 .topbar-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #222 !important;
   letter-spacing: 0.5px;
   margin-left: 0.5rem;
 }
@@ -46,31 +36,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
 }
 
-.search-wrapper {
+/* Dynamic website navigation */
+.website-navigation, .fallback-navigation {
   display: flex;
   align-items: center;
-  background: #f3f4f6;
-  border-radius: 1.5rem;
-  padding: 0.25rem 1rem;
-  min-width: 220px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  gap: 0.5rem;
 }
 
-.search-icon {
-  color: #888;
-  font-size: 1.1rem;
-  margin-right: 0.5rem;
+.nav-btn {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  transition: all 0.2s ease !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
 }
 
-.search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 1rem;
-  width: 140px;
-  color: #222;
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.active-nav {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-bottom: 2px solid currentColor !important;
+  font-weight: 600 !important;
 }
 
 .topbar-actions {
@@ -79,72 +72,143 @@
   gap: 0.75rem;
 }
 
-.topbar-btn, .cart-btn-prominent {
-  background: #f3f4f6 !important;
-  border: none !important;
-  color: #222 !important;
-  border-radius: 1rem !important;
-  transition: all 0.2s;
-  box-shadow: none !important;
-  width: 40px !important;
-  height: 40px !important;
+.search-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
+  border-radius: 1.5rem;
+  padding: 0.25rem 1rem;
+  min-width: 220px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  margin-right: 1rem;
 }
 
-.cart-btn-prominent {
-  font-weight: 600;
-  border-radius: 1.2rem !important;
+.search-icon {
+  font-size: 1.1rem;
+  margin-right: 0.5rem;
+  opacity: 0.7;
+}
+
+.search-input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 1rem;
+  width: 140px;
+  box-shadow: none !important;
+}
+
+.search-input::placeholder {
+  opacity: 0.7;
+}
+
+.cart-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 1rem !important;
+  transition: all 0.2s ease !important;
   width: 56px !important;
   height: 40px !important;
   margin: 0 0.25rem;
-  color: #222 !important;
-  background: #f3f4f6 !important;
 }
 
-.cart-btn-prominent:hover, .cart-btn-prominent.active-section {
-  background: #e0e7ef !important;
-  color: #222 !important;
+.cart-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
 }
 
-.topbar-btn .p-button-icon, .topbar-btn .pi, .cart-btn-prominent .p-button-icon, .cart-btn-prominent .pi {
-  color: #222 !important;
-  font-size: 1.2rem !important;
-  transition: color 0.2s;
-}
-
-.active-section {
-  border-bottom: 3px solid #111 !important;
-  background: #f3f4f6 !important;
-  color: #222 !important;
-  box-shadow: none !important;
-}
-
-.active-section .p-button-icon, .active-section .pi {
-  color: #222 !important;
+.cart-btn.active-nav {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-bottom: 2px solid currentColor !important;
 }
 
 .p-badge-danger {
   background: #ef4444 !important;
   color: #fff !important;
   box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+  font-size: 0.75rem;
+  min-width: 1.2rem;
+  height: 1.2rem;
 }
 
 .theme-dropdown {
   min-width: 120px;
   margin-left: 0.5rem;
+  border-radius: 1rem !important;
+}
+
+/* Ensure all text and icons are properly colored */
+.topbar-toolbar * {
+  transition: all 0.2s ease;
+}
+
+.topbar-toolbar .p-button-icon,
+.topbar-toolbar .pi {
+  font-size: 1.1rem !important;
+}
+
+/* Remove any potential dark backgrounds */
+.topbar-toolbar,
+.topbar-toolbar * {
+  border: none;
+  box-shadow: none;
+}
+
+/* Override any dark PrimeNG defaults */
+.p-toolbar {
+  background: transparent !important;
+  border: none !important;
+}
+
+.p-button-text {
+  background: transparent !important;
 }
 
 @media (max-width: 768px) {
-  .topbar-title { font-size: 1.1rem; }
-  .search-wrapper { min-width: 120px; }
-  .theme-dropdown { min-width: 80px; }
-  .cart-btn-prominent { width: 44px !important; }
+  .topbar-title { 
+    font-size: 1.1rem; 
+  }
+  
+  .search-wrapper { 
+    min-width: 120px; 
+  }
+  
+  .website-navigation, .fallback-navigation {
+    gap: 0.25rem;
+  }
+  
+  .nav-btn {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .theme-dropdown { 
+    min-width: 80px; 
+  }
+  
+  .cart-btn { 
+    width: 44px !important; 
+  }
 }
 
 @media (max-width: 480px) {
-  .topbar-title { font-size: 1rem; }
-  .search-wrapper { display: none; }
-  .theme-dropdown { display: none; }
+  .topbar-title { 
+    font-size: 1rem; 
+  }
+  
+  .search-wrapper { 
+    display: none; 
+  }
+  
+  .theme-dropdown { 
+    display: none; 
+  }
+  
+  .website-navigation, .fallback-navigation {
+    gap: 0.1rem;
+  }
+  
+  .nav-btn {
+    padding: 0.3rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
 }
