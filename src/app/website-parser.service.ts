@@ -47,7 +47,7 @@ export class WebsiteParserService {
     });
 
     return this.http.get<WebsiteHostingDto>(
-      `${this.apiUrl}/Website/GetByName/${encodeURIComponent(websiteName)}`,
+      `${this.apiUrl}/WebsiteHoster/${encodeURIComponent(websiteName)}`,
       { headers }
     ).pipe(
       retry(2),
@@ -66,7 +66,7 @@ export class WebsiteParserService {
     });
 
     return this.http.get<WorkspaceComponentDto[]>(
-      `${this.apiUrl}/Workspace/${encodeURIComponent(workspaceId)}/Components`,
+      `${this.apiUrl}/WebsiteHoster/workspace/${encodeURIComponent(workspaceId)}/components`,
       { headers }
     ).pipe(
       retry(2),
@@ -85,7 +85,7 @@ export class WebsiteParserService {
     });
 
     return this.http.get<boolean>(
-      `${this.apiUrl}/Website/CheckNameExists/${encodeURIComponent(websiteName)}`,
+      `${this.apiUrl}/WebsiteHoster/check/${encodeURIComponent(websiteName)}`,
       { headers }
     ).pipe(
       retry(2),

@@ -11,7 +11,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { MenuItem } from 'primeng/api';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 
@@ -30,7 +30,7 @@ interface ThemeOption {
     ToolbarModule,
     ButtonModule, 
     BadgeModule, 
-    DropdownModule,
+    SelectModule,
     AvatarModule,
     AvatarGroupModule
   ],

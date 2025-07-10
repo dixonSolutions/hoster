@@ -30,6 +30,9 @@ export * from './FreeTrials';
 export * from './CustomDomains';
 export * from './WebsiteAnalytics';
 
+// Website Rendering System
+export * from './WebsiteRendering';
+
 // Existing models
 export * from './account';
 export * from './ApiResponse';
