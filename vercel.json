@@ -1,5 +1,5 @@
 {
-  "buildCommand": "ng build --configuration=production",
+  "buildCommand": "ng build",
   "outputDirectory": "dist/angular-template-for-business-one/browser",
   "rewrites": [
     {
