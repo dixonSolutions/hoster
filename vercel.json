@@ -1,6 +1,6 @@
 {
   "buildCommand": "ng build",
-  "outputDirectory": "dist/angular-template-for-business-one/browser",
+  "outputDirectory": "dist/angular-template-for-business-one",
   "rewrites": [
     {
       "source": "/(.*)",
