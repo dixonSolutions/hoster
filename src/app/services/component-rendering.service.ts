@@ -81,6 +81,8 @@ export class ComponentRenderingService {
         return this.renderTestimonial(parameters as TestimonialParams);
       case 'prime-card-001':
         return this.renderPrimeCard(parameters as PrimeCardParams);
+      case 'angular-component':
+        return this.renderAngularComponent(parameters);
       default:
         return this.renderGenericComponent(component, componentDef, parameters);
     }
@@ -491,6 +493,98 @@ export class ComponentRenderingService {
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Render Angular component placeholder
+   */
+  private renderAngularComponent(parameters: any): string {
+    const componentName = parameters.componentName || 'Unknown Component';
+    const componentSelector = parameters.componentSelector || 'app-unknown';
+    const fullPage = parameters.fullPage || false;
+    const containerClass = parameters.containerClass || 'angular-component-container';
+
+    // Create a placeholder that will be replaced by the actual Angular component
+    // The dynamic website component will handle rendering the actual Angular component
+    if (fullPage) {
+      return `
+        <div class="${containerClass}" style="
+          width: 100%;
+          min-height: 100vh;
+          padding: 0;
+          margin: 0;
+          background-color: #ffffff;
+          position: relative;
+        ">
+          <!-- Angular Component Placeholder: ${componentName} -->
+          <div class="angular-component-placeholder" data-component="${componentSelector}" style="
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          ">
+            <div>
+              <i class="pi pi-cog" style="font-size: 3rem; margin-bottom: 1rem; display: block; animation: spin 2s linear infinite;"></i>
+              <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Loading ${componentName}</div>
+              <div style="font-size: 0.9rem; opacity: 0.8;">This content is rendered by Angular</div>
+            </div>
+          </div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="${containerClass}" style="
+          width: 100%;
+          height: 100%;
+          padding: 1rem;
+          background-color: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        ">
+          <!-- Angular Component Placeholder: ${componentName} -->
+          <div class="angular-component-placeholder" data-component="${componentSelector}" style="
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            border-radius: 6px;
+          ">
+            <div>
+              <i class="pi pi-cog" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; animation: spin 2s linear infinite;"></i>
+              <div>${componentName}</div>
+            </div>
+          </div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+        </div>
+      `;
+    }
   }
 
   /**

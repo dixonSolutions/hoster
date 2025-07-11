@@ -6,65 +6,157 @@ import { Subject, takeUntil } from 'rxjs';
 import { WebsiteParserService, WebsiteHostingDto, WorkspaceComponentDto } from '../website-parser.service';
 import { WebsiteRenderingService } from '../services/website-rendering.service';
 import { TopbarComponent } from '../topbar/topbar.component';
+import { ShoppingCartComponent } from '../shopping-cart/shopping-cart.component';
+import { OrderHistoryComponent } from '../order-history/order-history.component';
+import { ContactUsComponent } from '../contact-us/contact-us.component';
+import { HomeComponent } from '../home/home.component';
+
+// PrimeNG Imports
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ChipModule } from 'primeng/chip';
+import { TabViewModule } from 'primeng/tabview';
+import { AccordionModule } from 'primeng/accordion';
 
 @Component({
   selector: 'app-dynamic-website',
   standalone: true,
-  imports: [CommonModule, TopbarComponent],
+  imports: [
+    CommonModule, 
+    TopbarComponent, 
+    ShoppingCartComponent, 
+    OrderHistoryComponent, 
+    ContactUsComponent, 
+    HomeComponent,
+    CardModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    ChipModule,
+    TabViewModule,
+    AccordionModule
+  ],
   template: `
     <div class="dynamic-website-container">
-      <!-- Include topbar with website data -->
+      <!-- Always show topbar for consistency -->
       <app-topbar 
         *ngIf="websiteData && parsedWebsiteJson"
         [websiteData]="parsedWebsiteJson"
         [currentPageId]="currentPageId">
       </app-topbar>
 
-      <div *ngIf="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Loading website...</p>
+      <!-- Loading State -->
+      <div *ngIf="loading" class="p-d-flex p-flex-column p-ai-center p-jc-center loading-container">
+        <p-progressSpinner styleClass="custom-spinner"></p-progressSpinner>
+        <p class="p-text-center p-mt-3">Loading website...</p>
       </div>
 
-      <div *ngIf="error" class="error-container">
-        <h2>Website Not Found</h2>
-        <p>{{ error }}</p>
-        <button (click)="goHome()" class="btn btn-primary">Go to Home</button>
-      </div>
-
-      <div *ngIf="websiteData && !loading && !error" class="website-content">
-        <!-- Render the actual website with trusted HTML -->
-        <div *ngIf="safeRenderedHtml" class="rendered-website" [innerHTML]="safeRenderedHtml"></div>
-        
-        <!-- Fallback to debug view if no HTML -->
-        <div *ngIf="!safeRenderedHtml" class="website-debug">
-          <div class="website-header">
-            <h1>{{ websiteData.name }}</h1>
-            <p class="debug-notice">Debug View - Website rendering in progress...</p>
-          </div>
-          
-          <div class="website-body">
-            <div *ngIf="parsedWebsiteJson" class="website-json-content">
-              <!-- Render the website JSON content -->
-              <pre>{{ parsedWebsiteJson | json }}</pre>
+      <!-- Error State -->
+      <div *ngIf="error" class="p-d-flex p-flex-column p-ai-center p-jc-center error-container">
+        <p-card styleClass="error-card">
+          <ng-template pTemplate="header">
+            <div class="p-text-center p-p-3">
+              <i class="pi pi-exclamation-triangle error-icon"></i>
             </div>
-            
-            <div *ngIf="websiteData.components && websiteData.components.length > 0" class="components-container">
-              <h3>Components:</h3>
-              <div *ngFor="let component of websiteData.components" class="component-item">
-                <div class="component-header">
-                  <strong>{{ component.componentType }}</strong>
-                  <span class="component-id">ID: {{ component.id }}</span>
-                </div>
-                <div class="component-details">
-                  <p><strong>Position:</strong> X: {{ component.xPosition }}, Y: {{ component.yPosition }}</p>
-                  <p><strong>Size:</strong> {{ component.width }}x{{ component.height }}</p>
-                  <p><strong>Z-Index:</strong> {{ component.zIndex }}</p>
-                  <div *ngIf="component.parameters" class="component-parameters">
-                    <strong>Parameters:</strong>
-                    <pre>{{ parseComponentParameters(component.parameters) | json }}</pre>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <h2 class="p-text-center p-mb-3">Website Not Found</h2>
+            <p class="p-text-center p-mb-4">{{ error }}</p>
+            <div class="p-text-center">
+              <p-button 
+                label="Go to Home" 
+                icon="pi pi-home" 
+                styleClass="p-button-primary"
+                (onClick)="goHome()">
+              </p-button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+
+      <!-- Main Content -->
+      <div *ngIf="websiteData && !loading && !error" class="main-content">
+        <!-- Angular Component Pages with proper spacing -->
+        <div *ngIf="isAngularComponentPage" class="angular-component-wrapper">
+          <div class="component-container">
+            <app-shopping-cart *ngIf="currentAngularComponent === 'ShoppingCartComponent'"></app-shopping-cart>
+            <app-order-history *ngIf="currentAngularComponent === 'OrderHistoryComponent'"></app-order-history>
+            <app-contact-us *ngIf="currentAngularComponent === 'ContactUsComponent'"></app-contact-us>
+            <app-home *ngIf="currentAngularComponent === 'HomeComponent'"></app-home>
+          </div>
+        </div>
+        
+        <!-- Rendered Website Content -->
+        <div *ngIf="!isAngularComponentPage && safeRenderedHtml" class="rendered-website-wrapper">
+          <div class="rendered-content" [innerHTML]="safeRenderedHtml"></div>
+        </div>
+        
+        <!-- Debug View with PrimeNG styling -->
+        <div *ngIf="!isAngularComponentPage && !safeRenderedHtml" class="debug-wrapper">
+          <div class="p-grid p-justify-center">
+            <div class="p-col-12 p-lg-10 p-xl-8">
+              <p-card styleClass="debug-card">
+                <ng-template pTemplate="header">
+                  <div class="debug-header">
+                    <h1 class="website-title">{{ websiteData.name }}</h1>
+                    <p-chip 
+                      label="Debug Mode" 
+                      icon="pi pi-cog" 
+                      styleClass="debug-chip">
+                    </p-chip>
                   </div>
-                </div>
-              </div>
+                </ng-template>
+                
+                <ng-template pTemplate="content">
+                  <p-tabView>
+                    <!-- Website JSON Tab -->
+                    <p-tabPanel header="Website Data" leftIcon="pi pi-file-o">
+                      <div *ngIf="parsedWebsiteJson">
+                        <pre class="json-display">{{ parsedWebsiteJson | json }}</pre>
+                      </div>
+                    </p-tabPanel>
+                    
+                    <!-- Components Tab -->
+                    <p-tabPanel 
+                      header="Components" 
+                      leftIcon="pi pi-th-large"
+                      *ngIf="websiteData.components && websiteData.components.length > 0">
+                      <div class="components-grid">
+                        <p-card 
+                          *ngFor="let component of websiteData.components" 
+                          styleClass="component-card p-mb-3">
+                          <ng-template pTemplate="header">
+                            <div class="component-card-header">
+                              <span class="component-type">{{ component.componentType }}</span>
+                              <p-chip [label]="'ID: ' + component.id" styleClass="id-chip"></p-chip>
+                            </div>
+                          </ng-template>
+                          <ng-template pTemplate="content">
+                            <div class="component-details-grid">
+                              <div class="detail-item">
+                                <strong>Position:</strong> X: {{ component.xPosition }}, Y: {{ component.yPosition }}
+                              </div>
+                              <div class="detail-item">
+                                <strong>Size:</strong> {{ component.width }}x{{ component.height }}
+                              </div>
+                              <div class="detail-item">
+                                <strong>Z-Index:</strong> {{ component.zIndex }}
+                              </div>
+                              <div *ngIf="component.parameters" class="detail-item">
+                                <p-accordion>
+                                  <p-accordionTab header="Parameters">
+                                    <pre class="parameters-display">{{ parseComponentParameters(component.parameters) | json }}</pre>
+                                  </p-accordionTab>
+                                </p-accordion>
+                              </div>
+                            </div>
+                          </ng-template>
+                        </p-card>
+                      </div>
+                    </p-tabPanel>
+                  </p-tabView>
+                </ng-template>
+              </p-card>
             </div>
           </div>
         </div>
@@ -76,108 +168,226 @@ import { TopbarComponent } from '../topbar/topbar.component';
       padding: 0;
       margin: 0;
       min-height: 100vh;
-      background-color: #ffffff;
+      background-color: var(--surface-ground);
       position: relative;
     }
 
+    /* Loading State Styling */
     .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      margin-top: 80px; /* Account for topbar */
+      min-height: calc(100vh - 100px);
+      margin-top: 100px;
+      background: var(--surface-card);
     }
 
-    .loading-spinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid #ffffff;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+    .custom-spinner ::ng-deep .p-progress-spinner-circle {
+      stroke: var(--primary-color);
+      animation: p-progress-spinner-rotate 2s linear infinite;
     }
 
-    .loading-container p {
-      font-size: 18px;
-      margin: 0;
-      font-weight: 500;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
+    /* Error State Styling */
     .error-container {
-      text-align: center;
-      padding: 60px 40px;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-      color: white;
-      border-radius: 12px;
-      margin: 120px auto 40px; /* Account for topbar */
+      min-height: calc(100vh - 100px);
+      margin-top: 100px;
+      padding: 2rem;
+    }
+
+    .error-card {
       max-width: 600px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin: 0 auto;
     }
 
-    .error-container h2 {
-      color: white;
-      margin-bottom: 16px;
-      font-size: 28px;
-      font-weight: 700;
+    .error-icon {
+      font-size: 4rem;
+      color: var(--red-500);
     }
 
-    .error-container p {
-      font-size: 16px;
-      opacity: 0.9;
-      line-height: 1.6;
+    /* Main Content Layout */
+    .main-content {
+      padding-top: 100px; /* Account for fixed topbar */
+      min-height: calc(100vh - 100px);
+      background-color: var(--surface-ground);
     }
 
-    .btn {
-      padding: 12px 30px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      margin-top: 20px;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-
-    .website-content {
-      background-color: transparent;
-      border-radius: 0;
-      padding: 0;
-      box-shadow: none;
-      margin: 0;
-      padding-top: 80px; /* Account for fixed topbar */
-    }
-
-    .rendered-website {
+    /* Angular Component Wrapper */
+    .angular-component-wrapper {
       width: 100%;
-      min-height: calc(100vh - 80px);
-      padding: 0;
+      min-height: calc(100vh - 100px);
+      background-color: var(--surface-card);
+    }
+
+    .component-container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Rendered Website Content */
+    .rendered-website-wrapper {
+      width: 100%;
+      min-height: calc(100vh - 100px);
+      background-color: var(--surface-card);
+    }
+
+    .rendered-content {
+      width: 100%;
+      min-height: calc(100vh - 100px);
+    }
+
+    /* Debug View Styling */
+    .debug-wrapper {
+      padding: 2rem;
+      min-height: calc(100vh - 100px);
+      background-color: var(--surface-ground);
+    }
+
+    .debug-card {
+      box-shadow: var(--card-shadow);
+    }
+
+    .debug-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-text) 100%);
+      color: white;
+      margin: -1rem -1rem 1rem -1rem;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .website-title {
       margin: 0;
-      border-radius: 0;
-      background-color: #ffffff;
-      box-shadow: none;
-      position: relative;
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .debug-chip {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      color: white !important;
+    }
+
+    /* Component Grid Styling */
+    .components-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .component-card {
+      transition: all 0.3s ease;
+      border: 1px solid var(--surface-border);
+    }
+
+    .component-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow);
+    }
+
+    .component-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background-color: var(--surface-50);
+      margin: -1rem -1rem 1rem -1rem;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .component-type {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary-color);
+    }
+
+    .id-chip {
+      background-color: var(--surface-200) !important;
+      color: var(--text-color) !important;
+      font-size: 0.8rem;
+    }
+
+    .component-details-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .detail-item {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+    }
+
+    .detail-item strong {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    /* Code Display Styling */
+    .json-display,
+    .parameters-display {
+      background-color: var(--surface-100);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      max-height: 400px;
+      overflow-y: auto;
+      color: var(--text-color);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .main-content {
+        padding-top: 80px;
+      }
+      
+      .loading-container,
+      .error-container {
+        margin-top: 80px;
+        min-height: calc(100vh - 80px);
+      }
+      
+      .angular-component-wrapper,
+      .rendered-website-wrapper {
+        min-height: calc(100vh - 80px);
+      }
+      
+      .component-container {
+        padding: 1rem;
+      }
+      
+      .debug-wrapper {
+        padding: 1rem;
+        min-height: calc(100vh - 80px);
+      }
+      
+      .debug-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .website-title {
+        font-size: 1.4rem;
+      }
+    }
+
+    /* Ensure no conflicts with existing styles */
+    :host ::ng-deep .p-card {
+      box-shadow: var(--card-shadow);
+    }
+
+    :host ::ng-deep .p-tabview .p-tabview-panels {
+      background-color: var(--surface-card);
+    }
+
+    :host ::ng-deep .p-accordion .p-accordion-content {
+      background-color: var(--surface-card);
     }
 
     .website-debug {
@@ -380,6 +590,8 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
   renderedPageHtml: string | null = null;
   safeRenderedHtml: SafeHtml | null = null;
   currentPageId: string = 'home';
+  isAngularComponentPage = false;
+  currentAngularComponent: string | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -478,6 +690,25 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
     if (pages.length > 0) {
       const currentPage = pages.find(p => p.id === this.currentPageId);
       if (currentPage) {
+        // Check if this page contains Angular components
+        const hasAngularComponent = currentPage.components.some(comp => comp.type === 'angular-component');
+        
+        if (hasAngularComponent) {
+          // Find the Angular component to render
+          const angularComponent = currentPage.components.find(comp => comp.type === 'angular-component');
+          if (angularComponent && angularComponent.parameters?.componentName) {
+            console.log(`🔧 Rendering Angular component: ${angularComponent.parameters.componentName}`);
+            this.isAngularComponentPage = true;
+            this.currentAngularComponent = angularComponent.parameters.componentName;
+            this.safeRenderedHtml = null;
+            return;
+          }
+        }
+
+        // Regular HTML rendering for non-Angular component pages
+        this.isAngularComponentPage = false;
+        this.currentAngularComponent = null;
+        
         this.websiteRenderingService.renderPage(currentPage.id)
           .pipe(takeUntil(this.destroy$))
           .subscribe({

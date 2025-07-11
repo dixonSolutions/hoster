@@ -21,6 +21,7 @@ import { WebsiteCacheService } from './website-cache.service';
 import { ComponentRenderingService } from './component-rendering.service';
 import { NavigationRenderingService } from './navigation-rendering.service';
 import { PageRenderingService } from './page-rendering.service';
+import { BusinessPageInjectionService } from './business-page-injection.service';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +50,8 @@ export class WebsiteRenderingService {
     private cacheService: WebsiteCacheService,
     private componentRenderer: ComponentRenderingService,
     private navigationRenderer: NavigationRenderingService,
-    private pageRenderer: PageRenderingService
+    private pageRenderer: PageRenderingService,
+    private businessPageInjection: BusinessPageInjectionService
   ) {}
 
   /**
@@ -351,7 +353,8 @@ export class WebsiteRenderingService {
    * Process pages
    */
   private processPages(pagesData: any[]): ProcessedPage[] {
-    return pagesData.map(page => {
+    // First, process pages normally
+    const initialPages = pagesData.map(page => {
       const processedPage: ProcessedPage = {
         id: page.id,
         name: page.name,
@@ -366,6 +369,16 @@ export class WebsiteRenderingService {
 
       return processedPage;
     });
+
+    // Then apply business page injection logic
+    const finalPages = this.businessPageInjection.processBusinessPages(initialPages);
+
+    // Update cache for any modified/added pages
+    finalPages.forEach(page => {
+      this.cacheService.setPageComponents(page.id, page.components);
+    });
+
+    return finalPages;
   }
 
   /**
