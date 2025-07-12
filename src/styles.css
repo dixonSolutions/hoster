@@ -46,12 +46,21 @@ body[data-theme='cyan-orange'] {
   --toolbar-fg: #ff6f00;
 }
 
+/* Default light theme variables */
+:root {
+  --primary-bg: #ffffff;
+  --primary-fg: #333333;
+  --accent: #4A90E2;
+  --toolbar-bg: #ffffff;
+  --toolbar-fg: #333333;
+}
+
 body {
-  background: var(--primary-bg, #efefe7);
-  color: var(--primary-fg, #333);
+  background: var(--primary-bg, #ffffff);
+  color: var(--primary-fg, #333333);
 }
 
 .mat-toolbar {
-  background: var(--toolbar-bg, #efefe7) !important;
-  color: var(--toolbar-fg, #333) !important;
+  background: var(--toolbar-bg, #ffffff) !important;
+  color: var(--toolbar-fg, #333333) !important;
 }

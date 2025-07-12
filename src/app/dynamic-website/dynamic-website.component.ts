@@ -38,9 +38,9 @@ import { AccordionModule } from 'primeng/accordion';
   ],
   template: `
     <div class="dynamic-website-container">
-      <!-- Always show topbar for consistency -->
+      <!-- Conditionally show topbar - hide when website JSON contains navigation -->
       <app-topbar 
-        *ngIf="websiteData && parsedWebsiteJson"
+        *ngIf="websiteData && parsedWebsiteJson && !shouldHideAngularTopbar"
         [websiteData]="parsedWebsiteJson"
         [currentPageId]="currentPageId">
       </app-topbar>
@@ -168,7 +168,7 @@ import { AccordionModule } from 'primeng/accordion';
       padding: 0;
       margin: 0;
       min-height: 100vh;
-      background-color: var(--surface-ground);
+      background-color: #ffffff;
       position: relative;
     }
 
@@ -176,11 +176,11 @@ import { AccordionModule } from 'primeng/accordion';
     .loading-container {
       min-height: calc(100vh - 100px);
       margin-top: 100px;
-      background: var(--surface-card);
+      background: #ffffff;
     }
 
     .custom-spinner ::ng-deep .p-progress-spinner-circle {
-      stroke: var(--primary-color);
+      stroke: #2196F3;
       animation: p-progress-spinner-rotate 2s linear infinite;
     }
 
@@ -198,21 +198,21 @@ import { AccordionModule } from 'primeng/accordion';
 
     .error-icon {
       font-size: 4rem;
-      color: var(--red-500);
+      color: #dc3545;
     }
 
     /* Main Content Layout */
     .main-content {
       padding-top: 100px; /* Account for fixed topbar */
       min-height: calc(100vh - 100px);
-      background-color: var(--surface-ground);
+      background-color: #f8f9fa;
     }
 
     /* Angular Component Wrapper */
     .angular-component-wrapper {
       width: 100%;
       min-height: calc(100vh - 100px);
-      background-color: var(--surface-card);
+      background-color: #ffffff;
     }
 
     .component-container {
@@ -225,7 +225,7 @@ import { AccordionModule } from 'primeng/accordion';
     .rendered-website-wrapper {
       width: 100%;
       min-height: calc(100vh - 100px);
-      background-color: var(--surface-card);
+      background-color: #ffffff;
     }
 
     .rendered-content {
@@ -237,11 +237,11 @@ import { AccordionModule } from 'primeng/accordion';
     .debug-wrapper {
       padding: 2rem;
       min-height: calc(100vh - 100px);
-      background-color: var(--surface-ground);
+      background-color: #f8f9fa;
     }
 
     .debug-card {
-      box-shadow: var(--card-shadow);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .debug-header {
@@ -249,10 +249,10 @@ import { AccordionModule } from 'primeng/accordion';
       align-items: center;
       justify-content: space-between;
       padding: 1rem 2rem;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-text) 100%);
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
       color: white;
       margin: -1rem -1rem 1rem -1rem;
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border-radius: 8px 8px 0 0;
     }
 
     .website-title {
@@ -274,12 +274,12 @@ import { AccordionModule } from 'primeng/accordion';
 
     .component-card {
       transition: all 0.3s ease;
-      border: 1px solid var(--surface-border);
+      border: 1px solid #e9ecef;
     }
 
     .component-card:hover {
       transform: translateY(-2px);
-      box-shadow: var(--card-shadow);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .component-card-header {
@@ -287,20 +287,20 @@ import { AccordionModule } from 'primeng/accordion';
       align-items: center;
       justify-content: space-between;
       padding: 1rem;
-      background-color: var(--surface-50);
+      background-color: #f8f9fa;
       margin: -1rem -1rem 1rem -1rem;
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border-radius: 8px 8px 0 0;
     }
 
     .component-type {
       font-weight: 600;
       font-size: 1.1rem;
-      color: var(--primary-color);
+      color: #2196F3;
     }
 
     .id-chip {
-      background-color: var(--surface-200) !important;
-      color: var(--text-color) !important;
+      background-color: #e9ecef !important;
+      color: #333333 !important;
       font-size: 0.8rem;
     }
 
@@ -311,7 +311,7 @@ import { AccordionModule } from 'primeng/accordion';
 
     .detail-item {
       padding: 0.5rem 0;
-      border-bottom: 1px solid var(--surface-border);
+      border-bottom: 1px solid #e9ecef;
     }
 
     .detail-item:last-child {
@@ -319,23 +319,23 @@ import { AccordionModule } from 'primeng/accordion';
     }
 
     .detail-item strong {
-      color: var(--primary-color);
+      color: #2196F3;
       font-weight: 600;
     }
 
     /* Code Display Styling */
     .json-display,
     .parameters-display {
-      background-color: var(--surface-100);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--border-radius);
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
       padding: 1rem;
       font-family: 'Courier New', monospace;
       font-size: 0.85rem;
       line-height: 1.4;
       max-height: 400px;
       overflow-y: auto;
-      color: var(--text-color);
+      color: #333333;
       white-space: pre-wrap;
       word-wrap: break-word;
     }
@@ -379,15 +379,17 @@ import { AccordionModule } from 'primeng/accordion';
 
     /* Ensure no conflicts with existing styles */
     :host ::ng-deep .p-card {
-      box-shadow: var(--card-shadow);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      color: #333333;
     }
 
     :host ::ng-deep .p-tabview .p-tabview-panels {
-      background-color: var(--surface-card);
+      background-color: #ffffff;
     }
 
     :host ::ng-deep .p-accordion .p-accordion-content {
-      background-color: var(--surface-card);
+      background-color: #ffffff;
     }
 
     .website-debug {
@@ -594,6 +596,9 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
   currentAngularComponent: string | null = null;
   private destroy$ = new Subject<void>();
 
+  // New property to track if we should hide Angular topbar
+  shouldHideAngularTopbar = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -634,6 +639,7 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
     this.error = null;
     this.websiteData = null;
     this.safeRenderedHtml = null;
+    this.shouldHideAngularTopbar = false;
 
     this.websiteParserService.getWebsiteByName(websiteName)
       .pipe(takeUntil(this.destroy$))
@@ -642,7 +648,6 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
           this.websiteData = data;
           this.parsedWebsiteJson = this.websiteParserService.parseWebsiteJson(data.websiteJson);
           this.renderWebsite(data);
-          this.loading = false;
         },
         error: (error) => {
           this.error = error.message;
@@ -682,6 +687,8 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ Failed to initialize website rendering service:', error);
       // Keep the debug view as fallback
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -701,6 +708,7 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
             this.isAngularComponentPage = true;
             this.currentAngularComponent = angularComponent.parameters.componentName;
             this.safeRenderedHtml = null;
+            this.shouldHideAngularTopbar = false; // Show Angular topbar for Angular components
             return;
           }
         }
@@ -709,12 +717,17 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
         this.isAngularComponentPage = false;
         this.currentAngularComponent = null;
         
-        this.websiteRenderingService.renderPage(currentPage.id)
+        // Render page WITHOUT navigation to avoid duplication
+        this.websiteRenderingService.renderPage(currentPage.id, { includeNavigation: false })
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (html) => {
               this.renderedPageHtml = html;
               this.safeRenderedHtml = this.sanitizer.bypassSecurityTrustHtml(html);
+              
+              // Check if the rendered HTML contains navigation elements
+              this.detectNavigationInRenderedHtml(html);
+              
               console.log('✅ Current page rendered successfully');
             },
             error: (error) => {
@@ -724,14 +737,54 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
           });
       } else {
         console.warn('⚠️ Current page not found:', this.currentPageId);
+        // Fallback to first page
+        this.currentPageId = pages[0].id;
+        this.renderCurrentPage();
       }
     } else {
       console.warn('⚠️ No pages available to render current page:', this.currentPageId);
     }
   }
 
-  parseComponentParameters(parameters: string | null): any {
-    return this.websiteParserService.parseComponentParameters(parameters);
+  /**
+   * Detect if the rendered HTML contains navigation elements
+   * and decide whether to hide the Angular topbar
+   */
+  private detectNavigationInRenderedHtml(html: string): void {
+    // Only hide Angular topbar if there's clear evidence of a duplicate navigation bar
+    // Be more specific to avoid false positives
+    const hasDefiniteNavigation = (
+      // Check for specific navigation container classes
+      html.includes('class="navigation-bar"') ||
+      html.includes('class="top-navigation"') ||
+      html.includes('class="main-navigation"') ||
+      html.includes('class="nav-bar"') ||
+      html.includes('class="navbar"') ||
+      html.includes('class="site-header"') ||
+      // Check for HTML5 nav element with multiple links
+      (html.includes('<nav') && (html.match(/<a[^>]*href[^>]*>/g) || []).length > 5) ||
+      // Check for header with multiple navigation links (more than 6 links suggests navigation)
+      (html.includes('<header') && (html.match(/<a[^>]*href[^>]*>/g) || []).length > 6)
+    );
+
+    if (hasDefiniteNavigation) {
+      console.log('🔍 Definite navigation bar detected in rendered HTML - hiding Angular topbar');
+      this.shouldHideAngularTopbar = true;
+    } else {
+      console.log('📄 No duplicate navigation detected - showing Angular topbar');
+      this.shouldHideAngularTopbar = false;
+    }
+  }
+
+  parseComponentParameters(parameters: any): any {
+    if (typeof parameters === 'string') {
+      try {
+        return JSON.parse(parameters);
+      } catch {
+        return parameters;
+      }
+    }
+    return parameters || {};
   }
 
   goHome() {

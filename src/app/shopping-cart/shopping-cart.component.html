@@ -1,79 +1,166 @@
+<!-- Business Services Section -->
+<div class="business-services-section" *ngIf="businessInfo">
+  <p-card header="Available Services" subheader="{{businessInfo.businessName}}" styleClass="business-info-card">
+    <p class="business-description">{{businessInfo.businessDescription}}</p>
+    
+    <div class="business-contact-info">
+      <p-chip *ngIf="businessInfo.phone" icon="pi pi-phone" label="{{businessInfo.phone}}"></p-chip>
+      <p-chip *ngIf="businessInfo.email" icon="pi pi-envelope" label="{{businessInfo.email}}"></p-chip>
+    </div>
+    
+    <p-divider align="center">
+      <p-chip label="Services" icon="pi pi-shopping-cart"></p-chip>
+    </p-divider>
+    
+    <div *ngIf="isLoadingBusinessData" class="loading-container">
+      <p-progressSpinner styleClass="custom-spinner"></p-progressSpinner>
+      <p>Loading business services...</p>
+    </div>
+    
+    <div *ngIf="!isLoadingBusinessData && businessServices.length > 0" class="services-grid">
+      <p-card *ngFor="let service of businessServices" styleClass="service-card">
+        <ng-template pTemplate="header">
+          <img *ngIf="service.serviceImageUrl" [src]="service.serviceImageUrl" alt="Service Image" class="service-image">
+          <div *ngIf="!service.serviceImageUrl" class="service-image-placeholder">
+            <i class="pi pi-image"></i>
+          </div>
+        </ng-template>
+        
+        <ng-template pTemplate="title">
+          <span class="service-name">{{service.serviceName}}</span>
+        </ng-template>
+        
+        <ng-template pTemplate="subtitle">
+          <div class="service-details">
+            <p-tag severity="info" icon="pi pi-clock" value="{{service.duration}} min"></p-tag>
+            <p-tag severity="success" icon="pi pi-dollar" value="{{service.price | currency:service.currency}}"></p-tag>
+          </div>
+        </ng-template>
+        
+        <p class="service-description">{{service.serviceDescription}}</p>
+        
+        <ng-template pTemplate="footer">
+          <div class="service-actions">
+            <p-button 
+              *ngIf="!isServiceInCart(service)" 
+              label="Add to Cart" 
+              icon="pi pi-cart-plus" 
+              (onClick)="addServiceToCart(service)"
+              styleClass="p-button-sm">
+            </p-button>
+            
+            <div *ngIf="isServiceInCart(service)" class="quantity-controls">
+              <p-button 
+                icon="pi pi-minus" 
+                (onClick)="decrementServiceQuantity(service)" 
+                styleClass="p-button-sm p-button-outlined"
+                severity="secondary">
+              </p-button>
+              <p-chip [label]="getServiceQuantityInCart(service).toString()" styleClass="quantity-chip"></p-chip>
+              <p-button 
+                icon="pi pi-plus" 
+                (onClick)="incrementServiceQuantity(service)" 
+                styleClass="p-button-sm p-button-outlined"
+                severity="secondary">
+              </p-button>
+            </div>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+    
+    <p-message *ngIf="!isLoadingBusinessData && businessServices.length === 0" 
+               severity="info" 
+               text="No services available at this time.">
+    </p-message>
+  </p-card>
+</div>
+
+<!-- Shopping Cart Section -->
 <div class="cart-container" *ngIf="dataService.CartItems.length > 0; else emptyCart">
-  <h2>Your Service Cart</h2>
-  <mat-table [dataSource]="dataService.CartItems" class="mat-elevation-z8 pretty-cart-table">
+  <p-card header="Your Service Cart" styleClass="cart-card">
+    <p-table [value]="dataService.CartItems" styleClass="p-datatable-sm custom-cart-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Image</th>
+          <th>Service Name</th>
+          <th>Unit Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Remove</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>
+            <img [src]="item.service.serviceImageUrl" alt="Service Image" class="cart-table-img" *ngIf="item.service.serviceImageUrl" />
+            <i class="pi pi-image" *ngIf="!item.service.serviceImageUrl" style="font-size: 2rem; color: #ccc;"></i>
+          </td>
+          <td><strong>{{ item.service.serviceName }}</strong></td>
+          <td>{{ item.service.servicePrice | currency:item.service.servicePriceCurrencyUnit }}</td>
+          <td>
+            <div class="quantity-controls">
+              <p-button 
+                icon="pi pi-minus" 
+                (onClick)="dataService.DecrementQuantity(item.service)" 
+                styleClass="p-button-sm p-button-outlined"
+                severity="secondary">
+              </p-button>
+              <span class="qty-value">{{ item.quantity }}</span>
+              <p-button 
+                icon="pi pi-plus" 
+                (onClick)="dataService.IncrementQuantity(item.service)" 
+                styleClass="p-button-sm p-button-outlined"
+                severity="secondary">
+              </p-button>
+            </div>
+          </td>
+          <td>{{ (item.service.servicePrice || 0) * item.quantity | currency:item.service.servicePriceCurrencyUnit }}</td>
+          <td>
+            <p-button 
+              icon="pi pi-trash" 
+              (onClick)="dataService.RemoveFromCart(item.service)" 
+              styleClass="p-button-sm p-button-danger"
+              severity="danger">
+            </p-button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
 
-    <!-- Image Column -->
-    <ng-container matColumnDef="image">
-      <th mat-header-cell *matHeaderCellDef> Image </th>
-      <td mat-cell *matCellDef="let item">
-        <img [src]="item.service.serviceImageUrl" alt="Service Image" class="cart-table-img" *ngIf="item.service.serviceImageUrl" />
-      </td>
-    </ng-container>
-
-    <!-- Service Name Column -->
-    <ng-container matColumnDef="serviceName">
-      <th mat-header-cell *matHeaderCellDef> Service Name </th>
-      <td mat-cell *matCellDef="let item"> <b>{{ item.service.serviceName }}</b> </td>
-    </ng-container>
-
-    <!-- Unit Price Column -->
-    <ng-container matColumnDef="unitPrice">
-      <th mat-header-cell *matHeaderCellDef> Unit Price </th>
-      <td mat-cell *matCellDef="let item"> {{ item.service.servicePrice | currency:item.service.servicePriceCurrencyUnit }} </td>
-    </ng-container>
-
-    <!-- Quantity Column -->
-    <ng-container matColumnDef="quantity">
-      <th mat-header-cell *matHeaderCellDef> Quantity </th>
-      <td mat-cell *matCellDef="let item">
-        <button mat-mini-button color="primary" (click)="dataService.DecrementQuantity(item.service)">-</button>
-        <span class="qty-value">{{ item.quantity }}</span>
-        <button mat-mini-button color="primary" (click)="dataService.IncrementQuantity(item.service)">+</button>
-      </td>
-    </ng-container>
-
-    <!-- Total Column -->
-    <ng-container matColumnDef="total">
-      <th mat-header-cell *matHeaderCellDef> Total </th>
-      <td mat-cell *matCellDef="let item">
-        {{ (item.service.servicePrice || 0) * item.quantity | currency:item.service.servicePriceCurrencyUnit }}
-      </td>
-    </ng-container>
-
-    <!-- Remove Column -->
-    <ng-container matColumnDef="remove">
-      <th mat-header-cell *matHeaderCellDef> Remove </th>
-      <td mat-cell *matCellDef="let item">
-        <button mat-icon-button color="warn" (click)="dataService.RemoveFromCart(item.service)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-
-    <mat-header-row *matHeaderRowDef="['image', 'serviceName', 'unitPrice', 'quantity', 'total', 'remove']"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: ['image', 'serviceName', 'unitPrice', 'quantity', 'total', 'remove'];"></mat-row>
-  </mat-table>
-
-  <div class="cart-summary">
-    <h3>Order summary</h3>
-    <div class="cart-summary-row">
-      <span>Total Items:</span>
-      <span>{{dataService.itemsInCart}}</span>
-    </div>
-    <div class="cart-summary-row">
-      <span>Total Price:</span>
-      <span>{{totalPrice | currency}}</span>
-    </div>
-    <div><p>Select a date for your service(s)</p>
-      <mat-form-field class="example-full-width">
-        <mat-label>Choose a date</mat-label>
-        <input matInput [matDatepickerFilter]="myFilter" [matDatepicker]="picker">
-        <mat-hint>MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field></div>
-    <button class="checkout-btn" (click)="CheckOutPessed()">Checkout</button>
-  </div>
+    <ng-template pTemplate="footer">
+      <div class="cart-summary">
+        <p-panel header="Order Summary" styleClass="cart-summary-panel">
+          <div class="cart-summary-row">
+            <span>Total Items:</span>
+            <p-chip [label]="dataService.itemsInCart.toString()" styleClass="summary-chip"></p-chip>
+          </div>
+          <div class="cart-summary-row">
+            <span>Total Price:</span>
+            <p-chip [label]="(totalPrice | currency) || ''" styleClass="summary-chip price-chip"></p-chip>
+          </div>
+          <div class="date-selection">
+            <p>Select a date for your service(s)</p>
+            <p-calendar 
+              [(ngModel)]="selectedDate" 
+              [minDate]="getTomorrowDate()" 
+              dateFormat="mm/dd/yy" 
+              placeholder="Choose a date"
+              styleClass="date-picker">
+            </p-calendar>
+          </div>
+          <p-button 
+            label="Checkout" 
+            icon="pi pi-shopping-cart" 
+            (onClick)="CheckOutPessed()" 
+            styleClass="checkout-btn p-button-lg"
+            severity="success">
+          </p-button>
+        </p-panel>
+      </div>
+    </ng-template>
+  </p-card>
 </div>
 
 <!-- Customer Details Form -->
@@ -197,7 +284,31 @@
 
 <ng-template #emptyCart>
   <div class="empty-cart">
-    <h2>Your cart is empty</h2>
-    <p>Add some services to get started!</p>
+    <p-card styleClass="empty-cart-card">
+      <ng-template pTemplate="header">
+        <div class="empty-cart-icon">
+          <i class="pi pi-shopping-cart" style="font-size: 4rem; color: #ccc;"></i>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="title">
+        <h2>Your cart is empty</h2>
+      </ng-template>
+      
+      <ng-template pTemplate="subtitle">
+        <p>Browse our services below and add some to get started!</p>
+      </ng-template>
+      
+      <ng-template pTemplate="footer">
+        <div class="empty-cart-actions" *ngIf="businessServices.length > 0">
+          <p-button 
+            label="Browse Services" 
+            icon="pi pi-arrow-up" 
+            (onClick)="scrollToServices()"
+            styleClass="p-button-outlined">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-card>
   </div>
 </ng-template>

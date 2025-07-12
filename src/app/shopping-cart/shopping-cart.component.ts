@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { DataServiceService } from '../data-service.service';
 import { CommonModule } from '@angular/common';
 import { CartItem } from '../data-service.service';
@@ -10,8 +10,26 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CookieService } from 'ngx-cookie-service';
+import { WebsiteHosterService } from '../services/website-hoster.service';
+import { ServiceDto, BusinessBasicInfoDto } from '../models/WebsiteHoster';
+
+// PrimeNG Imports
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CalendarModule } from 'primeng/calendar';
+import { ChipModule } from 'primeng/chip';
+import { TagModule } from 'primeng/tag';
+import { DividerModule } from 'primeng/divider';
+import { MessageModule } from 'primeng/message';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PanelModule } from 'primeng/panel';
+import { BadgeModule } from 'primeng/badge';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface CustomerDetails {
   name: string;
@@ -43,17 +61,40 @@ interface OrderData {
     MatNativeDateModule,
     MatButtonModule,
     MatCardModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule,
+    // PrimeNG Modules
+    CardModule,
+    ButtonModule,
+    TableModule,
+    InputTextModule,
+    InputNumberModule,
+    CalendarModule,
+    ChipModule,
+    TagModule,
+    DividerModule,
+    MessageModule,
+    ProgressSpinnerModule,
+    PanelModule,
+    BadgeModule,
+    TooltipModule
   ],
   templateUrl: './shopping-cart.component.html',
   styleUrl: './shopping-cart.component.css',
   providers: [CookieService]
 })
-export class ShoppingCartComponent {
+export class ShoppingCartComponent implements OnInit{
   public dataService = inject(DataServiceService);
+  public websiteHosterService = inject(WebsiteHosterService);
   customerForm: FormGroup;
   showCustomerForm = false;
-  selectedDate: Date | null = null;
+  selectedDate: Date | undefined = undefined;
+  
+  // Business data properties
+  businessServices: ServiceDto[] = [];
+  businessInfo: BusinessBasicInfoDto | null = null;
+  isLoadingBusinessData = false;
+  currentWebsiteName: string | null = null;
 
   constructor(private fb: FormBuilder, private cookieService: CookieService) {
     this.customerForm = this.fb.group({
@@ -65,6 +106,137 @@ export class ShoppingCartComponent {
       state: ['', [Validators.required]],
       postalCode: ['', [Validators.required]]
     });
+  }
+  
+  ngOnInit(): void {
+    this.loadBusinessData();
+  }
+
+  /**
+   * Load business data from WebsiteHosterService
+   */
+  loadBusinessData(): void {
+    // Get current website name from URL or use default
+    this.currentWebsiteName = this.getCurrentWebsiteNameFromUrl() || 'hello';
+    
+    // Check if we already have cached business data
+    const cachedBusinessData = this.websiteHosterService.getCurrentBusinessRegistration();
+    if (cachedBusinessData) {
+      this.businessServices = cachedBusinessData.services;
+      this.businessInfo = cachedBusinessData.basicInfo;
+      return;
+    }
+    
+    // Load business data from API
+    this.isLoadingBusinessData = true;
+    this.websiteHosterService.getBusinessRegistrationByWebsiteName(this.currentWebsiteName).subscribe({
+      next: (data) => {
+        this.businessServices = data.services;
+        this.businessInfo = data.basicInfo;
+        this.isLoadingBusinessData = false;
+        console.log('Business data loaded:', data);
+      },
+      error: (error) => {
+        console.error('Error loading business data:', error);
+        this.isLoadingBusinessData = false;
+        this.dataService.openSnackBar(this, 5000, 'Error loading business services: ' + error.message, 'OK');
+      }
+    });
+  }
+
+  /**
+   * Get current website name from URL
+   */
+  private getCurrentWebsiteNameFromUrl(): string | null {
+    const path = window.location.pathname;
+    const segments = path.split('/').filter(segment => segment.length > 0);
+    return segments.length > 0 ? segments[0] : null;
+  }
+
+  /**
+   * Add service to cart from business services
+   */
+  addServiceToCart(service: ServiceDto): void {
+    // Convert ServiceDto to ServicesForBusiness format for compatibility
+    const cartService = {
+      serviceID: service.serviceID,
+      serviceName: service.serviceName,
+      serviceDescription: service.serviceDescription,
+      servicePrice: service.price,
+      servicePriceCurrencyUnit: service.currency,
+      serviceImageUrl: service.serviceImageUrl,
+      serviceEstimatedTime: service.duration.toString() + ' minutes',
+      businessID: this.businessInfo?.businessID || ''
+    };
+    
+    this.dataService.AddToCart(cartService);
+    this.dataService.openSnackBar(this, 3000, `${service.serviceName} added to cart!`, 'OK');
+  }
+
+  /**
+   * Check if service is already in cart
+   */
+  isServiceInCart(service: ServiceDto): boolean {
+    return this.dataService.CartItems.some(item => item.service.serviceID === service.serviceID);
+  }
+
+  /**
+   * Get quantity of service in cart
+   */
+  getServiceQuantityInCart(service: ServiceDto): number {
+    const item = this.dataService.CartItems.find(item => item.service.serviceID === service.serviceID);
+    return item ? item.quantity : 0;
+  }
+
+  /**
+   * Convert ServiceDto to ServicesForBusiness format
+   */
+  private convertServiceDtoToServicesForBusiness(service: ServiceDto): any {
+    return {
+      serviceID: service.serviceID,
+      serviceName: service.serviceName,
+      serviceDescription: service.serviceDescription,
+      servicePrice: service.price,
+      servicePriceCurrencyUnit: service.currency,
+      serviceImageUrl: service.serviceImageUrl,
+      serviceEstimatedTime: service.duration.toString() + ' minutes',
+      businessID: this.businessInfo?.businessID || ''
+    };
+  }
+
+  /**
+   * Increment service quantity in cart
+   */
+  incrementServiceQuantity(service: ServiceDto): void {
+    const convertedService = this.convertServiceDtoToServicesForBusiness(service);
+    this.dataService.IncrementQuantity(convertedService);
+  }
+
+  /**
+   * Decrement service quantity in cart
+   */
+  decrementServiceQuantity(service: ServiceDto): void {
+    const convertedService = this.convertServiceDtoToServicesForBusiness(service);
+    this.dataService.DecrementQuantity(convertedService);
+  }
+
+  /**
+   * Get tomorrow's date for date picker minimum date
+   */
+  getTomorrowDate(): Date {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  }
+
+  /**
+   * Scroll to services section
+   */
+  scrollToServices(): void {
+    const servicesSection = document.querySelector('.business-services-section');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   CheckOutPessed() {
@@ -140,7 +312,7 @@ export class ShoppingCartComponent {
   }
 
   onDateSelected(date: Date | null) {
-    this.selectedDate = date;
+    this.selectedDate = date || undefined;
   }
 
   submitOrder() {
@@ -172,7 +344,7 @@ export class ShoppingCartComponent {
       this.dataService.updateItemsInCart();
       this.showCustomerForm = false;
       this.customerForm.reset();
-      this.selectedDate = null;
+      this.selectedDate = undefined;
     } else {
       this.dataService.openSnackBar(this, 5000, 'Please fill in all required fields and select a date', 'OK');
     }
@@ -181,7 +353,7 @@ export class ShoppingCartComponent {
   cancelOrder() {
     this.showCustomerForm = false;
     this.customerForm.reset();
-    this.selectedDate = null;
+    this.selectedDate = undefined;
   }
 
   myFilter = (d: Date | null): boolean => {
