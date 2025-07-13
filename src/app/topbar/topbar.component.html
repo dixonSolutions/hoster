@@ -1,3 +1,4 @@
+
 <div class="topbar-container">
   <p-toolbar styleClass="topbar-toolbar glassmorphism" [style]="{ 
     'border-radius': '2rem', 
@@ -13,14 +14,58 @@
   }">
     <ng-template pTemplate="start">
       <div class="topbar-left">
-        <span class="topbar-title" [style]="{ 'color': websiteNavigation?.textColor || '#333333', 'font-weight': '600' }">
-          {{ businessName || 'Website' }}
-        </span>
+        <!-- Hamburger Menu Button (Mobile Only) -->
+        <p-button 
+          *ngIf="isMobile"
+          icon="pi pi-bars" 
+          class="hamburger-btn"
+          (onClick)="toggleSidebar()"
+          text
+          plain
+          [style]="{ 'color': websiteNavigation?.textColor || '#333333', 'margin-right': '0.5rem' }"
+        />
+        
+        <!-- Website Logo Section -->
+        <div class="logo-section" *ngIf="websiteNavigation; else defaultLogo">
+          <!-- Logo Image -->
+          <img 
+            *ngIf="websiteNavigation.logoImage" 
+            [src]="websiteNavigation.logoImage" 
+            [alt]="websiteNavigation.logoText || 'Logo'"
+            class="logo-image"
+            [ngClass]="'logo-' + (websiteNavigation.logoShape || 'square')"
+            [style]="{ 
+              'height': getLogoSize(),
+              'width': getLogoSize(),
+              'border-radius': getLogoBorderRadius()
+            }"
+          />
+          
+          <!-- Logo Text -->
+          <span 
+            *ngIf="websiteNavigation.logoText" 
+            class="logo-text"
+            [style]="{ 
+              'color': websiteNavigation.textColor || '#333333', 
+              'font-weight': '600',
+              'margin-left': websiteNavigation.logoImage ? '0.75rem' : '0'
+            }"
+          >
+            {{ websiteNavigation.logoText }}
+          </span>
+        </div>
+        
+        <!-- Default Logo (fallback) -->
+        <ng-template #defaultLogo>
+          <span class="topbar-title" [style]="{ 'color': websiteNavigation?.textColor || '#333333', 'font-weight': '600' }">
+            {{ businessName || 'Your Business' }}
+          </span>
+        </ng-template>
       </div>
     </ng-template>
     
     <ng-template pTemplate="center">
-      <div class="topbar-center">
+      <div class="topbar-center" [class.desktop-only]="isMobile">
         <!-- Dynamic website navigation -->
         <div class="website-navigation" *ngIf="websitePages && websitePages.length > 0">
           <p-button 
@@ -46,7 +91,7 @@
     
     <ng-template pTemplate="end">
       <div class="topbar-actions">
-        <span class="search-wrapper" *ngIf="dataService.services && dataService.services.length > 0">
+        <span class="search-wrapper" *ngIf="dataService.services && dataService.services.length > 0 && !isMobile">
           <i class="pi pi-search search-icon" [style]="{ 'color': websiteNavigation?.textColor || '#666666' }"></i>
           <input 
             type="text" 
@@ -76,6 +121,7 @@
         />
         
         <p-select 
+          *ngIf="!isMobile"
           [options]="themeOptions" 
           [(ngModel)]="selectedTheme" 
           optionLabel="name" 
@@ -93,5 +139,153 @@
       </div>
     </ng-template>
   </p-toolbar>
+
+  <!-- Mobile Sidebar -->
+  <p-sidebar 
+    [(visible)]="sidebarVisible" 
+    position="left" 
+    styleClass="mobile-sidebar"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="true"
+  >
+    <ng-template pTemplate="header">
+      <div class="sidebar-header">
+        <!-- Logo Section in Sidebar -->
+        <div class="sidebar-logo" *ngIf="websiteNavigation; else sidebarDefaultLogo">
+          <img 
+            *ngIf="websiteNavigation.logoImage" 
+            [src]="websiteNavigation.logoImage" 
+            [alt]="websiteNavigation.logoText || 'Logo'"
+            class="sidebar-logo-image"
+            [style]="{ 
+              'height': '32px',
+              'width': '32px',
+              'border-radius': getLogoBorderRadius()
+            }"
+          />
+          <span 
+            *ngIf="websiteNavigation.logoText" 
+            class="sidebar-logo-text"
+          >
+            {{ websiteNavigation.logoText }}
+          </span>
+        </div>
+        
+        <ng-template #sidebarDefaultLogo>
+          <span class="sidebar-logo-text">{{ businessName || 'Your Business' }}</span>
+        </ng-template>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <div class="sidebar-content">
+        <!-- Navigation Menu -->
+        <div class="sidebar-navigation">
+          <h3 class="sidebar-section-title">Navigation</h3>
+          
+          <!-- Website Pages Navigation -->
+          <div *ngIf="websitePages && websitePages.length > 0" class="nav-items">
+            <div 
+              *ngFor="let page of websitePages" 
+              class="sidebar-nav-item"
+              [ngClass]="{'active': currentPageId === page.id}"
+              (click)="navigateToPage(page); toggleSidebar()"
+            >
+              <i [class]="getPageIcon(page.id)" class="nav-icon"></i>
+              <span class="nav-label">{{ page.name }}</span>
+            </div>
+          </div>
+          
+          <!-- Fallback Navigation -->
+          <div *ngIf="!websitePages || websitePages.length === 0" class="nav-items">
+            <div 
+              class="sidebar-nav-item"
+              [ngClass]="{'active': activeSection === 'landing-page'}"
+              (click)="navigateToLandingPage(); toggleSidebar()"
+            >
+              <i class="pi pi-home nav-icon"></i>
+              <span class="nav-label">Home</span>
+            </div>
+            <div 
+              class="sidebar-nav-item"
+              [ngClass]="{'active': activeSection === 'home'}"
+              (click)="navigateToHome(); toggleSidebar()"
+            >
+              <i class="pi pi-shopping-bag nav-icon"></i>
+              <span class="nav-label">Shop</span>
+            </div>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Additional Menu Items -->
+        <div class="sidebar-menu">
+          <h3 class="sidebar-section-title">Menu</h3>
+          <div class="nav-items">
+            <div 
+              class="sidebar-nav-item"
+              [ngClass]="{'active': activeSection === 'checkout'}"
+              (click)="navigateToCheckout(); toggleSidebar()"
+            >
+              <i class="pi pi-shopping-cart nav-icon"></i>
+              <span class="nav-label">Shopping Cart</span>
+              <span *ngIf="dataService.itemsInCart > 0" class="cart-badge">{{ dataService.itemsInCart }}</span>
+            </div>
+            <div 
+              class="sidebar-nav-item"
+              [ngClass]="{'active': activeSection === 'order-history'}"
+              (click)="navigateToOrderHistory(); toggleSidebar()"
+            >
+              <i class="pi pi-history nav-icon"></i>
+              <span class="nav-label">Order History</span>
+            </div>
+            <div 
+              class="sidebar-nav-item"
+              (click)="openSimpleDialog(); toggleSidebar()"
+            >
+              <i class="pi pi-info-circle nav-icon"></i>
+              <span class="nav-label">About</span>
+            </div>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Theme Selection (Mobile) -->
+        <div class="sidebar-theme">
+          <h3 class="sidebar-section-title">Theme</h3>
+          <p-select 
+            [options]="themeOptions" 
+            [(ngModel)]="selectedTheme" 
+            optionLabel="name" 
+            placeholder="Select Theme" 
+            styleClass="sidebar-theme-select" 
+            (onChange)="selectTheme($event.value)" 
+            [showClear]="true" 
+            (onClear)="clearTheme()"
+          >
+          </p-select>
+        </div>
+
+        <!-- Search (Mobile) -->
+        <div *ngIf="dataService.services && dataService.services.length > 0" class="sidebar-search">
+          <h3 class="sidebar-section-title">Search Services</h3>
+          <span class="p-input-icon-left sidebar-search-wrapper">
+            <i class="pi pi-search"></i>
+            <input 
+              type="text" 
+              pInputText 
+              placeholder="Search services..." 
+              class="sidebar-search-input" 
+              [(ngModel)]="searchText" 
+              (ngModelChange)="onSearchChange()"
+            />
+          </span>
+        </div>
+      </div>
+    </ng-template>
+  </p-sidebar>
 </div>
   

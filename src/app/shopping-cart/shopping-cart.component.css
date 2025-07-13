@@ -703,6 +703,103 @@ button[mat-mini-button] {
   width: 100%;
 }
 
+/* PrimeNG DatePicker Styling */
+::ng-deep .date-picker .p-datepicker {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+::ng-deep .date-picker .p-inputtext {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+::ng-deep .date-picker .p-inputtext:hover {
+  border-color: #2196F3;
+}
+
+::ng-deep .date-picker .p-inputtext:focus {
+  border-color: #2196F3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
+  outline: none;
+}
+
+::ng-deep .date-picker .p-datepicker-trigger {
+  background: #2196F3;
+  border: 1px solid #2196F3;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+::ng-deep .date-picker .p-datepicker-trigger:hover {
+  background: #1976D2;
+}
+
+::ng-deep .date-picker .p-datepicker-trigger:focus {
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
+  outline: none;
+}
+
+::ng-deep .date-picker .p-datepicker-calendar td {
+  padding: 0.5rem;
+}
+
+::ng-deep .date-picker .p-datepicker-calendar .p-datepicker-today {
+  background: #e3f2fd;
+  color: #1976D2;
+  font-weight: 600;
+}
+
+::ng-deep .date-picker .p-datepicker-calendar .p-datepicker-today:hover {
+  background: #bbdefb;
+}
+
+::ng-deep .date-picker .p-datepicker-calendar .p-datepicker-selected {
+  background: #2196F3;
+  color: white;
+  font-weight: 600;
+}
+
+::ng-deep .date-picker .p-datepicker-calendar .p-datepicker-selected:hover {
+  background: #1976D2;
+}
+
+::ng-deep .date-picker .p-datepicker-header {
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem;
+}
+
+::ng-deep .date-picker .p-datepicker-header .p-datepicker-title {
+  font-weight: 600;
+  color: #333;
+}
+
+::ng-deep .date-picker .p-datepicker-header .p-datepicker-prev,
+::ng-deep .date-picker .p-datepicker-header .p-datepicker-next {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+::ng-deep .date-picker .p-datepicker-header .p-datepicker-prev:hover,
+::ng-deep .date-picker .p-datepicker-header .p-datepicker-next:hover {
+  color: #2196F3;
+}
+
 .checkout-btn {
   width: 100%;
   margin: 1.5rem;

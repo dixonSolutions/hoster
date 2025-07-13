@@ -14,6 +14,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { CookieService } from 'ngx-cookie-service';
 import { WebsiteHosterService } from '../services/website-hoster.service';
 import { ServiceDto, BusinessBasicInfoDto } from '../models/WebsiteHoster';
+import { CalendarModule } from 'primeng/calendar';
+
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -21,7 +23,7 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { CalendarModule } from 'primeng/calendar';
+
 import { ChipModule } from 'primeng/chip';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
@@ -63,13 +65,14 @@ interface OrderData {
     MatCardModule,
     ReactiveFormsModule,
     FormsModule,
+    CalendarModule,
     // PrimeNG Modules
     CardModule,
     ButtonModule,
     TableModule,
     InputTextModule,
     InputNumberModule,
-    CalendarModule,
+
     ChipModule,
     TagModule,
     DividerModule,
@@ -89,6 +92,7 @@ export class ShoppingCartComponent implements OnInit{
   customerForm: FormGroup;
   showCustomerForm = false;
   selectedDate: Date | undefined = undefined;
+  minDate!: Date;
   
   // Business data properties
   businessServices: ServiceDto[] = [];
@@ -109,6 +113,10 @@ export class ShoppingCartComponent implements OnInit{
   }
   
   ngOnInit(): void {
+    // Set minimum date to tomorrow
+    this.minDate = new Date();
+    this.minDate.setDate(this.minDate.getDate() + 1);
+    
     this.loadBusinessData();
   }
 
@@ -220,14 +228,7 @@ export class ShoppingCartComponent implements OnInit{
     this.dataService.DecrementQuantity(convertedService);
   }
 
-  /**
-   * Get tomorrow's date for date picker minimum date
-   */
-  getTomorrowDate(): Date {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow;
-  }
+
 
   /**
    * Scroll to services section
@@ -242,6 +243,8 @@ export class ShoppingCartComponent implements OnInit{
   CheckOutPessed() {
     if (this.dataService.CartItems.length == 0) {
       this.dataService.openSnackBar(this, 5000, 'Your cart is empty, you need to add some services to checkout', 'OK');
+    } else if (!this.selectedDate) {
+      this.dataService.openSnackBar(this, 5000, 'Please select a service date before proceeding to checkout', 'OK');
     } else {
       // Autofill from cookies if available
       const name = this.cookieService.get('customerName');
@@ -311,9 +314,7 @@ export class ShoppingCartComponent implements OnInit{
     }
   }
 
-  onDateSelected(date: Date | null) {
-    this.selectedDate = date || undefined;
-  }
+
 
   submitOrder() {
     if (this.customerForm.valid && this.selectedDate) {
@@ -356,16 +357,9 @@ export class ShoppingCartComponent implements OnInit{
     this.selectedDate = undefined;
   }
 
-  myFilter = (d: Date | null): boolean => {
-    if (!d) return false;
-    const today = new Date();
-    // Set to midnight for comparison
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 2);
-    // Only allow dates after today (i.e., tomorrow and later)
-    return d.getTime() >= tomorrow.getTime();
-  };
+
+
+
 
   get totalPrice(): number {
     return this.dataService.CartItems.reduce((sum, item) => sum + (item.service.servicePrice || 0) * item.quantity, 0);

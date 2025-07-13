@@ -38,9 +38,9 @@ import { AccordionModule } from 'primeng/accordion';
   ],
   template: `
     <div class="dynamic-website-container">
-      <!-- Conditionally show topbar - hide when website JSON contains navigation -->
+      <!-- Only show topbar when website loads successfully (no error) -->
       <app-topbar 
-        *ngIf="websiteData && parsedWebsiteJson && !shouldHideAngularTopbar"
+        *ngIf="!loading && !error && websiteData && parsedWebsiteJson && !shouldHideAngularTopbar"
         [websiteData]="parsedWebsiteJson"
         [currentPageId]="currentPageId">
       </app-topbar>
@@ -51,27 +51,16 @@ import { AccordionModule } from 'primeng/accordion';
         <p class="p-text-center p-mt-3">Loading website...</p>
       </div>
 
-      <!-- Error State -->
-      <div *ngIf="error" class="p-d-flex p-flex-column p-ai-center p-jc-center error-container">
-        <p-card styleClass="error-card">
-          <ng-template pTemplate="header">
-            <div class="p-text-center p-p-3">
-              <i class="pi pi-exclamation-triangle error-icon"></i>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <h2 class="p-text-center p-mb-3">Website Not Found</h2>
-            <p class="p-text-center p-mb-4">{{ error }}</p>
-            <div class="p-text-center">
-              <p-button 
-                label="Go to Home" 
-                icon="pi pi-home" 
-                styleClass="p-button-primary"
-                (onClick)="goHome()">
-              </p-button>
-            </div>
-          </ng-template>
-        </p-card>
+      <!-- Error State - Simple 404 -->
+      <div *ngIf="error" class="error-container">
+        <div class="error-content">
+          <h1>404</h1>
+          <h2>Website Not Found</h2>
+          <p>The website you are looking for could not be found.</p>
+          <p>Contact owner if issue persists.</p>
+          <p>That's all we know.</p>
+          <p>ServiceFuzz Business Website Hosting Platform</p>
+          <img src="https://i.ibb.co/DHdPJJB5/Screenshot-2025-06-09-094337.png" alt="404 Error" class="error-image" style="width:25%; height:auto;">        </div>
       </div>
 
       <!-- Main Content -->
@@ -84,13 +73,13 @@ import { AccordionModule } from 'primeng/accordion';
             <app-contact-us *ngIf="currentAngularComponent === 'ContactUsComponent'"></app-contact-us>
             <app-home *ngIf="currentAngularComponent === 'HomeComponent'"></app-home>
           </div>
-        </div>
-        
+          </div>
+          
         <!-- Rendered Website Content -->
         <div *ngIf="!isAngularComponentPage && safeRenderedHtml" class="rendered-website-wrapper">
           <div class="rendered-content" [innerHTML]="safeRenderedHtml"></div>
-        </div>
-        
+            </div>
+            
         <!-- Debug View with PrimeNG styling -->
         <div *ngIf="!isAngularComponentPage && !safeRenderedHtml" class="debug-wrapper">
           <div class="p-grid p-justify-center">
@@ -148,8 +137,8 @@ import { AccordionModule } from 'primeng/accordion';
                                     <pre class="parameters-display">{{ parseComponentParameters(component.parameters) | json }}</pre>
                                   </p-accordionTab>
                                 </p-accordion>
-                              </div>
-                            </div>
+                </div>
+              </div>
                           </ng-template>
                         </p-card>
                       </div>
@@ -184,21 +173,50 @@ import { AccordionModule } from 'primeng/accordion';
       animation: p-progress-spinner-rotate 2s linear infinite;
     }
 
-    /* Error State Styling */
+    /* Error State Styling - Simple 404 */
     .error-container {
-      min-height: calc(100vh - 100px);
-      margin-top: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #ffffff;
       padding: 2rem;
     }
 
-    .error-card {
+    .error-content {
+      text-align: center;
       max-width: 600px;
-      margin: 0 auto;
+      color: #333333;
     }
 
-    .error-icon {
-      font-size: 4rem;
-      color: #dc3545;
+    .error-content h1 {
+      font-size: 8rem;
+      font-weight: 900;
+      color: #666666;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .error-content h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #333333;
+      margin: 1rem 0;
+    }
+
+    .error-content p {
+      font-size: 1.1rem;
+      color: #666666;
+      line-height: 1.6;
+      margin: 0.5rem 0;
+    }
+
+    .error-image {
+      margin-top: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 100%;
+      height: auto;
     }
 
     /* Main Content Layout */
@@ -346,10 +364,26 @@ import { AccordionModule } from 'primeng/accordion';
         padding-top: 80px;
       }
       
-      .loading-container,
-      .error-container {
+      .loading-container {
         margin-top: 80px;
         min-height: calc(100vh - 80px);
+      }
+
+      .error-container {
+        min-height: 100vh;
+        padding: 1rem;
+      }
+
+      .error-content h1 {
+        font-size: 5rem;
+      }
+
+      .error-content h2 {
+        font-size: 2rem;
+      }
+
+      .error-content p {
+        font-size: 1rem;
       }
       
       .angular-component-wrapper,
@@ -363,7 +397,7 @@ import { AccordionModule } from 'primeng/accordion';
       
       .debug-wrapper {
         padding: 1rem;
-        min-height: calc(100vh - 80px);
+      min-height: calc(100vh - 80px);
       }
       
       .debug-header {
@@ -650,7 +684,8 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
           this.renderWebsite(data);
         },
         error: (error) => {
-          this.error = error.message;
+          // Set a simple error flag for 404 handling
+          this.error = 'Website not found';
           this.loading = false;
           console.error('Error loading website:', error);
         }
@@ -787,7 +822,5 @@ export class DynamicWebsiteComponent implements OnInit, OnDestroy {
     return parameters || {};
   }
 
-  goHome() {
-    this.router.navigate(['/home']);
-  }
+
 } 

@@ -8,13 +8,13 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicWebsiteComponent } from './dynamic-website/dynamic-website.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'shopping-cart', component: ShoppingCartComponent },
-  { path: 'checkout', component: ShoppingCartComponent },
-  { path: 'order-history', component: OrderHistoryComponent },
-  { path: 'landing-page', component: LandingPageComponent },
-  { path: 'contact-us', component: ContactUsComponent },
+//  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  //{ path: 'home', component: HomeComponent },
+  //{ path: 'shopping-cart', component: ShoppingCartComponent },
+  //{ path: 'checkout', component: ShoppingCartComponent },
+  //{ path: 'order-history', component: OrderHistoryComponent },
+  //{ path: 'landing-page', component: LandingPageComponent },
+  //{ path: 'contact-us', component: ContactUsComponent },
   // Wildcard route for dynamic websites - MUST be last
   { path: '**', component: DynamicWebsiteComponent }
 ];

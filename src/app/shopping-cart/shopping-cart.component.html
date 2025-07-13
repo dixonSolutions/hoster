@@ -1,6 +1,6 @@
 <!-- Business Services Section -->
 <div class="business-services-section" *ngIf="businessInfo">
-  <p-card header="Available Services" subheader="{{businessInfo.businessName}}" styleClass="business-info-card">
+  <p-card subheader="{{businessInfo.businessName}}" styleClass="business-info-card">
     <p class="business-description">{{businessInfo.businessDescription}}</p>
     
     <div class="business-contact-info">
@@ -94,9 +94,9 @@
       <ng-template pTemplate="body" let-item>
         <tr>
           <td>
-            <img [src]="item.service.serviceImageUrl" alt="Service Image" class="cart-table-img" *ngIf="item.service.serviceImageUrl" />
+        <img [src]="item.service.serviceImageUrl" alt="Service Image" class="cart-table-img" *ngIf="item.service.serviceImageUrl" />
             <i class="pi pi-image" *ngIf="!item.service.serviceImageUrl" style="font-size: 2rem; color: #ccc;"></i>
-          </td>
+      </td>
           <td><strong>{{ item.service.serviceName }}</strong></td>
           <td>{{ item.service.servicePrice | currency:item.service.servicePriceCurrencyUnit }}</td>
           <td>
@@ -107,7 +107,7 @@
                 styleClass="p-button-sm p-button-outlined"
                 severity="secondary">
               </p-button>
-              <span class="qty-value">{{ item.quantity }}</span>
+        <span class="qty-value">{{ item.quantity }}</span>
               <p-button 
                 icon="pi pi-plus" 
                 (onClick)="dataService.IncrementQuantity(item.service)" 
@@ -115,7 +115,7 @@
                 severity="secondary">
               </p-button>
             </div>
-          </td>
+      </td>
           <td>{{ (item.service.servicePrice || 0) * item.quantity | currency:item.service.servicePriceCurrencyUnit }}</td>
           <td>
             <p-button 
@@ -124,32 +124,34 @@
               styleClass="p-button-sm p-button-danger"
               severity="danger">
             </p-button>
-          </td>
+      </td>
         </tr>
       </ng-template>
     </p-table>
 
     <ng-template pTemplate="footer">
-      <div class="cart-summary">
+  <div class="cart-summary">
         <p-panel header="Order Summary" styleClass="cart-summary-panel">
-          <div class="cart-summary-row">
-            <span>Total Items:</span>
+    <div class="cart-summary-row">
+      <span>Total Items:</span>
             <p-chip [label]="dataService.itemsInCart.toString()" styleClass="summary-chip"></p-chip>
-          </div>
-          <div class="cart-summary-row">
-            <span>Total Price:</span>
+    </div>
+    <div class="cart-summary-row">
+      <span>Total Price:</span>
             <p-chip [label]="(totalPrice | currency) || ''" styleClass="summary-chip price-chip"></p-chip>
           </div>
-          <div class="date-selection">
-            <p>Select a date for your service(s)</p>
-            <p-calendar 
-              [(ngModel)]="selectedDate" 
-              [minDate]="getTomorrowDate()" 
-              dateFormat="mm/dd/yy" 
-              placeholder="Choose a date"
-              styleClass="date-picker">
-            </p-calendar>
-          </div>
+                      <div class="date-selection">
+              <p>Select a date for your service(s)</p>
+              <p-calendar 
+                [(ngModel)]="selectedDate" 
+                [minDate]="minDate" 
+                dateFormat="mm/dd/yy" 
+                placeholder="Choose a date"
+                styleClass="date-picker"
+                [showIcon]="true"
+                [readonlyInput]="true">
+              </p-calendar>
+    </div>
           <p-button 
             label="Checkout" 
             icon="pi pi-shopping-cart" 
@@ -158,7 +160,7 @@
             severity="success">
           </p-button>
         </p-panel>
-      </div>
+  </div>
     </ng-template>
   </p-card>
 </div>
@@ -248,14 +250,10 @@
 
         <div class="form-row">
           <mat-form-field appearance="outline">
-            <mat-label>Service Date *</mat-label>
-            <input matInput [matDatepickerFilter]="myFilter" [matDatepicker]="picker" (dateChange)="onDateSelected($event.value)">
-            <mat-hint>MM/DD/YYYY (minimum 2 days from today)</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="!selectedDate">
-              Please select a service date
-            </mat-error>
+            <mat-label>Selected Service Date</mat-label>
+            <input matInput [value]="selectedDate | date:'MM/dd/yyyy'" readonly>
+            <mat-hint>Date selected from the previous step</mat-hint>
+            <mat-icon matSuffix>calendar_today</mat-icon>
           </mat-form-field>
         </div>
 
@@ -273,7 +271,7 @@
 
         <div class="form-actions">
           <button mat-button type="button" (click)="cancelOrder()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="!customerForm.valid || !selectedDate">
+          <button mat-raised-button color="primary" type="submit" [disabled]="!customerForm.valid">
             Submit Order
           </button>
         </div>
@@ -292,7 +290,7 @@
       </ng-template>
       
       <ng-template pTemplate="title">
-        <h2>Your cart is empty</h2>
+    <h2>Your cart is empty</h2>
       </ng-template>
       
       <ng-template pTemplate="subtitle">

@@ -26,12 +26,43 @@
   gap: 1rem;
 }
 
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent !important;
+}
+
+.logo-image {
+  object-fit: contain;
+  transition: all 0.3s ease;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  background: transparent !important;
+}
+
 .topbar-title {
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   margin-left: 0.5rem;
   color: #333333;
+  background: transparent !important;
 }
 
 .topbar-center {
@@ -49,31 +80,34 @@
 }
 
 .nav-btn {
-  background: #f8f9fa !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: 1rem !important;
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px !important;
   transition: all 0.2s ease !important;
   padding: 0.5rem 1rem !important;
   font-weight: 500 !important;
-  color: #333333 !important;
+  color: #495057 !important;
   /* Ensure buttons are visible */
   opacity: 1 !important;
   visibility: visible !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 .nav-btn:hover {
-  background: #e3f2fd !important;
+  background: #f8f9fa !important;
   border-color: #2196F3 !important;
   transform: translateY(-1px);
   color: #2196F3 !important;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
 }
 
 .active-nav {
-  background: #e3f2fd !important;
+  background: #ffffff !important;
   border: 1px solid #2196F3 !important;
   border-bottom: 2px solid #2196F3 !important;
   font-weight: 600 !important;
   color: #2196F3 !important;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15) !important;
 }
 
 .topbar-actions {
@@ -85,19 +119,31 @@
 .search-wrapper {
   display: flex;
   align-items: center;
-  background: #f8f9fa;
-  border-radius: 1.5rem;
-  padding: 0.25rem 1rem;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
   min-width: 220px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin-right: 1rem;
+  transition: all 0.2s ease;
+}
+
+.search-wrapper:hover {
+  border-color: #2196F3;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.search-wrapper:focus-within {
+  border-color: #2196F3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
 }
 
 .search-icon {
   font-size: 1.1rem;
   margin-right: 0.5rem;
   opacity: 0.7;
-  color: #666666;
+  color: #6c757d;
 }
 
 .search-input {
@@ -107,40 +153,46 @@
   font-size: 1rem;
   width: 140px;
   box-shadow: none !important;
-  color: #333333;
+  color: #495057;
 }
 
 .search-input::placeholder {
   opacity: 0.7;
-  color: #666666;
+  color: #6c757d;
 }
 
 .cart-btn {
-  background: #f8f9fa !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: 1rem !important;
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px !important;
   transition: all 0.2s ease !important;
   width: 56px !important;
   height: 40px !important;
   margin: 0 0.25rem;
-  color: #333333 !important;
+  color: #495057 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 .cart-btn:hover {
-  background: #e3f2fd !important;
+  background: #f8f9fa !important;
+  border-color: #2196F3 !important;
+  color: #2196F3 !important;
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
 }
 
 .cart-btn.active-nav {
-  background: #e3f2fd !important;
+  background: #ffffff !important;
+  border: 1px solid #2196F3 !important;
   border-bottom: 2px solid #2196F3 !important;
   color: #2196F3 !important;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15) !important;
 }
 
 .p-badge-danger {
-  background: #ef4444 !important;
+  background: #dc3545 !important;
   color: #fff !important;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
   font-size: 0.75rem;
   min-width: 1.2rem;
   height: 1.2rem;
@@ -149,9 +201,12 @@
 .theme-dropdown {
   min-width: 120px;
   margin-left: 0.5rem;
-  border-radius: 1rem !important;
+  border-radius: 8px !important;
   background: #ffffff !important;
-  color: #333333 !important;
+  color: #495057 !important;
+  border: 1px solid #e9ecef !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Ensure all text and icons are properly colored */
@@ -162,19 +217,53 @@
 .topbar-toolbar .p-button-icon,
 .topbar-toolbar .pi {
   font-size: 1.1rem !important;
-  color: #333333 !important;
+  color: #495057 !important;
 }
 
 /* Override any dark PrimeNG defaults */
 .p-toolbar {
   background: #ffffff !important;
   border: none !important;
-  color: #333333 !important;
+  color: #495057 !important;
 }
 
 .p-button-text {
   background: transparent !important;
-  color: #333333 !important;
+  color: #495057 !important;
+}
+
+/* Theme Dropdown Enhancements */
+::ng-deep .theme-dropdown .p-select {
+  border: 1px solid #e9ecef !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+::ng-deep .theme-dropdown .p-select:not(.p-disabled):hover {
+  border-color: #2196F3 !important;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+}
+
+::ng-deep .theme-dropdown .p-select.p-focus {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
+}
+
+/* Input styling overrides */
+::ng-deep .p-inputtext {
+  background: #ffffff !important;
+  border: 1px solid #e9ecef !important;
+  color: #495057 !important;
+}
+
+::ng-deep .p-inputtext:hover {
+  border-color: #2196F3 !important;
+}
+
+::ng-deep .p-inputtext:focus {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
 }
 
 @media (max-width: 768px) {
@@ -226,3 +315,402 @@
     font-size: 0.8rem !important;
   }
 }
+
+/* Responsive Design - Mobile Sidebar */
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .hamburger-btn {
+    background: #ffffff !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    color: #495057 !important;
+    font-size: 1.2rem !important;
+    padding: 0.5rem !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  .hamburger-btn:hover {
+    background: #f8f9fa !important;
+    border-color: #2196F3 !important;
+    color: #2196F3 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+  }
+  
+  .topbar-title { 
+    font-size: 1.1rem; 
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+    max-width: 150px;
+  }
+  
+  .search-wrapper { 
+    display: none !important; 
+  }
+  
+  .theme-dropdown { 
+    display: none !important; 
+  }
+  
+  .cart-btn { 
+    width: 44px !important; 
+  }
+}
+
+/* Comprehensive PrimeNG Sidebar Overrides - White Theme */
+::ng-deep .p-sidebar {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+::ng-deep .p-sidebar-content {
+  background: #ffffff !important;
+  color: #333333 !important;
+}
+
+::ng-deep .p-sidebar-header {
+  background: #ffffff !important;
+  color: #333333 !important;
+  border-bottom: 1px solid #e9ecef !important;
+}
+
+::ng-deep .p-sidebar-left {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar-right {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar-top {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar-bottom {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar-mask {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Force white backgrounds on specific sidebar elements only */
+::ng-deep .p-sidebar .p-sidebar-content {
+  background-color: #ffffff !important;
+}
+
+::ng-deep .p-sidebar .p-sidebar-header {
+  background-color: #ffffff !important;
+}
+
+/* Override PrimeNG theme defaults only for sidebar components */
+::ng-deep .mobile-sidebar .p-component {
+  background: transparent !important;
+}
+
+::ng-deep .mobile-sidebar .p-divider {
+  background: transparent !important;
+}
+
+::ng-deep .mobile-sidebar .p-select {
+  background: #ffffff !important;
+}
+
+::ng-deep .mobile-sidebar .p-inputtext {
+  background: #ffffff !important;
+}
+
+/* Mobile Sidebar Styles - Complete White Theme */
+::ng-deep .mobile-sidebar {
+  width: 280px !important;
+  max-width: 90vw !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-content {
+  padding: 0 !important;
+  background: #ffffff !important;
+  border: none !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-header {
+  background: #ffffff !important;
+  color: #333333 !important;
+  padding: 1.5rem !important;
+  border-bottom: 1px solid #e9ecef !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-close-icon {
+  color: #6c757d !important;
+  font-size: 1.2rem !important;
+  transition: color 0.2s ease !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-close-icon:hover {
+  color: #2196F3 !important;
+}
+
+/* Additional sidebar wrapper overrides */
+::ng-deep .mobile-sidebar .p-sidebar-left {
+  background: #ffffff !important;
+}
+
+/* Fix any dark backgrounds on sidebar components only */
+::ng-deep .mobile-sidebar .sidebar-content * {
+  background: inherit !important;
+}
+
+::ng-deep .mobile-sidebar .nav-items * {
+  background: inherit !important;
+}
+
+/* Ensure sidebar wrapper container is white */
+::ng-deep .p-sidebar-left.mobile-sidebar {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar.mobile-sidebar {
+  background: #ffffff !important;
+}
+
+/* Target the specific mobile sidebar container */
+::ng-deep .mobile-sidebar.p-sidebar-left {
+  background: #ffffff !important;
+  border: none !important;
+}
+
+::ng-deep .mobile-sidebar.p-sidebar-left .p-sidebar {
+  background: #ffffff !important;
+}
+
+/* Override any dark theme defaults */
+::ng-deep .p-sidebar-left .p-sidebar-content {
+  background: #ffffff !important;
+}
+
+::ng-deep .p-sidebar-left .p-sidebar-header {
+  background: #ffffff !important;
+}
+
+/* Ensure no nested dark containers */
+::ng-deep .mobile-sidebar .p-sidebar-left {
+  background: #ffffff !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-content {
+  background: #ffffff !important;
+}
+
+::ng-deep .mobile-sidebar .p-sidebar-header {
+  background: #ffffff !important;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar-logo-image {
+  object-fit: contain;
+  border: 2px solid #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-logo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333333;
+  margin: 0;
+}
+
+.sidebar-content {
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.sidebar-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 1rem 0;
+  padding: 0 0.5rem;
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+  font-weight: 500;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  background: #f8f9fa !important;
+  color: #2196F3;
+  transform: translateX(4px);
+  border-color: #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-nav-item.active {
+  background: #ffffff !important;
+  color: #2196F3;
+  border-color: #2196F3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+  font-weight: 600;
+}
+
+.sidebar-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #2196F3;
+  border-radius: 0 4px 4px 0;
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.cart-badge {
+  background: #dc3545;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
+}
+
+.sidebar-nav-item.active .cart-badge {
+  background: #dc3545;
+  color: white;
+}
+
+/* Sidebar Theme Select */
+.sidebar-theme {
+  margin-bottom: 1.5rem;
+}
+
+::ng-deep .sidebar-theme-select {
+  width: 100% !important;
+}
+
+::ng-deep .sidebar-theme-select .p-select {
+  width: 100% !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  background: white !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+::ng-deep .sidebar-theme-select .p-select:not(.p-disabled):hover {
+  border-color: #2196F3 !important;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+}
+
+::ng-deep .sidebar-theme-select .p-select.p-focus {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
+}
+
+/* Sidebar Search */
+.sidebar-search {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-search-wrapper {
+  width: 100%;
+}
+
+.sidebar-search-input {
+  width: 100% !important;
+  padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  background: white !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.sidebar-search-input:focus {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
+  outline: none !important;
+}
+
+/* Divider Styling */
+::ng-deep .mobile-sidebar .p-divider {
+  margin: 1.5rem 0 !important;
+}
+
+::ng-deep .mobile-sidebar .p-divider.p-divider-horizontal:before {
+  border-top: 1px solid #e9ecef !important;
+}
+
+/* Smooth Sidebar Animation */
+::ng-deep .mobile-sidebar .p-sidebar {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* Overlay styling */
+::ng-deep .p-sidebar-mask {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Additional responsive adjustments */

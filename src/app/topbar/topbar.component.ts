@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { AboutUsPopupComponent } from '../about-us-popup/about-us-popup.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,6 +14,9 @@ import { MenuItem } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
+import { SidebarModule } from 'primeng/sidebar';
+import { MenuModule } from 'primeng/menu';
+import { DividerModule } from 'primeng/divider';
 
 interface ThemeOption {
   name: string;
@@ -51,14 +54,21 @@ interface WebsiteNavigation {
     BadgeModule, 
     SelectModule,
     AvatarModule,
-    AvatarGroupModule
+    AvatarGroupModule,
+    SidebarModule,
+    MenuModule,
+    DividerModule
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.css'
 })
-export class TopbarComponent implements OnInit, OnChanges {
+export class TopbarComponent implements OnInit, OnChanges, OnDestroy {
   @Input() websiteData: any = null;
   @Input() currentPageId: string = 'home';
+
+  // Mobile sidebar properties
+  sidebarVisible: boolean = false;
+  isMobile: boolean = false;
 
   themeOptions: ThemeOption[] = [
     { name: 'Rose & Red', value: 'rose-red', badgeColor: '#e57373' },
@@ -93,6 +103,10 @@ export class TopbarComponent implements OnInit, OnChanges {
     this.initializeMenuItems();
     this.setActiveSectionFromUrl(this.router.url);
     this.parseWebsiteData();
+    this.checkScreenSize();
+    
+    // Listen to window resize events
+    window.addEventListener('resize', this.onResize.bind(this));
     
     // Get user data and token
     this.dataService.getUserById(this.dataService.userID).subscribe({
@@ -128,6 +142,10 @@ export class TopbarComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.parseWebsiteData();
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('resize', this.onResize.bind(this));
   }
 
   private parseWebsiteData() {
@@ -282,26 +300,76 @@ export class TopbarComponent implements OnInit, OnChanges {
       this.searchResult = null;
       return;
     }
+    
     // Find the best match by name or description (simple scoring)
     let bestScore = 0;
     let bestMatch = null;
+    
     for (const service of this.dataService.services) {
       const name = (service.serviceName || '').toLowerCase();
       const desc = (service.serviceDescription || '').toLowerCase();
       let score = 0;
+      
       if (name.includes(query)) score += 2;
       if (desc.includes(query)) score += 1;
       if (name === query) score += 3; // exact name match
       if (desc === query) score += 2; // exact desc match
+      
       if (score > bestScore) {
         bestScore = score;
         bestMatch = service;
       }
     }
+    
     this.searchResult = bestMatch;
+    
     // For now, just log the result
     if (bestMatch) {
       console.log('Best service match:', bestMatch);
     }
+  }
+
+  getLogoSize(): string {
+    if (!this.websiteNavigation || !this.websiteNavigation.logoSize) {
+      return '40px'; // Default size
+    }
+    
+    const sizeMap: { [key: string]: string } = {
+      'small': '32px',
+      'medium': '40px',
+      'large': '48px',
+      'extra-large': '56px'
+    };
+    
+    return sizeMap[this.websiteNavigation.logoSize] || '40px';
+  }
+
+  getLogoBorderRadius(): string {
+    if (!this.websiteNavigation || !this.websiteNavigation.logoShape) {
+      return '4px'; // Default border radius
+    }
+    
+    const shapeMap: { [key: string]: string } = {
+      'square': '4px',
+      'rounded': '8px',
+      'circle': '50%'
+    };
+    
+    return shapeMap[this.websiteNavigation.logoShape] || '4px';
+  }
+
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 900; // Mobile breakpoint at 900px
+    if (this.isMobile) {
+      this.sidebarVisible = false; // Hide sidebar on mobile
+    }
+  }
+
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  toggleSidebar() {
+    this.sidebarVisible = !this.sidebarVisible;
   }
 }
