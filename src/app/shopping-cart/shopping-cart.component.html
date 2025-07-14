@@ -1,3 +1,6 @@
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
 <!-- Business Services Section -->
 <div class="business-services-section" *ngIf="businessInfo">
   <p-card subheader="{{businessInfo.businessName}}" styleClass="business-info-card">
@@ -18,55 +21,66 @@
     </div>
     
     <div *ngIf="!isLoadingBusinessData && businessServices.length > 0" class="services-grid">
-      <p-card *ngFor="let service of businessServices" styleClass="service-card">
-        <ng-template pTemplate="header">
-          <img *ngIf="service.serviceImageUrl" [src]="service.serviceImageUrl" alt="Service Image" class="service-image">
-          <div *ngIf="!service.serviceImageUrl" class="service-image-placeholder">
-            <i class="pi pi-image"></i>
-          </div>
-        </ng-template>
-        
-        <ng-template pTemplate="title">
-          <span class="service-name">{{service.serviceName}}</span>
-        </ng-template>
-        
-        <ng-template pTemplate="subtitle">
-          <div class="service-details">
-            <p-tag severity="info" icon="pi pi-clock" value="{{service.duration}} min"></p-tag>
-            <p-tag severity="success" icon="pi pi-dollar" value="{{service.price | currency:service.currency}}"></p-tag>
-          </div>
-        </ng-template>
-        
-        <p class="service-description">{{service.serviceDescription}}</p>
-        
-        <ng-template pTemplate="footer">
-          <div class="service-actions">
-            <p-button 
-              *ngIf="!isServiceInCart(service)" 
-              label="Add to Cart" 
-              icon="pi pi-cart-plus" 
-              (onClick)="addServiceToCart(service)"
-              styleClass="p-button-sm">
-            </p-button>
-            
-            <div *ngIf="isServiceInCart(service)" class="quantity-controls">
+      <div *ngFor="let service of businessServices" class="service-container">
+        <p-card styleClass="service-card">
+          <ng-template pTemplate="header">
+            <img *ngIf="service.serviceImageUrl" [src]="service.serviceImageUrl" alt="Service Image" class="service-image">
+            <div *ngIf="!service.serviceImageUrl" class="service-image-placeholder">
+              <i class="pi pi-image"></i>
+            </div>
+          </ng-template>
+          
+          <ng-template pTemplate="title">
+            <span class="service-name">{{service.serviceName}}</span>
+          </ng-template>
+          
+          <ng-template pTemplate="subtitle">
+            <div class="service-details">
+              <p-tag severity="info" icon="pi pi-clock" value="{{service.duration}} min"></p-tag>
+              <p-tag severity="success" icon="pi pi-dollar" value="{{service.price | currency:service.currency}}"></p-tag>
+            </div>
+          </ng-template>
+          
+          <p class="service-description">{{service.serviceDescription}}</p>
+          
+          <ng-template pTemplate="footer">
+            <div class="service-actions">
+              <div class="action-buttons">
+                <p-button 
+                  *ngIf="!isServiceInCart(service)" 
+                  label="Add to Cart" 
+                  icon="pi pi-cart-plus" 
+                  (onClick)="addServiceToCart(service)"
+                  styleClass="p-button-sm">
+                </p-button>
+                
+                <div *ngIf="isServiceInCart(service)" class="quantity-controls">
+                  <p-button 
+                    icon="pi pi-minus" 
+                    (onClick)="decrementServiceQuantity(service)" 
+                    styleClass="p-button-sm p-button-outlined"
+                    severity="secondary">
+                  </p-button>
+                  <p-chip [label]="getServiceQuantityInCart(service).toString()" styleClass="quantity-chip"></p-chip>
+                  <p-button 
+                    icon="pi pi-plus" 
+                    (onClick)="incrementServiceQuantity(service)" 
+                    styleClass="p-button-sm p-button-outlined"
+                    severity="secondary">
+                  </p-button>
+                </div>
+              </div>
+              
               <p-button 
-                icon="pi pi-minus" 
-                (onClick)="decrementServiceQuantity(service)" 
-                styleClass="p-button-sm p-button-outlined"
-                severity="secondary">
-              </p-button>
-              <p-chip [label]="getServiceQuantityInCart(service).toString()" styleClass="quantity-chip"></p-chip>
-              <p-button 
-                icon="pi pi-plus" 
-                (onClick)="incrementServiceQuantity(service)" 
-                styleClass="p-button-sm p-button-outlined"
-                severity="secondary">
+                label="Reviews" 
+                icon="pi pi-star" 
+                (onClick)="openReviewsDialog(service)"
+                styleClass="p-button-sm p-button-outlined p-button-secondary">
               </p-button>
             </div>
-          </div>
-        </ng-template>
-      </p-card>
+          </ng-template>
+        </p-card>
+      </div>
     </div>
     
     <p-message *ngIf="!isLoadingBusinessData && businessServices.length === 0" 
@@ -165,120 +179,187 @@
   </p-card>
 </div>
 
-<!-- Customer Details Form -->
-<div class="customer-form-container" *ngIf="showCustomerForm">
-  <mat-card class="customer-form-card">
-    <mat-card-header>
-      <mat-card-title>Customer Details</mat-card-title>
-      <mat-card-subtitle>Please provide your information to complete the order</mat-card-subtitle>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <form [formGroup]="customerForm" (ngSubmit)="submitOrder()">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Full Name *</mat-label>
-            <input matInput formControlName="name" placeholder="Enter your full name">
-            <mat-error *ngIf="customerForm.get('name')?.hasError('required')">
-              Name is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+<!-- Customer Details Dialog -->
+<p-dialog 
+  header="Customer Details" 
+  [(visible)]="showCustomerForm" 
+  [modal]="true" 
+  [style]="{ width: '50rem' }" 
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <ng-template pTemplate="header">
+    <div class="dialog-header">
+      <i class="pi pi-user"></i>
+      <span>Customer Details</span>
+    </div>
+  </ng-template>
+  
+  <p class="dialog-subtitle">Please provide your information to complete the order</p>
+  
+  <form [formGroup]="customerForm" (ngSubmit)="submitOrder()">
+    <div class="form-grid">
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="name" 
+            formControlName="name" 
+            placeholder="Enter your full name"
+            [class.ng-invalid]="customerForm.get('name')?.invalid && customerForm.get('name')?.touched"
+            styleClass="w-full">
+          <label for="name">Full Name *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('name')?.hasError('required') && customerForm.get('name')?.touched" 
+               class="p-error">Name is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Email *</mat-label>
-            <input matInput formControlName="email" placeholder="Enter your email" type="email">
-            <mat-error *ngIf="customerForm.get('email')?.hasError('required')">
-              Email is required
-            </mat-error>
-            <mat-error *ngIf="customerForm.get('email')?.hasError('email')">
-              Please enter a valid email address
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="email" 
+            formControlName="email" 
+            placeholder="Enter your email" 
+            type="email"
+            [class.ng-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched"
+            styleClass="w-full">
+          <label for="email">Email *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('email')?.hasError('required') && customerForm.get('email')?.touched" 
+               class="p-error">Email is required</small>
+        <small *ngIf="customerForm.get('email')?.hasError('email') && customerForm.get('email')?.touched" 
+               class="p-error">Please enter a valid email address</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Phone Number *</mat-label>
-            <input matInput formControlName="phone" placeholder="Enter your phone number">
-            <mat-error *ngIf="customerForm.get('phone')?.hasError('required')">
-              Phone number is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="phone" 
+            formControlName="phone" 
+            placeholder="Enter your phone number"
+            [class.ng-invalid]="customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched"
+            styleClass="w-full">
+          <label for="phone">Phone Number *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('phone')?.hasError('required') && customerForm.get('phone')?.touched" 
+               class="p-error">Phone number is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Street Address *</mat-label>
-            <input matInput formControlName="address" placeholder="Enter your street address">
-            <mat-error *ngIf="customerForm.get('address')?.hasError('required')">
-              Address is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="address" 
+            formControlName="address" 
+            placeholder="Enter your full street address (e.g., 15 Nada Street)"
+            [class.ng-invalid]="customerForm.get('address')?.invalid && customerForm.get('address')?.touched"
+            styleClass="w-full">
+          <label for="address">Street Address *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('address')?.hasError('required') && customerForm.get('address')?.touched" 
+               class="p-error">Address is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>City *</mat-label>
-            <input matInput formControlName="city" placeholder="Enter your city">
-            <mat-error *ngIf="customerForm.get('city')?.hasError('required')">
-              City is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="city" 
+            formControlName="city" 
+            placeholder="Enter your city"
+            [class.ng-invalid]="customerForm.get('city')?.invalid && customerForm.get('city')?.touched"
+            styleClass="w-full">
+          <label for="city">City *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('city')?.hasError('required') && customerForm.get('city')?.touched" 
+               class="p-error">City is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>State/Province *</mat-label>
-            <input matInput formControlName="state" placeholder="Enter your state or province">
-            <mat-error *ngIf="customerForm.get('state')?.hasError('required')">
-              State is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="state" 
+            formControlName="state" 
+            placeholder="Enter your state or province"
+            [class.ng-invalid]="customerForm.get('state')?.invalid && customerForm.get('state')?.touched"
+            styleClass="w-full">
+          <label for="state">State/Province *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('state')?.hasError('required') && customerForm.get('state')?.touched" 
+               class="p-error">State is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Postal Code *</mat-label>
-            <input matInput formControlName="postalCode" placeholder="Enter your postal code">
-            <mat-error *ngIf="customerForm.get('postalCode')?.hasError('required')">
-              Postal code is required
-            </mat-error>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="postalCode" 
+            formControlName="postalCode" 
+            placeholder="Enter your postal code"
+            [class.ng-invalid]="customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched"
+            styleClass="w-full">
+          <label for="postalCode">Postal Code *</label>
+        </p-floatlabel>
+        <small *ngIf="customerForm.get('postalCode')?.hasError('required') && customerForm.get('postalCode')?.touched" 
+               class="p-error">Postal code is required</small>
+      </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Selected Service Date</mat-label>
-            <input matInput [value]="selectedDate | date:'MM/dd/yyyy'" readonly>
-            <mat-hint>Date selected from the previous step</mat-hint>
-            <mat-icon matSuffix>calendar_today</mat-icon>
-          </mat-form-field>
-        </div>
+      <div class="form-row">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="selectedDate" 
+            [value]="selectedDate | date:'MM/dd/yyyy'" 
+            readonly 
+            styleClass="w-full">
+          <label for="selectedDate">Selected Service Date</label>
+        </p-floatlabel>
 
-        <div class="order-summary">
-          <h4>Order Summary</h4>
+      </div>
+
+      <div class="order-summary-dialog">
+        <p-panel header="Order Summary" styleClass="summary-panel">
           <div class="summary-row">
             <span>Total Items:</span>
-            <span>{{dataService.itemsInCart}}</span>
+            <p-chip [label]="dataService.itemsInCart.toString()"></p-chip>
           </div>
           <div class="summary-row">
             <span>Total Price:</span>
-            <span>{{totalPrice | currency}}</span>
+            <p-chip [label]="(totalPrice | currency) || ''" styleClass="price-chip"></p-chip>
           </div>
-        </div>
-
-        <div class="form-actions">
-          <button mat-button type="button" (click)="cancelOrder()">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="!customerForm.valid">
-            Submit Order
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
-</div>
+        </p-panel>
+      </div>
+    </div>
+  </form>
+  
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button 
+        label="Cancel" 
+        icon="pi pi-times" 
+        (onClick)="cancelOrder()" 
+        styleClass="p-button-text">
+      </p-button>
+      <p-button 
+        label="Clear Saved Address" 
+        icon="pi pi-trash" 
+        (onClick)="clearSavedAddress()" 
+        styleClass="p-button-outlined p-button-warning">
+      </p-button>
+      <p-button 
+        label="Submit Order" 
+        icon="pi pi-check" 
+        (onClick)="submitOrder()" 
+        [disabled]="!customerForm.valid"
+        styleClass="p-button-success">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
 
 <ng-template #emptyCart>
   <div class="empty-cart">
@@ -310,3 +391,22 @@
     </p-card>
   </div>
 </ng-template>
+
+<!-- Reviews Dialog -->
+<p-dialog 
+  [(visible)]="showReviewsDialog" 
+  [modal]="true" 
+  [closable]="true" 
+  [draggable]="false" 
+  [resizable]="false"
+  [header]="selectedServiceForReviews?.serviceName + ' - Reviews'"
+  styleClass="reviews-dialog"
+  [style]="{width: '90vw', maxWidth: '800px', height: '80vh'}">
+  
+  <app-reviews 
+    *ngIf="selectedServiceForReviews && businessInfo?.businessID"
+    [serviceId]="selectedServiceForReviews.serviceID" 
+    [businessId]="businessInfo!.businessID!"
+    [showAddReview]="true">
+  </app-reviews>
+</p-dialog>

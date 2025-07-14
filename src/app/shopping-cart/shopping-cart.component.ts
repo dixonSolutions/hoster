@@ -1,21 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { DataServiceService } from '../data-service.service';
 import { CommonModule } from '@angular/common';
 import { CartItem } from '../data-service.service';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
-import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CookieService } from 'ngx-cookie-service';
 import { WebsiteHosterService } from '../services/website-hoster.service';
 import { ServiceDto, BusinessBasicInfoDto } from '../models/WebsiteHoster';
-import { CalendarModule } from 'primeng/calendar';
-
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -23,7 +13,8 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-
+import { CalendarModule } from 'primeng/calendar';
+import { DialogModule } from 'primeng/dialog';
 import { ChipModule } from 'primeng/chip';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
@@ -32,6 +23,10 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PanelModule } from 'primeng/panel';
 import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { ReviewsComponent } from '../reviews/reviews.component';
 
 interface CustomerDetails {
   name: string;
@@ -55,24 +50,16 @@ interface OrderData {
   standalone: true,
   imports: [
     CommonModule, 
-    MatTableModule, 
-    MatIconModule, 
-    MatDatepickerModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatNativeDateModule,
-    MatButtonModule,
-    MatCardModule,
     ReactiveFormsModule,
     FormsModule,
-    CalendarModule,
     // PrimeNG Modules
     CardModule,
     ButtonModule,
     TableModule,
     InputTextModule,
     InputNumberModule,
-
+    CalendarModule,
+    DialogModule,
     ChipModule,
     TagModule,
     DividerModule,
@@ -80,11 +67,15 @@ interface OrderData {
     ProgressSpinnerModule,
     PanelModule,
     BadgeModule,
-    TooltipModule
+    TooltipModule,
+    FloatLabelModule,
+    ToastModule,
+    ReviewsComponent
   ],
   templateUrl: './shopping-cart.component.html',
   styleUrl: './shopping-cart.component.css',
-  providers: [CookieService]
+  providers: [CookieService],
+  encapsulation: ViewEncapsulation.None
 })
 export class ShoppingCartComponent implements OnInit{
   public dataService = inject(DataServiceService);
@@ -99,6 +90,10 @@ export class ShoppingCartComponent implements OnInit{
   businessInfo: BusinessBasicInfoDto | null = null;
   isLoadingBusinessData = false;
   currentWebsiteName: string | null = null;
+  
+  // Reviews dialog properties
+  showReviewsDialog = false;
+  selectedServiceForReviews: ServiceDto | null = null;
 
   constructor(private fb: FormBuilder, private cookieService: CookieService) {
     this.customerForm = this.fb.group({
@@ -240,6 +235,61 @@ export class ShoppingCartComponent implements OnInit{
     }
   }
 
+  /**
+   * Open reviews dialog for a specific service
+   */
+  openReviewsDialog(service: ServiceDto): void {
+    this.selectedServiceForReviews = service;
+    this.showReviewsDialog = true;
+    
+    // Force fix dialog background after a short delay
+    setTimeout(() => {
+      this.fixDialogBackground();
+    }, 100);
+  }
+
+  /**
+   * Force fix PrimeNG dialog background
+   */
+  private fixDialogBackground(): void {
+    // Find all possible dialog mask elements
+    const maskSelectors = [
+      '.p-dialog-mask',
+      '.p-component-overlay',
+      '.p-overlay-mask',
+      '.p-overlay',
+      '[data-pc-section="mask"]',
+      'div[class*="p-dialog-mask"]',
+      'div[class*="p-overlay"]',
+      'div[class*="p-component-overlay"]'
+    ];
+
+    maskSelectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach((element: any) => {
+        if (element.style) {
+          element.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+          element.style.background = 'rgba(0, 0, 0, 0.6)';
+          element.style.backdropFilter = 'blur(2px)';
+        }
+      });
+    });
+
+    // Also try to find any div that might be the dialog overlay
+    const allDivs = document.querySelectorAll('body > div:not([class*="app"]):not([id]):not([class*="ng"])');
+    allDivs.forEach((div: any) => {
+      if (div.style && div.children.length > 0) {
+        // Check if this div contains a dialog
+        const hasDialog = div.querySelector('.p-dialog') || div.querySelector('[class*="dialog"]');
+        if (hasDialog) {
+          div.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+          div.style.background = 'rgba(0, 0, 0, 0.6)';
+          div.style.backdropFilter = 'blur(2px)';
+        }
+      }
+    });
+  }
+
   CheckOutPessed() {
     if (this.dataService.CartItems.length == 0) {
       this.dataService.openSnackBar(this, 5000, 'Your cart is empty, you need to add some services to checkout', 'OK');
@@ -258,8 +308,19 @@ export class ShoppingCartComponent implements OnInit{
       this.customerForm.patchValue({ name, email, phone, address, city, state, postalCode });
       this.customerForm.updateValueAndValidity();
       this.showCustomerForm = true;
-      // Try to get browser location and patch address fields
-      this.tryPatchAddressFromLocation();
+      
+      // Force fix dialog background for checkout dialog
+      setTimeout(() => {
+        this.fixDialogBackground();
+      }, 100);
+      
+      // Only try to get browser location if no saved address exists
+      if (!address || !city || !state || !postalCode) {
+        console.log('No complete address saved in cookies, trying geolocation...');
+        this.tryPatchAddressFromLocation();
+      } else {
+        console.log('Complete address found in cookies, skipping geolocation.');
+      }
     }
   }
 
@@ -274,7 +335,13 @@ export class ShoppingCartComponent implements OnInit{
           // Placeholder: Replace with real reverse geocoding API call
           this.reverseGeocode(lat, lng).then(addr => {
             console.log('Patching form from geolocation:', addr);
-            this.customerForm.patchValue(addr);
+            // Only patch address-related fields to preserve existing personal information
+            this.customerForm.patchValue({
+              address: addr.address,
+              city: addr.city,
+              state: addr.state,
+              postalCode: addr.postalCode
+            });
             this.customerForm.updateValueAndValidity();
           });
         },
@@ -355,6 +422,25 @@ export class ShoppingCartComponent implements OnInit{
     this.showCustomerForm = false;
     this.customerForm.reset();
     this.selectedDate = undefined;
+  }
+
+  // Helper function to clear saved address data from cookies
+  clearSavedAddress() {
+    this.cookieService.delete('customerAddress', '/');
+    this.cookieService.delete('customerCity', '/');
+    this.cookieService.delete('customerState', '/');
+    this.cookieService.delete('customerPostalCode', '/');
+    console.log('Saved address data cleared from cookies');
+    this.dataService.openSnackBar(this, 3000, 'Saved address cleared. You can now enter a new address.', 'OK');
+    
+    // Clear the address fields in the form
+    this.customerForm.patchValue({
+      address: '',
+      city: '',
+      state: '',
+      postalCode: ''
+    });
+    this.customerForm.updateValueAndValidity();
   }
 
 

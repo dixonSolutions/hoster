@@ -1,6 +1,90 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
 
+/* Clean modern shopping cart style overrides */
+.p-datatable .p-datatable-thead > tr > th {
+  background: #f8f9fa !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  padding: 1rem !important;
+  border-bottom: 2px solid #dee2e6 !important;
+  font-size: 0.875rem !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  letter-spacing: 0.5px !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 1rem !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  color: #495057 !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: #f8f9fa !important;
+}
+
+.p-panel .p-panel-header {
+  background: #f8f9fa !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  font-size: 1.1rem !important;
+}
+
+.p-panel .p-panel-content {
+  background: #ffffff !important;
+  color: #495057 !important;
+  padding: 1rem !important;
+}
+
+.p-panel .p-panel-content-wrapper {
+  background: #ffffff !important;
+}
+
+.p-card .p-card-header {
+  background: #f8f9fa !important;
+  color: #495057 !important;
+  padding: 1.5rem !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  text-align: center !important;
+}
+
+.p-card .p-card-content {
+  background: #ffffff !important;
+  color: #495057 !important;
+}
+
+/* Fix any remaining dark/black backgrounds */
+.p-component {
+  background: #ffffff !important;
+}
+
+/* Date picker and form controls */
+.p-inputtext {
+  background: #ffffff !important;
+  color: #495057 !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+/* Override any dark panel content areas */
+[class*="p-panel"] {
+  background: #ffffff !important;
+  color: #495057 !important;
+}
+
+/* Ensure all PrimeNG components have light background */
+[class*="p-"]:not(.p-button):not(.p-chip) {
+  background-color: #ffffff !important;
+  color: #495057 !important;
+}
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
    
@@ -63,4 +147,251 @@ body {
 .mat-toolbar {
   background: var(--toolbar-bg, #ffffff) !important;
   color: var(--toolbar-fg, #333333) !important;
+}
+
+/* PrimeNG Dialog Global Overrides - More Aggressive */
+.p-dialog-mask,
+.p-component-overlay,
+.p-overlay,
+.p-overlay-mask,
+.p-dialog-mask.p-component-overlay,
+.p-component-overlay.p-dialog-mask,
+div[data-pc-section="mask"],
+div[class*="p-dialog-mask"],
+div[class*="p-overlay"],
+div[class*="p-component-overlay"] {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+/* Force override any white backgrounds */
+.p-dialog-mask *,
+.p-component-overlay *,
+.p-overlay * {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Prevent body from getting white background */
+body.p-overflow-hidden,
+body[class*="p-overflow"] {
+  background-color: inherit !important;
+  background: inherit !important;
+}
+
+/* Target all possible PrimeNG overlay elements */
+[class*="overlay"]:not(.p-dialog):not(.p-button):not(.p-input),
+[class*="mask"]:not(.p-dialog):not(.p-button):not(.p-input),
+[data-pc-section="mask"],
+[data-pc-name="dialog"] [data-pc-section="mask"] {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ultra aggressive approach - target any div that might be an overlay */
+body > div:not([class*="app"]):not([id]):not([data-testid]) {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Specific PrimeNG version targeting */
+.p-dialog-wrapper,
+.p-dialog-container,
+.p-dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Remove any white from the entire overlay system */
+* + .p-dialog,
+* + [class*="dialog"],
+* + [class*="overlay"],
+* + [class*="mask"] {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.p-dialog {
+  background: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  color: #495057 !important;
+}
+
+.p-dialog .p-dialog-header {
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: #495057 !important;
+}
+
+.p-dialog .p-dialog-title {
+  color: #495057 !important;
+  font-weight: 600 !important;
+  font-size: 1.2rem !important;
+}
+
+.p-dialog .p-dialog-header-icon {
+  color: #6c757d !important;
+  background: transparent !important;
+  border: none !important;
+  margin-left: 0.5rem !important;
+}
+
+.p-dialog .p-dialog-header-icon:hover {
+  color: #495057 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.p-dialog .p-dialog-content {
+  background: #ffffff !important;
+  padding: 1.5rem !important;
+  color: #495057 !important;
+}
+
+.p-dialog .p-dialog-footer {
+  background: #f8f9fa !important;
+  border-top: 1px solid #dee2e6 !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+/* PrimeNG Float Label Global Overrides */
+.p-float-label {
+  margin-bottom: 0.5rem !important;
+}
+
+.p-float-label label {
+  color: #6c757d !important;
+  font-weight: 500 !important;
+  background: #ffffff !important;
+}
+
+.p-float-label input:focus ~ label {
+  color: #007bff !important;
+}
+
+/* PrimeNG Input Global Overrides */
+.p-inputtext {
+  border: 1px solid #dee2e6 !important;
+  background: #ffffff !important;
+  color: #495057 !important;
+  padding: 0.75rem !important;
+  border-radius: 4px !important;
+  font-size: 1rem !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.p-inputtext:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+  outline: 0 !important;
+}
+
+.p-inputtext.ng-invalid.ng-touched {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.p-inputtext[readonly] {
+  background-color: #e9ecef !important;
+  opacity: 1 !important;
+}
+
+/* PrimeNG Button Global Overrides */
+.p-button {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  border: 1px solid transparent !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.p-button.p-button-text {
+  color: #6c757d !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+.p-button.p-button-text:hover {
+  color: #495057 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.p-button.p-button-outlined {
+  background: transparent !important;
+  color: #6c757d !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.p-button.p-button-outlined:hover {
+  background: #f8f9fa !important;
+  border-color: #adb5bd !important;
+}
+
+.p-button.p-button-outlined.p-button-warning {
+  color: #fd7e14 !important;
+  border-color: #fd7e14 !important;
+}
+
+.p-button.p-button-outlined.p-button-warning:hover {
+  background: #fd7e14 !important;
+  color: #ffffff !important;
+}
+
+.p-button.p-button-success {
+  background: #28a745 !important;
+  border-color: #28a745 !important;
+  color: #ffffff !important;
+}
+
+.p-button.p-button-success:hover {
+  background: #218838 !important;
+  border-color: #1e7e34 !important;
+}
+
+.p-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* PrimeNG Panel Global Overrides */
+.p-panel {
+  border: 1px solid #dee2e6 !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+}
+
+.p-panel .p-panel-header {
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  color: #495057 !important;
+  font-weight: 600 !important;
+  padding: 0.75rem !important;
+}
+
+.p-panel .p-panel-content {
+  background: #ffffff !important;
+  padding: 1rem !important;
+  color: #495057 !important;
+}
+
+/* PrimeNG Chip Global Overrides */
+.p-chip {
+  background: #e7f3ff !important;
+  color: #0066cc !important;
+  border: 1px solid #b3d9ff !important;
+  border-radius: 4px !important;
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.875rem !important;
+}
+
+.p-chip.price-chip {
+  background: #e8f5e8 !important;
+  color: #28a745 !important;
+  border: 1px solid #c3e6cb !important;
+  font-weight: 600 !important;
 }

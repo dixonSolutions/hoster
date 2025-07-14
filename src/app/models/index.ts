@@ -6,6 +6,7 @@ export * from './BusinessPlaces';
 // Service Management
 export * from './Services';
 export * from './ServicePlaceAssignments';
+export * from './ServiceReview';
 
 // Staff Management
 export * from './StaffMembers';

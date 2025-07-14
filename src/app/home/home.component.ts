@@ -2,18 +2,21 @@ import { Component, inject, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { AboutUsPopupComponent } from '../about-us-popup/about-us-popup.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DataServiceService } from '../data-service.service';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { BusinessRegistrationRequest } from '../models/BusinessRegistration';
+import { BusinessRegistrationRequest, ServiceRegistration } from '../models/BusinessRegistration';
 import { ServicesForBusiness } from '../models/ServicesForBusiness';
 import { switchMap } from 'rxjs/operators';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
+import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
+import { ReviewsComponent } from '../reviews/reviews.component';
 
 @Component({
   selector: 'app-home',
@@ -22,8 +25,11 @@ import { PanelModule } from 'primeng/panel';
     CardModule,
     ButtonModule,
     PanelModule,
+    ToastModule,
     HttpClientModule,
-    CommonModule
+    CommonModule,
+    DialogModule,
+    ReviewsComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
@@ -31,11 +37,15 @@ import { PanelModule } from 'primeng/panel';
 export class HomeComponent implements OnInit {
   public dataService = inject(DataServiceService);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
+  private messageService = inject(MessageService);
 
   businessDetails?: BusinessRegistrationRequest;
   loading = false;
   error?: string;
+  
+  // Reviews dialog properties
+  showReviewsDialog = false;
+  selectedServiceForReviews: ServiceRegistration | null = null;
 
   ngOnInit() {
     this.loading = true;
@@ -56,6 +66,16 @@ export class HomeComponent implements OnInit {
         // Get the first business (or you can show all businesses)
         if (businesses && businesses.length > 0) {
           this.businessDetails = businesses[0];
+          
+          // Ensure businessID is set on all services for reviews
+          if (this.businessDetails.services && this.businessDetails.basicInfo?.businessID) {
+            this.businessDetails.services.forEach(service => {
+              if (!service.businessID) {
+                service.businessID = this.businessDetails!.basicInfo!.businessID;
+              }
+            });
+          }
+          
           console.log('Business details loaded:', this.businessDetails);
         } else {
           this.error = 'No businesses found for this user';
@@ -76,6 +96,28 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  openReviewsDialog(service: ServiceRegistration) {
+    // Ensure we have the business ID before opening the dialog
+    if (!this.businessDetails?.basicInfo?.businessID) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Business information not available. Please try again.',
+        life: 5000
+      });
+      return;
+    }
+    
+    console.log('Opening reviews dialog:');
+    console.log('Business ID from businessDetails:', this.businessDetails.basicInfo.businessID);
+    console.log('Service:', service);
+    
+    this.selectedServiceForReviews = service;
+    this.showReviewsDialog = true;
+  }
+
+
+
   addToCart(service: any) {
     // Convert business service format to ServicesForBusiness format
     const serviceForBusiness: ServicesForBusiness = {
@@ -93,10 +135,11 @@ export class HomeComponent implements OnInit {
     console.log('Service added to cart:', serviceForBusiness);
     
     // Show success message
-    this.snackBar.open(`${service.serviceName} added to cart!`, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom'
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: `${service.serviceName} added to cart!`,
+      life: 3000
     });
   }
 }

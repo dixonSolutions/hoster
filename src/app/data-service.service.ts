@@ -6,13 +6,7 @@ import { catchError, retry } from 'rxjs/operators';
 import { BussinessBasicInfo } from './models/BussinessBasicInfo';
 import { ServicesForBusiness } from './models/ServicesForBusiness';
 import { User } from './models/user';
-import {
-  MatSnackBar,
-  MatSnackBarAction,
-  MatSnackBarActions,
-  MatSnackBarLabel,
-  MatSnackBarRef,
-} from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 
 // New imports for business operations
 import { 
@@ -74,7 +68,7 @@ interface GoogleClientRegistrationRequest {
   providedIn: 'root'
 })
 export class DataServiceService {
-  private _snackBar = inject(MatSnackBar);
+  private messageService = inject(MessageService);
   User: Account | undefined;
   JWTtoken: string | undefined;
   itemsInCart: number = 0;
@@ -186,10 +180,28 @@ export class DataServiceService {
     return result;
   }
 
-  openSnackBar(component: any, duration: number, firstButton: string, secondButton: string) {
-    this._snackBar.open(firstButton, secondButton, {
-      duration: duration,
+  showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: string, detail: string, duration: number = 5000) {
+    this.messageService.add({
+      severity: severity,
+      summary: summary,
+      detail: detail,
+      life: duration,
     });
+  }
+
+  // Legacy method for backward compatibility
+  openSnackBar(component: any, duration: number, message: string, action: string) {
+    // Determine severity based on message content
+    let severity: 'success' | 'info' | 'warn' | 'error' = 'info';
+    if (message.toLowerCase().includes('error') || message.toLowerCase().includes('failed')) {
+      severity = 'error';
+    } else if (message.toLowerCase().includes('success') || message.toLowerCase().includes('added to cart')) {
+      severity = 'success';
+    } else if (message.toLowerCase().includes('warning') || message.toLowerCase().includes('empty')) {
+      severity = 'warn';
+    }
+    
+    this.showToast(severity, action, message, duration);
   }
 
   // ==================== BUSINESS REGISTRATION OPERATIONS ====================

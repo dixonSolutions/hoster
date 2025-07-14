@@ -1,0 +1,113 @@
+<!-- Trigger Button -->
+<p-button 
+  *ngIf="showAsButton"
+  [label]="buttonLabel"
+  [icon]="buttonIcon"
+  [styleClass]="buttonClass"
+  (onClick)="openDialog()">
+</p-button>
+
+<!-- Review Form Dialog -->
+<p-dialog 
+  [(visible)]="showDialog"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="dialogTitle"
+  styleClass="review-form-dialog"
+  [style]="{width: '500px'}"
+  (onHide)="closeDialog()">
+
+  <div class="review-form-container">
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="loading-overlay">
+      <p-progressSpinner></p-progressSpinner>
+      <p>{{ isEditMode ? 'Updating review...' : 'Submitting review...' }}</p>
+    </div>
+
+    <!-- Error Messages are now shown as toast messages -->
+
+    <!-- Review Form -->
+    <form #reviewFormRef="ngForm" (ngSubmit)="submitReview()" class="review-form">
+      <!-- Name Input -->
+      <div class="form-field">
+        <p-floatlabel>
+          <input 
+            pInputText 
+            id="reviewerName" 
+            [(ngModel)]="reviewForm.name" 
+            name="name"
+            #nameInput="ngModel"
+            placeholder="Enter your name"
+            [maxlength]="100"
+            required
+            styleClass="form-input">
+          <label for="reviewerName">Your Name *</label>
+        </p-floatlabel>
+        <small class="character-count">{{ getCharacterCount(reviewForm.name) }}/100</small>
+      </div>
+
+      <!-- Star Rating -->
+      <div class="form-field">
+        <label class="rating-label">Your Rating *</label>
+        <div class="rating-container">
+          <p-rating 
+            [(ngModel)]="reviewForm.stars" 
+            name="stars"
+            [stars]="5"
+            styleClass="form-rating">
+          </p-rating>
+          <span class="rating-text">{{ getRatingLabel(reviewForm.stars) }}</span>
+        </div>
+      </div>
+
+      <!-- Description Textarea -->
+      <div class="form-field">
+        <p-floatlabel>
+          <input  
+            pInputText 
+            id="reviewDescription" 
+            [(ngModel)]="reviewForm.description" 
+            name="description"
+            rows="4" 
+            [maxlength]="1000"
+            placeholder="Share your experience... (optional)"
+            styleClass="form-textarea">
+    
+          <label for="reviewDescription">Your Review (Optional)</label>
+        </p-floatlabel>
+        <small class="character-count">{{ getCharacterCount(reviewForm.description) }}/1000</small>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <p-button 
+          label="Cancel" 
+          icon="pi pi-times" 
+          type="button"
+          (onClick)="closeDialog()" 
+          styleClass="p-button-text cancel-button">
+        </p-button>
+        
+        <p-button 
+          *ngIf="isEditMode"
+          label="Delete" 
+          icon="pi pi-trash" 
+          type="button"
+          (onClick)="deleteReview()" 
+          styleClass="p-button-danger delete-button"
+          [disabled]="loading">
+        </p-button>
+        
+        <p-button 
+          [label]="submitButtonLabel" 
+          [icon]="submitButtonIcon" 
+          type="submit"
+          [disabled]="loading || !reviewFormRef.form.valid || reviewForm.stars === 0"
+          styleClass="p-button-primary submit-button">
+        </p-button>
+      </div>
+    </form>
+  </div>
+</p-dialog> 

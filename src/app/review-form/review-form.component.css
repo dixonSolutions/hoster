@@ -1,0 +1,480 @@
+/* Review Form Dialog */
+:host ::ng-deep .review-form-dialog {
+  border-radius: 24px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-radius: 24px 24px 0 0 !important;
+  padding: 2rem 2.5rem !important;
+  border-bottom: none !important;
+  position: relative !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-header::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 60px !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 2px !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-title {
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  color: white !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-header-icon {
+  color: white !important;
+  font-size: 1.4rem !important;
+  transition: all 0.3s ease !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-header-icon:hover {
+  transform: scale(1.1) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 50% !important;
+}
+
+:host ::ng-deep .review-form-dialog .p-dialog-content {
+  padding: 0 !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  border-radius: 0 0 24px 24px !important;
+}
+
+/* Form Container */
+.review-form-container {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0 0 24px 24px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  gap: 1rem;
+}
+
+.loading-overlay p {
+  color: #495057;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Error Messages */
+.error-messages {
+  padding: 1rem 2rem 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .form-error-message {
+  margin-bottom: 0.5rem !important;
+  border-radius: 8px !important;
+}
+
+/* Review Form */
+.review-form {
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: white;
+  margin: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Fields */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+/* Input Styling */
+:host ::ng-deep .form-input {
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  border: 2px solid #e1e5e9 !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+  background: #fafbfc !important;
+  font-weight: 500 !important;
+  color: #2d3748 !important;
+}
+
+:host ::ng-deep .form-input:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+  outline: none !important;
+  background: white !important;
+  transform: translateY(-1px) !important;
+}
+
+:host ::ng-deep .form-input:hover {
+  border-color: #667eea !important;
+  background: white !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Float Label Styling */
+:host ::ng-deep .p-float-label {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+:host ::ng-deep .p-float-label label {
+  color: #667eea !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+  background: rgba(102, 126, 234, 0.1) !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 6px !important;
+}
+
+:host ::ng-deep .p-float-label input:focus ~ label,
+:host ::ng-deep .p-float-label input.p-filled ~ label,
+:host ::ng-deep .p-float-label textarea:focus ~ label,
+:host ::ng-deep .p-float-label textarea.p-filled ~ label {
+  color: #667eea !important;
+  font-weight: 700 !important;
+  background: rgba(102, 126, 234, 0.2) !important;
+  transform: scale(0.95) !important;
+}
+
+/* Character Count */
+.character-count {
+  font-size: 0.8rem;
+  color: #667eea;
+  text-align: right;
+  margin-top: 0.25rem;
+  font-weight: 500;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  display: inline-block;
+  min-width: 50px;
+}
+
+/* Rating Section */
+.rating-label {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-label::before {
+  content: "⭐";
+  font-size: 1.2rem;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 16px;
+  border: 2px solid #e1e5e9;
+  transition: all 0.3s ease;
+}
+
+.rating-container:hover {
+  border-color: #667eea;
+  background: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+}
+
+:host ::ng-deep .form-rating .p-rating-item {
+  font-size: 2rem !important;
+  color: #e1e5e9 !important;
+  margin: 0 0.3rem !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+}
+
+:host ::ng-deep .form-rating .p-rating-item:hover {
+  transform: scale(1.15) !important;
+  color: #ffd700 !important;
+}
+
+:host ::ng-deep .form-rating .p-rating-item.p-rating-item-active {
+  color: #ffc107 !important;
+  transform: scale(1.1) !important;
+}
+
+:host ::ng-deep .form-rating .p-rating-item.p-rating-item-active:hover {
+  color: #ffb300 !important;
+  transform: scale(1.2) !important;
+}
+
+.rating-text {
+  font-size: 1rem;
+  color: #667eea;
+  font-weight: 600;
+  min-width: 100px;
+  padding: 0.5rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Textarea Styling */
+:host ::ng-deep .form-textarea {
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  border: 2px solid #e1e5e9 !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  font-family: inherit !important;
+  resize: vertical !important;
+  min-height: 120px !important;
+  transition: all 0.3s ease !important;
+  background: #fafbfc !important;
+  font-weight: 500 !important;
+  color: #2d3748 !important;
+  line-height: 1.5 !important;
+}
+
+:host ::ng-deep .form-textarea:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+  outline: none !important;
+  background: white !important;
+  transform: translateY(-1px) !important;
+}
+
+:host ::ng-deep .form-textarea:hover {
+  border-color: #667eea !important;
+  background: white !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f3f4;
+  margin-top: 1.5rem;
+}
+
+/* Button Styling */
+:host ::ng-deep .cancel-button {
+  color: #6c757d !important;
+  font-weight: 600 !important;
+  padding: 0.875rem 1.75rem !important;
+  border-radius: 12px !important;
+  border: 2px solid #e1e5e9 !important;
+  transition: all 0.3s ease !important;
+}
+
+:host ::ng-deep .cancel-button:hover {
+  background: #f8f9fa !important;
+  color: #495057 !important;
+  border-color: #ced4da !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+:host ::ng-deep .delete-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 0.875rem 1.75rem !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+}
+
+:host ::ng-deep .delete-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4) !important;
+}
+
+:host ::ng-deep .submit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 700 !important;
+  padding: 0.875rem 2.5rem !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+:host ::ng-deep .submit-button::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+  transition: left 0.5s ease !important;
+}
+
+:host ::ng-deep .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+}
+
+:host ::ng-deep .submit-button:hover:not(:disabled)::before {
+  left: 100% !important;
+}
+
+:host ::ng-deep .submit-button:disabled {
+  background: #9ca3af !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  :host ::ng-deep .review-form-dialog {
+    width: 95% !important;
+    max-width: 500px !important;
+    margin: 1rem !important;
+  }
+  
+  :host ::ng-deep .review-form-dialog .p-dialog-header {
+    padding: 1rem 1.5rem !important;
+  }
+  
+  :host ::ng-deep .review-form-dialog .p-dialog-title {
+    font-size: 1.2rem !important;
+  }
+  
+  .review-form {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  :host ::ng-deep .form-actions .p-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  .rating-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .rating-text {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :host ::ng-deep .review-form-dialog {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  :host ::ng-deep .review-form-dialog .p-dialog-header {
+    border-radius: 0 !important;
+    padding: 1rem !important;
+  }
+  
+  :host ::ng-deep .review-form-dialog .p-dialog-content {
+    border-radius: 0 !important;
+  }
+  
+  .review-form {
+    padding: 1rem;
+  }
+  
+  :host ::ng-deep .form-rating .p-rating-item {
+    font-size: 1.3rem !important;
+    margin: 0 0.15rem !important;
+  }
+}
+
+/* Focus states for accessibility */
+:host ::ng-deep .p-button:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25) !important;
+}
+
+:host ::ng-deep .form-rating .p-rating-item:focus {
+  outline: 2px solid #007bff !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Animation for smooth transitions */
+:host ::ng-deep .review-form-dialog {
+  animation: slideIn 0.3s ease-out !important;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Progress spinner styling */
+:host ::ng-deep .loading-overlay .p-progress-spinner {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+:host ::ng-deep .loading-overlay .p-progress-spinner-circle {
+  stroke: #007bff !important;
+  animation: p-progress-spinner-rotate 2s linear infinite !important;
+} 

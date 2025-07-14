@@ -1,3 +1,6 @@
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
 <div *ngIf="loading">Loading business details...</div>
 <div *ngIf="error" class="error">{{ error }}</div>
 
@@ -22,7 +25,7 @@
       </ng-template>
       <ng-template pTemplate="footer">
         <div class="service-actions">
-          <p-button label="Review" icon="pi pi-eye" styleClass="p-button-text" class="mr-2" />
+          <p-button label="Reviews" icon="pi pi-star" styleClass="p-button-text" class="mr-2" (onClick)="openReviewsDialog(service)" />
           <p-button label="Add to Cart" icon="pi pi-shopping-cart" (onClick)="addToCart(service)" />
           <p-button icon="pi pi-info-circle" styleClass="p-button-text" (onClick)="openDialog()" />
         </div>
@@ -47,4 +50,23 @@
     </div>
   </div>
 </div>
+
+<!-- Reviews Dialog -->
+<p-dialog 
+  [(visible)]="showReviewsDialog" 
+  [modal]="true" 
+  [closable]="true" 
+  [draggable]="false" 
+  [resizable]="false"
+  [header]="selectedServiceForReviews?.serviceName + ' - Reviews'"
+  styleClass="reviews-dialog"
+  [style]="{width: '90vw', maxWidth: '800px', height: '80vh'}">
+  
+  <app-reviews 
+    *ngIf="selectedServiceForReviews && businessDetails?.basicInfo?.businessID"
+    [serviceId]="selectedServiceForReviews.serviceID!"
+    [businessId]="businessDetails!.basicInfo!.businessID!"
+    [showAddReview]="true">
+  </app-reviews>
+</p-dialog>
 

@@ -1,0 +1,157 @@
+<div class="reviews-container">
+  <!-- Review Summary Section -->
+  <div class="review-summary" *ngIf="reviewSummary">
+    <div class="summary-header">
+      <div class="overall-rating">
+        <div class="rating-value">
+          <span class="rating-number">{{ reviewSummary.averageStars.toFixed(1) }}</span>
+          <div class="rating-stars">
+            <p-rating 
+              [ngModel]="reviewSummary.averageStars" 
+              [readonly]="true" 
+              [stars]="5"
+              styleClass="custom-rating">
+            </p-rating>
+          </div>
+        </div>
+        <p class="total-reviews">{{ reviewSummary.totalReviews }} review{{ reviewSummary.totalReviews !== 1 ? 's' : '' }}</p>
+      </div>
+      
+      <!-- Star Distribution -->
+      <div class="star-distribution" *ngIf="!compact">
+        <div class="star-row" *ngFor="let star of [5, 4, 3, 2, 1]">
+          <span class="star-label">{{ star }}</span>
+          <i class="pi pi-star-fill star-icon"></i>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getStarPercentage(star)"></div>
+          </div>
+          <span class="star-count">{{ reviewSummary.starDistribution[star] || 0 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Review Button -->
+  <div class="add-review-section" *ngIf="showAddReview && !compact">
+    <app-review-form 
+      [serviceId]="serviceId" 
+      [businessId]="businessId"
+      (reviewAdded)="onReviewAdded($event)"
+      (reviewUpdated)="onReviewUpdated($event)">
+    </app-review-form>
+  </div>
+
+  <!-- Reviews List -->
+  <div class="reviews-list">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="skeleton-review" *ngFor="let i of [1,2,3]">
+        <div class="skeleton-header">
+          <p-skeleton shape="circle" size="3rem"></p-skeleton>
+          <div class="skeleton-info">
+            <p-skeleton width="8rem" height="1.2rem"></p-skeleton>
+            <p-skeleton width="10rem" height="1rem"></p-skeleton>
+          </div>
+        </div>
+        <p-skeleton width="100%" height="4rem"></p-skeleton>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <p-message 
+      *ngIf="error" 
+      severity="error" 
+      [text]="error"
+      styleClass="error-message">
+    </p-message>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && !error && reviews.length === 0" class="empty-state">
+      <i class="pi pi-star empty-icon"></i>
+      <h3>No reviews yet</h3>
+      <p>Be the first to share your experience with this service!</p>
+    </div>
+
+    <!-- Reviews -->
+    <div *ngIf="!loading && !error && reviews.length > 0" class="reviews-grid">
+      <p-card 
+        *ngFor="let review of displayedReviews" 
+        class="review-card"
+        styleClass="review-card-style">
+        
+        <ng-template pTemplate="header">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <p-avatar 
+                [label]="getInitials(review.name)"
+                shape="circle"
+                size="large"
+                styleClass="reviewer-avatar">
+              </p-avatar>
+              <div class="reviewer-details">
+                <h4 class="reviewer-name">{{ review.name }}</h4>
+                <div class="review-meta">
+                  <p-rating 
+                    [ngModel]="review.stars" 
+                    [readonly]="true" 
+                    [stars]="5"
+                    styleClass="review-rating">
+                  </p-rating>
+                  <span class="review-date">{{ formatDate(review.createdAt) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="content">
+          <div class="review-content">
+            <p *ngIf="review.description" class="review-text">{{ review.description }}</p>
+            <p *ngIf="!review.description" class="review-text no-description">
+              <em>{{ review.name }} rated this service {{ review.stars }} star{{ review.stars !== 1 ? 's' : '' }}</em>
+            </p>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+          <div class="review-footer">
+            <p-badge 
+              *ngIf="review.stars === 5" 
+              value="Excellent" 
+              severity="success"
+              styleClass="rating-badge">
+            </p-badge>
+            <p-badge 
+              *ngIf="review.stars === 4" 
+              value="Good" 
+              severity="info"
+              styleClass="rating-badge">
+            </p-badge>
+            <p-badge 
+              *ngIf="review.stars === 3" 
+              value="Average" 
+              severity="warn"
+              styleClass="rating-badge">
+            </p-badge>
+            <p-badge 
+              *ngIf="review.stars < 3" 
+              value="Poor" 
+              severity="danger"
+              styleClass="rating-badge">
+            </p-badge>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- Show More/Less Button -->
+    <div *ngIf="hasMoreReviews" class="show-more-section">
+      <p-button 
+        [label]="showAllReviews ? 'Show Less' : 'Show More Reviews'"
+        [icon]="showAllReviews ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+        styleClass="p-button-text show-more-btn"
+        (click)="toggleShowAll()">
+      </p-button>
+    </div>
+  </div>
+</div> 

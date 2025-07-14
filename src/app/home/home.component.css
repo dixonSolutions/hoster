@@ -25,6 +25,39 @@ body, html {
   transform: translateY(-2px) scale(1.01);
 }
 
+/* Reviews Dialog Styling */
+::ng-deep .reviews-dialog {
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
+}
+
+::ng-deep .reviews-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: white !important;
+  border-radius: 16px 16px 0 0 !important;
+  padding: 1.5rem 2rem !important;
+  border-bottom: none !important;
+}
+
+::ng-deep .reviews-dialog .p-dialog-title {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: white !important;
+}
+
+::ng-deep .reviews-dialog .p-dialog-header-icon {
+  color: white !important;
+}
+
+::ng-deep .reviews-dialog .p-dialog-content {
+  padding: 0 !important;
+  background: white !important;
+  border-radius: 0 0 16px 16px !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+}
+
 .service-title {
   font-size: 1.25rem;
   font-weight: 700;
