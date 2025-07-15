@@ -91,6 +91,11 @@ export class ShoppingCartComponent implements OnInit{
   isLoadingBusinessData = false;
   currentWebsiteName: string | null = null;
   
+  // Available days properties
+  availableDays: Date[] = [];
+  isLoadingAvailableDays = false;
+  disabledDates: Date[] = [];
+  
   // Reviews dialog properties
   showReviewsDialog = false;
   selectedServiceForReviews: ServiceDto | null = null;
@@ -127,6 +132,10 @@ export class ShoppingCartComponent implements OnInit{
     if (cachedBusinessData) {
       this.businessServices = cachedBusinessData.services;
       this.businessInfo = cachedBusinessData.basicInfo;
+      // Load available days if we have business ID
+      if (this.businessInfo?.businessID) {
+        this.loadAvailableDays(this.businessInfo.businessID);
+      }
       return;
     }
     
@@ -138,6 +147,11 @@ export class ShoppingCartComponent implements OnInit{
         this.businessInfo = data.basicInfo;
         this.isLoadingBusinessData = false;
         console.log('Business data loaded:', data);
+        
+        // Load available days after business data is loaded
+        if (this.businessInfo?.businessID) {
+          this.loadAvailableDays(this.businessInfo.businessID);
+        }
       },
       error: (error) => {
         console.error('Error loading business data:', error);
@@ -146,6 +160,86 @@ export class ShoppingCartComponent implements OnInit{
       }
     });
   }
+
+  /**
+   * Load available days for the business
+   */
+  loadAvailableDays(businessId: string): void {
+    this.isLoadingAvailableDays = true;
+    
+    this.websiteHosterService.getNextAvailableDays(businessId).subscribe({
+      next: (availableDays) => {
+        this.availableDays = availableDays;
+        this.updateDisabledDates();
+        this.isLoadingAvailableDays = false;
+        console.log(`Found ${availableDays.length} available days:`, availableDays);
+        
+        // If a selected date is no longer available, clear it
+        if (this.selectedDate && !this.isDateAvailable(this.selectedDate)) {
+          this.selectedDate = undefined;
+          this.dataService.openSnackBar(this, 5000, 'Your previously selected date is no longer available. Please select a new date.', 'OK');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading available days:', error);
+        this.isLoadingAvailableDays = false;
+        this.dataService.openSnackBar(this, 5000, 'Unable to load available dates. Please try again later.', 'OK');
+        
+        // Fallback: enable dates from tomorrow for 30 days
+        this.setFallbackDates();
+      }
+    });
+  }
+
+  /**
+   * Set fallback dates if available days API fails
+   */
+  private setFallbackDates(): void {
+    const dates: Date[] = [];
+    const today = new Date();
+    
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(date);
+    }
+    
+    this.availableDays = dates;
+    this.updateDisabledDates();
+    console.log('Using fallback dates for next 30 days');
+  }
+
+  /**
+   * Update disabled dates array - disable all dates except available ones
+   */
+  private updateDisabledDates(): void {
+    const disabled: Date[] = [];
+    const today = new Date();
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(today.getFullYear() + 1);
+    
+    // Generate all dates from today to one year from now
+    const currentDate = new Date(today);
+    while (currentDate <= oneYearFromNow) {
+      // If this date is not in available days, add it to disabled
+      if (!this.isDateAvailable(currentDate)) {
+        disabled.push(new Date(currentDate));
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    this.disabledDates = disabled;
+  }
+
+  /**
+   * Check if a date is in the available days list
+   */
+  isDateAvailable(date: Date): boolean {
+    const dateStr = date.toDateString();
+    return this.availableDays.some(availableDate => availableDate.toDateString() === dateStr);
+  }
+
+
 
   /**
    * Get current website name from URL

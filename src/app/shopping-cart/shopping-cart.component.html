@@ -154,17 +154,34 @@
       <span>Total Price:</span>
             <p-chip [label]="(totalPrice | currency) || ''" styleClass="summary-chip price-chip"></p-chip>
           </div>
-                      <div class="date-selection">
-              <p>Select a date for your service(s)</p>
-              <p-calendar 
-                [(ngModel)]="selectedDate" 
-                [minDate]="minDate" 
-                dateFormat="mm/dd/yy" 
-                placeholder="Choose a date"
-                styleClass="date-picker"
-                [showIcon]="true"
-                [readonlyInput]="true">
-              </p-calendar>
+                                            <div class="date-selection">
+               <div class="date-selection-header">
+                 <h4>Select a Service Date</h4>
+                 <p *ngIf="isLoadingAvailableDays" class="loading-text">
+                   <i class="pi pi-spin pi-spinner"></i> Loading available dates...
+                 </p>
+                 <p *ngIf="!isLoadingAvailableDays && availableDays.length > 0" class="available-dates-info">
+                   {{availableDays.length}} dates available for booking
+                 </p>
+                 <p *ngIf="!isLoadingAvailableDays && availableDays.length === 0" class="no-dates-info">
+                   No available dates found. Please contact the business.
+                 </p>
+               </div>
+               
+               <!-- Simple Calendar with Disabled Dates -->
+               <div class="calendar-container">
+                 <p-calendar 
+                   [(ngModel)]="selectedDate" 
+                   [minDate]="minDate" 
+                   [disabledDates]="disabledDates"
+                   dateFormat="mm/dd/yy" 
+                   placeholder="Choose an available date"
+                   styleClass="simple-date-picker"
+                   [showIcon]="true"
+                   [readonlyInput]="true"
+                   [disabled]="isLoadingAvailableDays || availableDays.length === 0">
+                 </p-calendar>
+               </div>
     </div>
           <p-button 
             label="Checkout" 

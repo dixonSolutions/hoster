@@ -710,3 +710,100 @@ body > div:last-child:not([class*="app"]):not([id]):not([class*="ng"]) {
 }
 
 /* ========== END DIALOG STYLING ========== */
+
+/* ========== AVAILABLE DAYS STYLING ========== */
+
+/* Date Selection Container */
+.date-selection {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.date-selection-header h4 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.loading-text {
+  color: #6c757d;
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.available-dates-info {
+  color: #28a745;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+.no-dates-info {
+  color: #dc3545;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+/* Simple Calendar Container */
+.calendar-container {
+  margin: 1rem 0;
+}
+
+:host ::ng-deep .simple-date-picker .p-calendar {
+  width: 100% !important;
+}
+
+:host ::ng-deep .simple-date-picker .p-inputtext {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 8px !important;
+  border: 2px solid #dee2e6 !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+:host ::ng-deep .simple-date-picker .p-inputtext:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+
+:host ::ng-deep .simple-date-picker .p-datepicker {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 12px !important;
+}
+
+/* Disabled dates styling */
+:host ::ng-deep .simple-date-picker .p-datepicker-calendar td.p-datepicker-other-month,
+:host ::ng-deep .simple-date-picker .p-datepicker-calendar td.p-disabled {
+  opacity: 0.3 !important;
+}
+
+:host ::ng-deep .simple-date-picker .p-datepicker-calendar td.p-disabled span {
+  background: #f8f9fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+}
+
+/* Available dates styling */
+:host ::ng-deep .simple-date-picker .p-datepicker-calendar td:not(.p-disabled) span:hover {
+  background: #007bff !important;
+  color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .date-selection {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .date-selection-header h4 {
+    font-size: 1rem;
+  }
+}
+
+/* ========== END AVAILABLE DAYS STYLING ========== */

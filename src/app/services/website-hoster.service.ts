@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, map } from 'rxjs/operators';
 import { 
   BusinessRegistrationDto, 
   WebsiteHostingDto, 
@@ -19,6 +19,10 @@ export class WebsiteHosterService {
   // Cache for business registration data
   private businessRegistrationCache: Map<string, BusinessRegistrationDto> = new Map();
   private websiteHostingCache: Map<string, WebsiteHostingDto> = new Map();
+  
+  // Cache for available days with timestamp for cache expiration
+  private availableDaysCache: Map<string, { data: Date[], timestamp: number }> = new Map();
+  private readonly CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
   
   // Current business data (for easy access across components)
   private currentBusinessRegistration: BusinessRegistrationDto | null = null;
@@ -80,6 +84,78 @@ export class WebsiteHosterService {
   }
 
   /**
+   * Get next available days for a business based on their schedule and order-ahead settings
+   * @param businessId - The business ID
+   * @returns Observable array of available dates
+   */
+  getNextAvailableDays(businessId: string): Observable<Date[]> {
+    // Check cache first and validate it's not expired
+    const cached = this.availableDaysCache.get(businessId);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+      return new Observable(observer => {
+        observer.next(cached.data);
+        observer.complete();
+      });
+    }
+
+    return this.http.get<string[]>(`${this.baseUrl}/business/${encodeURIComponent(businessId)}/available-days`)
+      .pipe(
+        map(dates => dates.map(dateStr => new Date(dateStr))),
+        catchError(this.handleError),
+        // Cache the result with timestamp
+        tap(data => {
+          this.availableDaysCache.set(businessId, {
+            data: data,
+            timestamp: now
+          });
+        })
+      );
+  }
+
+  /**
+   * Clear available days cache for specific business
+   * @param businessId - The business ID to clear from cache
+   */
+  clearAvailableDaysCache(businessId: string): void {
+    this.availableDaysCache.delete(businessId);
+  }
+
+  /**
+   * Clear all available days cache
+   */
+  clearAllAvailableDaysCache(): void {
+    this.availableDaysCache.clear();
+  }
+
+  /**
+   * Check if available days are cached for a business
+   * @param businessId - The business ID
+   * @returns boolean
+   */
+  hasAvailableDaysCache(businessId: string): boolean {
+    const cached = this.availableDaysCache.get(businessId);
+    const now = Date.now();
+    return cached ? (now - cached.timestamp) < this.CACHE_DURATION : false;
+  }
+
+  /**
+   * Get cached available days (if valid)
+   * @param businessId - The business ID
+   * @returns Date[] | null
+   */
+  getCachedAvailableDays(businessId: string): Date[] | null {
+    const cached = this.availableDaysCache.get(businessId);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+      return cached.data;
+    }
+    return null;
+  }
+
+  /**
    * Get current business registration data (from cache)
    * @returns BusinessRegistrationDto | null
    */
@@ -135,6 +211,7 @@ export class WebsiteHosterService {
   clearAllCaches(): void {
     this.businessRegistrationCache.clear();
     this.websiteHostingCache.clear();
+    this.availableDaysCache.clear();
     this.currentBusinessRegistration = null;
     this.currentWebsiteHosting = null;
     this.currentWebsiteName = null;
@@ -213,6 +290,8 @@ export class WebsiteHosterService {
 Usage example in a component:
 
 export class MyComponent {
+  availableDays: Date[] = [];
+
   constructor(private websiteHosterService: WebsiteHosterService) {}
 
   loadBusinessData(websiteName: string) {
@@ -243,5 +322,53 @@ export class MyComponent {
         }
       });
   }
+
+  loadAvailableDays(businessId: string) {
+    this.websiteHosterService.getNextAvailableDays(businessId)
+      .subscribe({
+        next: (availableDays) => {
+          this.availableDays = availableDays;
+          console.log(`Found ${availableDays.length} available days`);
+          console.log('Available days:', availableDays.map(d => d.toDateString()));
+        },
+        error: (error) => {
+          console.error('Error loading available days:', error.message);
+          // Handle error - show user-friendly message
+        }
+      });
+  }
+
+  // Helper method to check if a date is weekend
+  isWeekend(date: Date): boolean {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Sunday or Saturday
+  }
+
+  // Helper method to select a day
+  selectDay(selectedDate: Date): void {
+    console.log('Selected date:', selectedDate.toDateString());
+    // Implement your day selection logic here
+  }
 }
+
+// Template usage example:
+// <div class="available-days">
+//   <h3>Available Days</h3>
+//   <div class="calendar-grid">
+//     <div *ngFor="let day of availableDays" 
+//          class="available-day"
+//          [class.weekend]="isWeekend(day)"
+//          (click)="selectDay(day)">
+//       {{ day | date:'MMM d, EEE' }}
+//     </div>
+//   </div>
+// </div>
+
+// PrimeNG Calendar integration example:
+// <p-calendar 
+//   [(ngModel)]="selectedDate"
+//   [enabledDates]="availableDays"
+//   [inline]="true"
+//   [showWeek]="true">
+// </p-calendar>
 */ 
