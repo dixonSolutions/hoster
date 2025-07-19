@@ -200,130 +200,133 @@
   </p-card>
 </div>
 
-<!-- Customer Details Dialog -->
+<!-- Simplified Order Dialog -->
 <p-dialog 
-  [header]="currentAuthStep.title" 
+  header="Complete Your Order" 
   [(visible)]="showCustomerForm" 
   [modal]="true" 
-  [style]="{ width: '60rem' }" 
+  [style]="{ width: '50rem' }" 
   [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
   [draggable]="false"
   [resizable]="false"
-  [closable]="!isRequestingMagicLink">
+  [closable]="true"
+  styleClass="modern-order-dialog">
   
   <ng-template pTemplate="header">
-    <div class="dialog-header">
-      <i class="pi pi-key" *ngIf="currentAuthStep.step === 'auth'"></i>
-      <i class="pi pi-user" *ngIf="currentAuthStep.step === 'details'"></i>
-      <i class="pi pi-check" *ngIf="currentAuthStep.step === 'confirmation'"></i>
-      <span>{{ currentAuthStep.title }}</span>
+    <div class="modern-dialog-header">
+      <i class="pi pi-shopping-cart"></i>
+      <span>Complete Your Order</span>
     </div>
   </ng-template>
   
-  <!-- Authentication Step -->
-  <div *ngIf="currentAuthStep.step === 'auth'" class="auth-step">
-    <p class="dialog-subtitle" *ngIf="!isAuthenticated">Please authenticate to continue with your order</p>
-    <p class="dialog-subtitle auth-success" *ngIf="isAuthenticated">
-      ✓ Authenticated as: <strong>{{ authToken?.emailOrPhone }}</strong>
-    </p>
-
-    <form [formGroup]="authForm" *ngIf="!isAuthenticated">
-      <div class="form-grid">
-        <div class="form-row">
-          <label for="authType">Authentication Method *</label>
-          <p-dropdown 
-            id="authType"
-            formControlName="authType"
-            [options]="authTypes"
-            placeholder="Select authentication method"
-            styleClass="w-full">
-          </p-dropdown>
-        </div>
-
-        <div class="form-row">
-          <p-floatlabel>
-            <input 
-              pInputText 
-              id="emailOrPhone" 
-              formControlName="emailOrPhone" 
-              [placeholder]="authForm.get('authType')?.value === 'email' ? 'Enter your email address' : 'Enter your phone number'"
-              [class.ng-invalid]="authForm.get('emailOrPhone')?.invalid && authForm.get('emailOrPhone')?.touched"
-              styleClass="w-full">
-            <label for="emailOrPhone">
-              {{ authForm.get('authType')?.value === 'email' ? 'Email Address' : 'Phone Number' }} *
-            </label>
-          </p-floatlabel>
-          <small *ngIf="authForm.get('emailOrPhone')?.hasError('required') && authForm.get('emailOrPhone')?.touched" 
-                 class="p-error">
-            {{ authForm.get('authType')?.value === 'email' ? 'Email' : 'Phone number' }} is required
-          </small>
-        </div>
-      </div>
-    </form>
-
-    <div *ngIf="isAuthenticated" class="auth-success-message">
-      <p-message severity="success" text="You are now authenticated and can proceed with your order."></p-message>
-    </div>
-  </div>
-
-  <!-- Details Step -->
-  <div *ngIf="currentAuthStep.step === 'details'" class="details-step">
-    <p class="dialog-subtitle">Please provide your details to complete the order</p>
-  
-    <!-- Location Selection for Cart Items -->
-    <div class="location-selection-section" *ngIf="cartItemsWithLocations.length > 0">
-      <h4>Service Location Selection</h4>
-      <p class="help-text">Please select where you would like to receive each service:</p>
+  <div class="modern-order-content">
+    <!-- Order Summary Section -->
+    <div class="order-summary-section">
+      <h4><i class="pi pi-list"></i> Order Summary</h4>
       
-      <div *ngFor="let cartItem of cartItemsWithLocations" class="cart-item-location">
-        <div class="service-info">
-          <h5>{{ cartItem.service.serviceName }}</h5>
-          <p>{{ cartItem.service.serviceDescription }}</p>
-          <p-chip [label]="'Quantity: ' + cartItem.quantity"></p-chip>
-        </div>
-        
-        <div class="location-options">
-          <label>Select Location:</label>
-          <div class="location-radio-group">
-            <div *ngFor="let location of getLocationsForService(cartItem.service.serviceID || '')" 
-                 class="location-option">
-              <p-radioButton 
-                [value]="location" 
-                [(ngModel)]="cartItem.selectedLocation" 
-                name="location-{{ cartItem.service.serviceID }}"
-                [inputId]="'location-' + cartItem.service.serviceID + '-' + location.id">
-              </p-radioButton>
-              <label [for]="'location-' + cartItem.service.serviceID + '-' + location.id" class="location-label">
-                <strong>{{ location.name }}</strong>
-                <span *ngIf="location.address" class="location-address">{{ location.address }}</span>
-              </label>
+      <!-- Service Items with Location Selection -->
+      <div class="service-items">
+        <div *ngFor="let cartItem of cartItemsWithLocations; let i = index; trackBy: trackCartItem" 
+             class="service-item-card">
+          <div class="service-info">
+            <div class="service-header">
+              <h5>{{ cartItem.service.serviceName }}</h5>
+              <p-chip [label]="'Qty: ' + cartItem.quantity" styleClass="quantity-chip"></p-chip>
+                             <p-chip [label]="((cartItem.service.servicePrice || 0) * cartItem.quantity | currency) || '$0.00'" 
+                       styleClass="price-chip"></p-chip>
+            </div>
+            <p class="service-description">{{ cartItem.service.serviceDescription }}</p>
+          </div>
+          
+          <!-- Location Selection -->
+          <div class="location-selection">
+            <label class="location-label">Service Location:</label>
+            <div class="location-options">
+              <div *ngFor="let location of getLocationsForService(cartItem.service.serviceID || ''); let j = index; trackBy: trackLocation" 
+                   class="location-option">
+                <p-radioButton 
+                  [value]="location" 
+                  [(ngModel)]="cartItem.selectedLocation" 
+                  [name]="'location-' + i"
+                  [inputId]="'location-' + i + '-' + j"
+                  (onClick)="onLocationSelected(cartItem, location)">
+                </p-radioButton>
+                <label [for]="'location-' + i + '-' + j" class="location-option-label">
+                  <div class="location-name">
+                    <i class="pi" [class.pi-home]="location.type === 'service-to-customer'" 
+                       [class.pi-building]="location.type === 'customer-to-service'"></i>
+                    {{ location.name }}
+                  </div>
+                  <small class="location-address">{{ location.address }}</small>
+                </label>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <!-- Total Section -->
+      <div class="order-total">
+        <div class="total-row">
+          <span>Total Items:</span>
+          <p-chip [label]="dataService.itemsInCart.toString()" styleClass="summary-chip"></p-chip>
+        </div>
+        <div class="total-row total-price">
+          <span>Total Price:</span>
+          <p-chip [label]="(totalPrice | currency) || '$0.00'" styleClass="price-chip-large"></p-chip>
+        </div>
+        <div class="total-row">
+          <span>Service Date:</span>
+          <p-chip [label]="(selectedDate | date:'MMM d, yyyy') || 'No date selected'" styleClass="date-chip"></p-chip>
+        </div>
+      </div>
     </div>
 
-    <!-- Customer Details Form -->
-    <form [formGroup]="customerForm">
-      <div class="form-grid">
+    <!-- Customer Details Section -->
+    <div class="customer-details-section">
+      <h4><i class="pi pi-user"></i> Your Details</h4>
+      
+      <form [formGroup]="orderForm" class="modern-form">
         <div class="form-row">
           <p-floatlabel>
             <input 
               pInputText 
               id="name" 
               formControlName="name" 
-              placeholder="Enter your full name"
-              [class.ng-invalid]="customerForm.get('name')?.invalid && customerForm.get('name')?.touched"
               styleClass="w-full">
             <label for="name">Full Name *</label>
           </p-floatlabel>
-          <small *ngIf="customerForm.get('name')?.hasError('required') && customerForm.get('name')?.touched" 
-                 class="p-error">Name is required</small>
         </div>
 
-        <!-- Address fields (only if S2C services are selected) -->
-        <div *ngIf="customerForm.get('address')" class="address-section">
-          <h5>Delivery Address</h5>
+        <div class="form-row-group">
+          <div class="form-row">
+            <p-floatlabel>
+              <p-dropdown 
+                id="contactMethod"
+                formControlName="contactMethod"
+                [options]="contactMethods"
+                styleClass="w-full">
+              </p-dropdown>
+              <label for="contactMethod">Contact Method *</label>
+            </p-floatlabel>
+          </div>
+          
+          <div class="form-row">
+            <p-floatlabel>
+              <input 
+                pInputText 
+                id="contactValue" 
+                formControlName="contactValue" 
+                [placeholder]="getContactPlaceholder()"
+                styleClass="w-full">
+              <label for="contactValue">{{ getContactLabel() }} *</label>
+            </p-floatlabel>
+          </div>
+        </div>
+
+        <!-- Address fields (only shown if S2C services are selected) -->
+        <div *ngIf="hasServiceToCustomerOrders()" class="address-section">
+          <h5><i class="pi pi-map-marker"></i> Service Address</h5>
           
           <div class="form-row">
             <p-floatlabel>
@@ -331,144 +334,81 @@
                 pInputText 
                 id="address" 
                 formControlName="address" 
-                placeholder="Enter your full street address"
-                [class.ng-invalid]="customerForm.get('address')?.invalid && customerForm.get('address')?.touched"
                 styleClass="w-full">
               <label for="address">Street Address *</label>
             </p-floatlabel>
-            <small *ngIf="customerForm.get('address')?.hasError('required') && customerForm.get('address')?.touched" 
-                   class="p-error">Address is required</small>
           </div>
 
-          <div class="form-row">
-            <p-floatlabel>
-              <input 
-                pInputText 
-                id="city" 
-                formControlName="city" 
-                placeholder="Enter your city"
-                [class.ng-invalid]="customerForm.get('city')?.invalid && customerForm.get('city')?.touched"
-                styleClass="w-full">
-              <label for="city">City/Suburb *</label>
-            </p-floatlabel>
-            <small *ngIf="customerForm.get('city')?.hasError('required') && customerForm.get('city')?.touched" 
-                   class="p-error">City is required</small>
-          </div>
-
-          <div class="form-row">
-            <p-floatlabel>
-              <input 
-                pInputText 
-                id="state" 
-                formControlName="state" 
-                placeholder="Enter your state or province"
-                [class.ng-invalid]="customerForm.get('state')?.invalid && customerForm.get('state')?.touched"
-                styleClass="w-full">
-              <label for="state">State/Province *</label>
-            </p-floatlabel>
-            <small *ngIf="customerForm.get('state')?.hasError('required') && customerForm.get('state')?.touched" 
-                   class="p-error">State is required</small>
-          </div>
-
-          <div class="form-row">
-            <p-floatlabel>
-              <input 
-                pInputText 
-                id="postalCode" 
-                formControlName="postalCode" 
-                placeholder="Enter your postal code"
-                [class.ng-invalid]="customerForm.get('postalCode')?.invalid && customerForm.get('postalCode')?.touched"
-                styleClass="w-full">
-              <label for="postalCode">Postal Code *</label>
-            </p-floatlabel>
-            <small *ngIf="customerForm.get('postalCode')?.hasError('required') && customerForm.get('postalCode')?.touched" 
-                   class="p-error">Postal code is required</small>
+          <div class="form-row-group">
+            <div class="form-row">
+              <p-floatlabel>
+                <input 
+                  pInputText 
+                  id="city" 
+                  formControlName="city" 
+                  styleClass="w-full">
+                <label for="city">City *</label>
+              </p-floatlabel>
+            </div>
+            
+            <div class="form-row">
+              <p-floatlabel>
+                <input 
+                  pInputText 
+                  id="state" 
+                  formControlName="state" 
+                  styleClass="w-full">
+                <label for="state">State *</label>
+              </p-floatlabel>
+            </div>
+            
+            <div class="form-row">
+              <p-floatlabel>
+                <input 
+                  pInputText 
+                  id="postalCode" 
+                  formControlName="postalCode" 
+                  styleClass="w-full">
+                <label for="postalCode">Postal Code *</label>
+              </p-floatlabel>
+            </div>
           </div>
         </div>
 
+        <!-- Order Notes -->
         <div class="form-row">
           <p-floatlabel>
-            <input 
-              pInputText 
-              id="selectedDate" 
-              [value]="selectedDate | date:'MM/dd/yyyy'" 
-              readonly 
+            <textarea 
+              pInputTextarea 
+              id="notes" 
+              formControlName="notes" 
+              rows="3"
               styleClass="w-full">
-            <label for="selectedDate">Selected Service Date</label>
+            </textarea>
+            <label for="notes">Additional Notes (Optional)</label>
           </p-floatlabel>
         </div>
-
-        <div class="order-summary-dialog">
-          <p-panel header="Order Summary" styleClass="summary-panel">
-            <div class="summary-row">
-              <span>Total Items:</span>
-              <p-chip [label]="dataService.itemsInCart.toString()"></p-chip>
-            </div>
-            <div class="summary-row">
-              <span>Total Price:</span>
-              <p-chip [label]="(totalPrice | currency) || ''" styleClass="price-chip"></p-chip>
-            </div>
-          </p-panel>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
   
   <ng-template pTemplate="footer">
-    <div class="dialog-footer">
-      <!-- Authentication Step Footer -->
-      <div *ngIf="currentAuthStep.step === 'auth'" class="auth-footer">
-        <p-button 
-          label="Cancel" 
-          icon="pi pi-times" 
-          (onClick)="cancelOrder()" 
-          styleClass="p-button-text"
-          [disabled]="isRequestingMagicLink">
-        </p-button>
-        
-        <p-button 
-          *ngIf="!isAuthenticated"
-          label="Send Magic Link" 
-          icon="pi pi-send" 
-          (onClick)="requestMagicLink()" 
-          styleClass="p-button-primary"
-          [disabled]="!authForm.valid"
-          [loading]="isRequestingMagicLink">
-        </p-button>
-        
-        <p-button 
-          *ngIf="isAuthenticated"
-          label="Continue" 
-          icon="pi pi-arrow-right" 
-          (onClick)="currentAuthStep = { step: 'details', title: 'Details' }" 
-          styleClass="p-button-success">
-        </p-button>
-      </div>
-
-      <!-- Details Step Footer -->
-      <div *ngIf="currentAuthStep.step === 'details'" class="details-footer">
-        <p-button 
-          label="Back" 
-          icon="pi pi-arrow-left" 
-          (onClick)="currentAuthStep = { step: 'auth', title: 'Authentication' }" 
-          styleClass="p-button-text">
-        </p-button>
-        
-        <p-button 
-          label="Cancel" 
-          icon="pi pi-times" 
-          (onClick)="cancelOrder()" 
-          styleClass="p-button-outlined">
-        </p-button>
-        
-        <p-button 
-          label="Submit Order" 
-          icon="pi pi-check" 
-          (onClick)="submitOrderWithAuth()" 
-          styleClass="p-button-success"
-          [disabled]="!customerForm.valid || !selectedDate">
-        </p-button>
-      </div>
+    <div class="modern-dialog-footer">
+      <p-button 
+        label="Cancel" 
+        icon="pi pi-times" 
+        (onClick)="cancelOrder()" 
+        styleClass="p-button-text">
+      </p-button>
+      
+      <p-button 
+        label="Submit Order" 
+        icon="pi pi-check" 
+        (onClick)="submitOrderSimplified()" 
+        styleClass="p-button-success p-button-lg"
+        [disabled]="!orderForm.valid || !selectedDate || !allLocationsSelected()"
+        [loading]="isSubmittingOrder">
+      </p-button>
     </div>
   </ng-template>
 </p-dialog>

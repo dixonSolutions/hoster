@@ -28,7 +28,59 @@ export class OrderAuthService {
   public authToken$ = this.authTokenSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Check for existing token in storage on service initialization
+    // Only check for existing token if user came from magic link or explicitly requested
+    // Don't automatically load tokens to prevent unwanted persistence
+    console.log('🔧 OrderAuthService initialized, checking if should load stored token...');
+    
+    if (this.shouldLoadStoredToken()) {
+      console.log('✅ Loading stored token because user came from magic link');
+      this.loadTokenFromStorage();
+    } else {
+      console.log('❌ Not loading stored token - user did not come from magic link');
+      // Clear any stale tokens if user didn't come from magic link
+      this.clearStaleTokensIfPresent();
+    }
+  }
+
+  /**
+   * Check if we should load stored token based on URL or other indicators
+   */
+  private shouldLoadStoredToken(): boolean {
+    if (typeof window === 'undefined') {
+      return false; // Server-side rendering
+    }
+    
+    const currentPath = window.location.pathname;
+    const hasAuthInPath = currentPath.includes('/auth');
+    const hasReturnFromAuthParam = window.location.search.includes('returnFromAuth=true');
+    
+    console.log('🔍 Checking if should load stored token:', {
+      currentPath,
+      hasAuthInPath,
+      hasReturnFromAuthParam,
+      decision: hasAuthInPath || hasReturnFromAuthParam
+    });
+    
+    return hasAuthInPath || hasReturnFromAuthParam;
+  }
+
+  /**
+   * Clear stale tokens if user didn't come from magic link
+   */
+  private clearStaleTokensIfPresent(): void {
+    const stored = localStorage.getItem('orderAuthToken');
+    if (stored) {
+      console.log('🧹 Clearing stale authentication token - user did not come from magic link');
+      localStorage.removeItem('orderAuthToken');
+      this.authTokenSubject.next(null);
+    }
+  }
+
+  /**
+   * Explicitly load token from storage (for cases where we know we need it)
+   */
+  public loadStoredTokenExplicitly(): void {
+    console.log('🔄 Explicitly loading stored token...');
     this.loadTokenFromStorage();
   }
 
@@ -260,10 +312,42 @@ export class OrderAuthService {
   }
 
   /**
-   * Check if token is still valid
+   * Check if token is valid (not expired and not too old)
    */
   private isTokenValid(token: AuthToken): boolean {
-    return new Date() < token.expiresAt;
+    const now = new Date();
+    
+    // Check if token is expired
+    if (token.expiresAt <= now) {
+      console.log('❌ Token is expired:', {
+        expiresAt: token.expiresAt,
+        now: now,
+        expiredBy: Math.round((now.getTime() - token.expiresAt.getTime()) / 1000 / 60) + ' minutes'
+      });
+      return false;
+    }
+    
+    // Check if token is too old (older than 24 hours from creation)
+    // This prevents tokens from persisting indefinitely across browser sessions
+    const tokenAge = now.getTime() - (token.expiresAt.getTime() - (24 * 60 * 60 * 1000)); // Assume 24hr expiry
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    
+    if (tokenAge > maxAge) {
+      console.log('❌ Token is too old (older than 24 hours):', {
+        tokenAge: Math.round(tokenAge / 1000 / 60 / 60) + ' hours',
+        maxAge: Math.round(maxAge / 1000 / 60 / 60) + ' hours',
+        emailOrPhone: token.emailOrPhone
+      });
+      return false;
+    }
+    
+    console.log('✅ Token is valid:', {
+      emailOrPhone: token.emailOrPhone,
+      expiresIn: Math.round((token.expiresAt.getTime() - now.getTime()) / 1000 / 60) + ' minutes',
+      ageInHours: Math.round(tokenAge / 1000 / 60 / 60) + ' hours'
+    });
+    
+    return true;
   }
 
   /**

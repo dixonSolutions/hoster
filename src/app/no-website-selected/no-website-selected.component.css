@@ -1,0 +1,125 @@
+/* Simple Welcome Page Styles */
+.no-website-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 2rem;
+}
+
+.content {
+  text-align: center;
+  max-width: 600px;
+  color: #333333;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 2rem;
+  border: 3px solid #e9ecef;
+}
+
+.content h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 0 2rem 0;
+}
+
+.content p {
+  font-size: 1.1rem;
+  color: #666666;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+
+.content code {
+  background: #f8f9fa;
+  color: #333333;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 1rem;
+}
+
+.content code strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 2rem;
+}
+
+.btn-primary {
+ 
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .no-website-container {
+    padding: 1rem;
+  }
+
+  .content h1 {
+    font-size: 2.5rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+  }
+
+  .content p {
+    font-size: 1rem;
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content h1 {
+    font-size: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.1rem;
+  }
+
+  .content p {
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    max-width: 300px;
+  }
+}

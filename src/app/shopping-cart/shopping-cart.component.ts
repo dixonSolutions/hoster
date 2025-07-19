@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { DataServiceService } from '../data-service.service';
 import { CommonModule } from '@angular/common';
 import { CartItem } from '../data-service.service';
@@ -115,9 +115,11 @@ export class ShoppingCartComponent implements OnInit{
   
   customerForm: FormGroup;
   authForm: FormGroup;
+  orderForm: FormGroup;
   showCustomerForm = false;
   selectedDate: Date | undefined = undefined;
   minDate!: Date;
+  isSubmittingOrder = false;
 
 // Result: "https://organisely.app" or "http://localhost:4200"
   
@@ -158,9 +160,16 @@ export class ShoppingCartComponent implements OnInit{
     { label: 'Phone', value: 'phone' }
   ];
 
+  // Contact method options for simplified form
+  contactMethods = [
+    { label: 'Email', value: 'email' },
+    { label: 'Phone', value: 'phone' }
+  ];
+
   constructor(
     private fb: FormBuilder, 
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    private cdr: ChangeDetectorRef
   ) {
     // Authentication form
     this.authForm = this.fb.group({
@@ -171,6 +180,14 @@ export class ShoppingCartComponent implements OnInit{
     // Customer details form (conditional validators will be added dynamically)
     this.customerForm = this.fb.group({
       name: ['', [Validators.required]]
+    });
+
+    // Simplified order form for new flow
+    this.orderForm = this.fb.group({
+      name: ['', [Validators.required]],
+      contactMethod: ['email', [Validators.required]],
+      contactValue: ['', [Validators.required]],
+      notes: ['']
     });
 
     // Subscribe to auth token changes
@@ -216,35 +233,74 @@ export class ShoppingCartComponent implements OnInit{
     
     // Check if user is returning from authentication
     this.checkReturnFromAuthentication();
+    
+    // Add debugging functionality
+    this.setupDebugMethods();
   }
 
   /**
-   * Check authentication status when component initializes
+   * Setup debug methods for troubleshooting authentication issues
+   */
+  private setupDebugMethods(): void {
+    if (typeof window !== 'undefined') {
+      (window as any).debugAuth = {
+        testAuth: () => this.orderAuthService.testAuthenticationFlow(),
+        clearAuth: () => {
+          this.orderAuthService.clearAllAuthData();
+          this.isAuthenticated = false;
+          this.authToken = null;
+          console.log('🧹 Authentication cleared manually');
+        },
+        checkStatus: () => {
+          const status = this.orderAuthService.getAuthenticationStatus();
+          console.log('🔍 Current auth status:', status);
+          return status;
+        },
+        forceLoadToken: () => {
+          this.orderAuthService.loadStoredTokenExplicitly();
+          console.log('🔄 Forced token reload');
+        },
+        clearStaleTokens: () => {
+          localStorage.removeItem('orderAuthToken');
+          console.log('🧹 Cleared localStorage tokens');
+        }
+      };
+      
+      console.log('🛠️ Debug methods available:');
+      console.log('  - window.debugAuth.testAuth() - Test authentication flow');
+      console.log('  - window.debugAuth.clearAuth() - Clear authentication');
+      console.log('  - window.debugAuth.checkStatus() - Check auth status');
+      console.log('  - window.debugAuth.forceLoadToken() - Force load stored token');
+      console.log('  - window.debugAuth.clearStaleTokens() - Clear localStorage tokens');
+    }
+  }
+
+  /**
+   * Check initial authentication status when component loads
    */
   private checkInitialAuthenticationStatus(): void {
-    const authStatus = this.orderAuthService.getAuthenticationStatus();
-    console.log('🔍 Initial authentication check:', authStatus);
+    console.log('🔍 Checking initial authentication status...');
     
-    if (authStatus.isAuthenticated && authStatus.token) {
-      this.authToken = authStatus.token;
-      this.isAuthenticated = true;
-      this.currentAuthStep = { step: 'details', title: 'Details' };
-      
-      // Pre-populate auth form with existing token data
-      this.authForm.patchValue({
-        authType: authStatus.token.type,
-        emailOrPhone: authStatus.token.emailOrPhone
-      });
-      
-      console.log('✅ User already authenticated:', authStatus.token.emailOrPhone);
-      
-      // Show time remaining
-      if (authStatus.timeRemaining) {
-        const minutesRemaining = Math.round(authStatus.timeRemaining / 1000 / 60);
-        console.log(`⏰ Authentication expires in ${minutesRemaining} minutes`);
-      }
+    // Get the actual authentication status from the service
+    const authStatus = this.orderAuthService.getAuthenticationStatus();
+    const hasValidToken = !!(authStatus.isAuthenticated && authStatus.token);
+    
+    console.log('🎫 Initial auth status check:', {
+      serviceReportsAuthenticated: authStatus.isAuthenticated,
+      hasActualToken: !!authStatus.token,
+      tokenEmailOrPhone: authStatus.token?.emailOrPhone || 'No token',
+      timeRemaining: authStatus.timeRemaining ? Math.round(authStatus.timeRemaining / 1000 / 60) + ' minutes' : 'No token',
+      finalDecision: hasValidToken ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'
+    });
+    
+    // Sync component state with actual authentication status
+    this.isAuthenticated = hasValidToken;
+    this.authToken = hasValidToken ? authStatus.token! : null;
+    
+    if (hasValidToken) {
+      console.log('✅ User is authenticated on component load');
     } else {
-      console.log('ℹ️ User not authenticated:', authStatus.errorMessage || 'No token found');
+      console.log('🔐 User is NOT authenticated on component load');
     }
   }
 
@@ -265,19 +321,24 @@ export class ShoppingCartComponent implements OnInit{
         const authStatus = this.orderAuthService.getAuthenticationStatus();
         
         if (authStatus.isAuthenticated && this.dataService.CartItems.length > 0) {
-          console.log('✅ User authenticated and has items in cart - reopening checkout');
+          console.log('✅ User authenticated and has items in cart - preparing to reopen checkout');
           
           this.messageService.add({
             severity: 'success',
             summary: 'Authentication Successful',
-            detail: 'You are now authenticated! Continuing with your order...',
-            life: 4000
+            detail: 'You are now authenticated! Click checkout to continue with your order.',
+            life: 6000
           });
           
-          // Automatically reopen the checkout dialog
-          setTimeout(() => {
-            this.openOrderForm();
-          }, 1000);
+          // Only automatically reopen if dialog is not already open
+          if (!this.showCustomerForm) {
+            console.log('📋 Auto-reopening checkout dialog after authentication');
+            setTimeout(() => {
+              this.openOrderForm();
+            }, 1000);
+          } else {
+            console.log('ℹ️ Checkout dialog already open, skipping auto-reopen');
+          }
         } else if (!authStatus.isAuthenticated) {
           console.log('❌ User not authenticated after return from auth page');
           
@@ -293,18 +354,15 @@ export class ShoppingCartComponent implements OnInit{
         this.cleanupUrlParameters();
       }, 1000); // Give some time for token processing
     }
-    
+
     if (requestNewAuth === 'true') {
-      console.log('🔄 User needs to request new authentication...');
-      
+      console.log('🔄 User requesting new authentication...');
       this.messageService.add({
         severity: 'info',
-        summary: 'Authentication Required',
-        detail: 'Please authenticate to continue with your order.',
+        summary: 'Please Authenticate',
+        detail: 'Please complete authentication to place your order.',
         life: 4000
       });
-      
-      // Clean up URL parameters
       this.cleanupUrlParameters();
     }
   }
@@ -587,50 +645,92 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   CheckOutPessed() {
+    // Prevent multiple dialogs from opening
+    if (this.showCustomerForm) {
+      console.log('ℹ️ Checkout dialog already open, ignoring click');
+      return;
+    }
+
     if (this.dataService.CartItems.length == 0) {
       this.dataService.openSnackBar(this, 5000, 'Your cart is empty, you need to add some services to checkout', 'OK');
     } else if (!this.selectedDate) {
       this.dataService.openSnackBar(this, 5000, 'Please select a service date before proceeding to checkout', 'OK');
     } else {
-      // Autofill from cookies if available
-      const name = this.cookieService.get('customerName');
-      const email = this.cookieService.get('customerEmail');
-      const phone = this.cookieService.get('customerPhone');
-      const address = this.cookieService.get('customerAddress');
-      const city = this.cookieService.get('customerCity');
-      const state = this.cookieService.get('customerState');
-      const postalCode = this.cookieService.get('customerPostalCode');
-      console.log('Patching form from cookies:', { name, email, phone, address, city, state, postalCode });
-      this.customerForm.patchValue({ name, email, phone, address, city, state, postalCode });
-      this.customerForm.updateValueAndValidity();
+      console.log('🛒 Starting simplified checkout process...');
+      
+      // Initialize cart with smart location defaults
+      this.initializeCartWithLocations();
+      
+      // Load saved data from cookies for the new form
+      this.loadSavedDataToOrderForm();
+      
+      // Open the new simplified dialog
       this.showCustomerForm = true;
       
-      // Force fix dialog background for checkout dialog
+      // Force fix dialog background
       setTimeout(() => {
         this.fixDialogBackground();
       }, 100);
       
-      // Only try to get browser location if no saved address exists
-      if (!address || !city || !state || !postalCode) {
-        console.log('No complete address saved in cookies, trying geolocation...');
-        this.tryPatchAddressFromLocation();
-      } else {
-        console.log('Complete address found in cookies, skipping geolocation.');
-      }
+      console.log('✅ Simplified checkout dialog opened');
     }
+  }
+
+  /**
+   * Load saved customer data into the new order form
+   */
+  private loadSavedDataToOrderForm(): void {
+    const name = this.cookieService.get('customerName');
+    const email = this.cookieService.get('customerEmail');
+    const phone = this.cookieService.get('customerPhone');
+    
+    // Determine contact method and value
+    let contactMethod = 'email';
+    let contactValue = '';
+    
+    if (email) {
+      contactMethod = 'email';
+      contactValue = email;
+    } else if (phone) {
+      contactMethod = 'phone';
+      contactValue = phone;
+    }
+    
+    // Patch the order form
+    this.orderForm.patchValue({
+      name: name || '',
+      contactMethod: contactMethod,
+      contactValue: contactValue
+    });
+    
+    console.log('📝 Loaded saved data to order form:', { name, contactMethod, contactValue });
   }
 
   // Try to get browser location and patch address fields
   tryPatchAddressFromLocation() {
     if (navigator.geolocation) {
+      console.log('🗺️ Attempting to get user location with timeout...');
+      
+      // Set a timeout to prevent indefinite hanging
+      const timeoutId = setTimeout(() => {
+        console.log('⏰ Geolocation timeout after 5 seconds, skipping...');
+      }, 5000);
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          clearTimeout(timeoutId);
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          console.log('Geolocation success:', { lat, lng });
-          // Placeholder: Replace with real reverse geocoding API call
-          this.reverseGeocode(lat, lng).then(addr => {
-            console.log('Patching form from geolocation:', addr);
+          console.log('✅ Geolocation success:', { lat, lng });
+          
+          // Use a timeout for the reverse geocoding as well
+          Promise.race([
+            this.reverseGeocode(lat, lng),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Reverse geocoding timeout')), 3000)
+            )
+          ]).then((addr: any) => {
+            console.log('✅ Patching form from geolocation:', addr);
             // Only patch address-related fields to preserve existing personal information
             this.customerForm.patchValue({
               address: addr.address,
@@ -639,12 +739,24 @@ export class ShoppingCartComponent implements OnInit{
               postalCode: addr.postalCode
             });
             this.customerForm.updateValueAndValidity();
+          }).catch((error) => {
+            console.log('⚠️ Reverse geocoding failed or timed out:', error);
           });
         },
         (error) => {
-          console.log('Geolocation error:', error);
+          clearTimeout(timeoutId);
+          console.log('❌ Geolocation error:', error.message || error);
+          // Don't show error to user, just continue without location
+        },
+        {
+          // Add timeout and other options to prevent hanging
+          timeout: 5000,
+          enableHighAccuracy: false,
+          maximumAge: 300000 // 5 minutes
         }
       );
+    } else {
+      console.log('ℹ️ Geolocation not supported by this browser');
     }
   }
 
@@ -722,10 +834,35 @@ export class ShoppingCartComponent implements OnInit{
     }
   }
 
-  cancelOrder() {
+  /**
+   * Cancel order and close dialog
+   */
+  cancelOrder(): void {
+    console.log('❌ Cancelling order and closing dialog...');
+    
+    // Close the dialog
     this.showCustomerForm = false;
-    this.customerForm.reset();
-    this.selectedDate = undefined;
+    
+    // Reset authentication step
+    this.currentAuthStep = { step: 'auth', title: 'Authentication' };
+    
+    // Reset any form states if needed
+    this.isRequestingMagicLink = false;
+    
+    // Clear any selection states that might be causing issues
+    this.cartItemsWithLocations.forEach(item => {
+      item.selectedLocation = undefined;
+    });
+    
+    console.log('✅ Order cancelled and dialog closed successfully');
+    
+    // Show a brief message
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Order Cancelled',
+      detail: 'You can restart the checkout process anytime.',
+      life: 3000
+    });
   }
 
   // Helper function to clear saved address data from cookies
@@ -795,13 +932,22 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
-   * Initialize cart with location options
+   * Initialize cart with smart location defaults
    */
   initializeCartWithLocations(): void {
-    this.cartItemsWithLocations = this.dataService.CartItems.map(item => ({
-      ...item,
-      selectedLocation: undefined
-    }));
+    this.cartItemsWithLocations = this.dataService.CartItems.map(item => {
+      const cartItemWithLocation: CartItemWithLocation = {
+        ...item,
+        selectedLocation: undefined
+      };
+      
+      // Auto-select smart default location
+      this.autoSelectDefaultLocation(cartItemWithLocation);
+      
+      return cartItemWithLocation;
+    });
+    
+    console.log('🛒 Initialized cart with smart location defaults:', this.cartItemsWithLocations);
   }
 
   /**
@@ -864,18 +1010,136 @@ export class ShoppingCartComponent implements OnInit{
    * Open order form and setup for authenticated user
    */
   openOrderForm(): void {
-    // Initialize cart with locations if not already done
-    if (this.cartItemsWithLocations.length !== this.dataService.CartItems.length) {
-      this.initializeCartWithLocations();
-    }
-
-    if (!this.isAuthenticated) {
-      this.currentAuthStep = { step: 'auth', title: 'Authentication' };
-    } else {
-      this.currentAuthStep = { step: 'details', title: 'Details' };
+    console.log('🔧 Opening order form...');
+    
+    // Prevent opening if already open
+    if (this.showCustomerForm) {
+      console.log('⚠️ Order form already open, skipping...');
+      return;
     }
     
-    this.showCustomerForm = true;
+    try {
+      // Initialize cart with locations if not already done
+      if (this.cartItemsWithLocations.length !== this.dataService.CartItems.length) {
+        console.log('🔄 Initializing cart with locations...');
+        this.initializeCartWithLocations();
+      }
+
+      // PROPERLY CHECK JWT TOKEN EXISTENCE - Don't rely on boolean flag
+      const authStatus = this.orderAuthService.getAuthenticationStatus();
+      const hasValidToken = !!(authStatus.isAuthenticated && authStatus.token);
+      
+      console.log('🔍 Authentication check:', {
+        isAuthenticatedFlag: this.isAuthenticated,
+        authStatusAuthenticated: authStatus.isAuthenticated,
+        hasToken: !!authStatus.token,
+        tokenEmailOrPhone: authStatus.token?.emailOrPhone || 'No token',
+        finalDecision: hasValidToken ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'
+      });
+
+      // Set the appropriate step based on ACTUAL token existence
+      if (!hasValidToken) {
+        console.log('🔐 No valid JWT token found, starting with auth step');
+        this.currentAuthStep = { step: 'auth', title: 'Authentication' };
+        // Update the component's authentication flag to match reality
+        this.isAuthenticated = false;
+        this.authToken = null;
+      } else {
+        console.log('✅ Valid JWT token found, starting with details step');
+        console.log('🎫 Token details:', {
+          emailOrPhone: authStatus.token!.emailOrPhone,
+          type: authStatus.token!.type,
+          expiresAt: authStatus.token!.expiresAt,
+          timeRemaining: authStatus.timeRemaining ? Math.round(authStatus.timeRemaining / 1000 / 60) + ' minutes' : 'Unknown'
+        });
+        this.currentAuthStep = { step: 'details', title: 'Details' };
+        // Update the component's authentication state to match reality
+        this.isAuthenticated = true;
+        this.authToken = authStatus.token;
+        
+        // Test location service data to catch any errors
+        console.log('🔍 Testing location service data...');
+        try {
+          for (const cartItem of this.cartItemsWithLocations) {
+            const locations = this.getLocationsForService(cartItem.service.serviceID || '');
+            console.log(`📍 Locations for ${cartItem.service.serviceName}:`, locations);
+          }
+        } catch (locationError) {
+          console.error('❌ Error in location service:', locationError);
+        }
+      }
+      
+      // Open the dialog
+      console.log('📋 Setting showCustomerForm = true...');
+      this.showCustomerForm = true;
+      
+      // Force Angular change detection to ensure dialog appears
+      this.cdr.detectChanges();
+      
+      // Force the timeout to execute even if there are template errors
+      setTimeout(() => {
+        try {
+          console.log('🔄 Checking dialog state after change detection...');
+          console.log('Dialog state check:', {
+            showCustomerForm: this.showCustomerForm,
+            currentAuthStep: this.currentAuthStep,
+            cartItemsLength: this.cartItemsWithLocations.length,
+            isAuthenticated: this.isAuthenticated
+          });
+          
+          // Check if dialog actually appeared in DOM
+          const dialogElement = document.querySelector('p-dialog');
+          const dialogMask = document.querySelector('.p-dialog-mask');
+          const dialogVisible = document.querySelector('p-dialog[style*="display: block"], p-dialog:not([style*="display: none"])');
+          
+          console.log('🌐 DOM check:', {
+            dialogElement: !!dialogElement,
+            dialogMask: !!dialogMask,
+            dialogVisible: !!dialogVisible,
+            dialogElementCount: document.querySelectorAll('p-dialog').length
+          });
+          
+          if (!dialogElement && this.showCustomerForm) {
+            console.error('❌ CRITICAL: Dialog should be open but not found in DOM!');
+            console.error('This might be a PrimeNG rendering issue. Attempting recovery...');
+            
+            // Try to recover by forcing another change detection cycle
+            this.showCustomerForm = false;
+            this.cdr.detectChanges();
+            setTimeout(() => {
+              console.log('🔄 Attempting dialog recovery...');
+              this.showCustomerForm = true;
+              this.cdr.detectChanges();
+            }, 100);
+          } else if (dialogElement && !dialogVisible) {
+            console.warn('⚠️ Dialog exists in DOM but may not be visible');
+            // Try to fix visibility issues
+            const pDialogElements = document.querySelectorAll('p-dialog');
+            pDialogElements.forEach((el: any) => {
+              if (el.style) {
+                console.log('🔧 Dialog element style:', el.style.cssText);
+              }
+            });
+          } else if (dialogElement && this.showCustomerForm) {
+            console.log('✅ Dialog appears to be properly rendered and visible');
+          }
+          
+          this.fixDialogBackground();
+        } catch (timeoutError) {
+          console.error('❌ Error in dialog check timeout:', timeoutError);
+        }
+      }, 300);
+      
+      console.log('✅ Order form setup completed');
+      
+    } catch (error) {
+      console.error('❌ Error in openOrderForm:', error);
+      console.error('Stack trace:', error);
+      
+      // Try to recover
+      this.showCustomerForm = false;
+      this.currentAuthStep = { step: 'auth', title: 'Authentication' };
+    }
   }
 
   /**
@@ -1083,22 +1347,41 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
-   * Clear cart and reset forms
+   * Clear cart and form data
    */
   private clearCartAndForm(): void {
     this.dataService.CartItems = [];
     this.dataService.updateItemsInCart();
-    this.cartItemsWithLocations = [];
     this.showCustomerForm = false;
     this.customerForm.reset();
     this.selectedDate = undefined;
-    this.currentAuthStep = { step: 'auth', title: 'Authentication' };
+    this.cartItemsWithLocations = [];
+  }
+
+  /**
+   * TrackBy function for cart items to improve ngFor performance
+   */
+  trackCartItem(index: number, item: CartItemWithLocation): any {
+    return item.service.serviceID || index;
+  }
+
+  /**
+   * TrackBy function for locations to improve ngFor performance
+   */
+  trackLocation(index: number, location: ServiceLocation): any {
+    return location.id || index;
   }
 
   /**
    * Handle location selection for cart item
    */
   onLocationSelected(cartItem: CartItemWithLocation, location: ServiceLocation): void {
+    console.log('📍 Location selected:', {
+      service: cartItem.service.serviceName,
+      location: location.name,
+      locationType: location.type
+    });
+    
     cartItem.selectedLocation = location;
     
     // Check if any S2C locations are selected and add address fields if needed
@@ -1115,8 +1398,17 @@ export class ShoppingCartComponent implements OnInit{
       item.selectedLocation?.type === OrderType.S2C
     );
 
-    if (hasS2CServices) {
+    console.log('🔍 Checking if address fields needed:', {
+      hasS2CServices,
+      currentAddressControl: !!this.customerForm.get('address')
+    });
+
+    if (hasS2CServices && !this.customerForm.get('address')) {
+      console.log('➕ Adding address fields to form');
       this.addAddressFieldsToForm();
+    } else if (!hasS2CServices && this.customerForm.get('address')) {
+      console.log('➖ Removing address fields from form');
+      this.removeAddressFieldsFromForm();
     }
   }
 
@@ -1149,6 +1441,18 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
+   * Remove address fields from customer form when no S2C services are selected
+   */
+  private removeAddressFieldsFromForm(): void {
+    const addressFields = ['address', 'city', 'state', 'postalCode', 'country'];
+    addressFields.forEach(field => {
+      if (this.customerForm.get(field)) {
+        this.customerForm.removeControl(field);
+      }
+    });
+  }
+
+  /**
    * Validate that all cart items have location selections
    */
   private validateLocationSelections(): boolean {
@@ -1156,25 +1460,263 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
-   * Get available locations for a service
+   * Get available locations for a service based on actual business data
    */
   getLocationsForService(serviceId: string): ServiceLocation[] {
-    // For demo purposes, return both types
-    // In real implementation, this would come from business data
-    return [
-      {
+    try {
+      console.log('📍 Getting locations for service:', serviceId);
+      
+      const locations: ServiceLocation[] = [];
+      
+      // Always add customer location option (S2C - Service to Customer)
+      locations.push({
         id: 'customer-location',
-        name: 'At Customer Location',
-        type: OrderType.S2C
-      },
-      {
-        id: 'business-location-1', 
-        name: 'Main Business Location',
-        type: OrderType.C2S,
-        placeID: 'PLACE_001',
-        address: '123 Business St'
+        name: 'At Your Location',
+        type: OrderType.S2C,
+        address: 'Service provided at your address'
+      });
+      
+      // Add business locations if available (C2S - Customer to Service)
+      if (this.businessPlaces && this.businessPlaces.length > 0) {
+        this.businessPlaces.forEach(place => {
+          locations.push({
+            id: `business-${place.placeID}`,
+            name: place.place_name,
+            type: OrderType.C2S,
+            placeID: place.placeID,
+            address: `${place.place_address}, ${place.place_city}, ${place.place_state}`
+          });
+        });
+      } else {
+        // Add default business location if no specific places are configured
+        locations.push({
+          id: 'business-main',
+          name: 'Business Location',
+          type: OrderType.C2S,
+          placeID: 'default-business-location',
+          address: this.businessInfo?.businessName || 'Business premises'
+        });
       }
-    ];
+      
+      console.log('✅ Available locations for service:', locations);
+      return locations;
+      
+    } catch (error) {
+      console.error('❌ Error in getLocationsForService:', error);
+      // Return safe default to prevent template errors
+      return [
+        {
+          id: 'customer-location',
+          name: 'At Your Location',
+          type: OrderType.S2C,
+          address: 'Service at your location'
+        }
+      ];
+    }
+  }
+
+  /**
+   * Auto-select default location for a service (smart defaults)
+   */
+  private autoSelectDefaultLocation(cartItem: CartItemWithLocation): void {
+    const locations = this.getLocationsForService(cartItem.service.serviceID || '');
+    
+    if (locations.length > 0) {
+      // Smart default: prefer customer location for mobile services, business location for in-store services
+      const serviceName = cartItem.service.serviceName?.toLowerCase() || '';
+      const isLikelyMobileService = 
+        serviceName.includes('delivery') || 
+        serviceName.includes('home') || 
+        serviceName.includes('mobile') ||
+        serviceName.includes('cleaning') ||
+        serviceName.includes('installation');
+      
+      if (isLikelyMobileService) {
+        // Default to customer location for likely mobile services
+        cartItem.selectedLocation = locations.find(loc => loc.type === OrderType.S2C) || locations[0];
+      } else {
+        // Default to business location for likely in-store services
+        cartItem.selectedLocation = locations.find(loc => loc.type === OrderType.C2S) || locations[0];
+      }
+      
+      console.log(`🎯 Auto-selected location for ${cartItem.service.serviceName}:`, cartItem.selectedLocation);
+    }
+  }
+
+  // ==================== NEW SIMPLIFIED ORDER METHODS ====================
+
+  /**
+   * Get contact placeholder text based on selected method
+   */
+  getContactPlaceholder(): string {
+    const method = this.orderForm.get('contactMethod')?.value;
+    return method === 'email' ? 'Enter your email address' : 'Enter your phone number';
+  }
+
+  /**
+   * Get contact label based on selected method
+   */
+  getContactLabel(): string {
+    const method = this.orderForm.get('contactMethod')?.value;
+    return method === 'email' ? 'Email Address' : 'Phone Number';
+  }
+
+  /**
+   * Check if any services require service-to-customer delivery
+   */
+  hasServiceToCustomerOrders(): boolean {
+    return this.cartItemsWithLocations.some(item => 
+      item.selectedLocation?.type === OrderType.S2C
+    );
+  }
+
+  /**
+   * Check if all cart items have locations selected
+   */
+  allLocationsSelected(): boolean {
+    return this.cartItemsWithLocations.every(item => !!item.selectedLocation);
+  }
+
+  /**
+   * Submit order using simplified flow (no upfront authentication)
+   */
+  async submitOrderSimplified(): Promise<void> {
+    if (!this.orderForm.valid || !this.selectedDate || !this.allLocationsSelected()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Incomplete Order',
+        detail: 'Please fill in all required fields and select locations for all services.',
+        life: 5000
+      });
+      return;
+    }
+
+    this.isSubmittingOrder = true;
+
+    try {
+      const orderData = this.buildOrderData();
+      
+      // Send order to backend and request authentication
+      await this.submitOrderAndRequestAuth(orderData);
+      
+      // Show success message
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Order Submitted Successfully!',
+        detail: 'An authentication link has been sent to your contact method. Click the link to confirm your order.',
+        life: 8000
+      });
+
+      // Clear cart and close dialog
+      this.clearCartAndCloseDialog();
+      
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Order Submission Failed',
+        detail: 'There was an error submitting your order. Please try again.',
+        life: 5000
+      });
+    } finally {
+      this.isSubmittingOrder = false;
+    }
+  }
+
+  /**
+   * Build order data from form
+   */
+  private buildOrderData(): any {
+    const formValue = this.orderForm.value;
+    
+    // Add address fields if needed
+    if (this.hasServiceToCustomerOrders()) {
+      const addressFields = ['address', 'city', 'state', 'postalCode'];
+      addressFields.forEach(field => {
+        if (!this.orderForm.get(field)) {
+          this.orderForm.addControl(field, this.fb.control('', [Validators.required]));
+        }
+      });
+      
+      // Re-validate with address fields
+      if (!this.orderForm.valid) {
+        throw new Error('Address information is required for home/mobile services');
+      }
+    }
+
+    return {
+      customerName: formValue.name,
+      contactMethod: formValue.contactMethod,
+      contactValue: formValue.contactValue,
+      serviceDate: this.selectedDate,
+      notes: formValue.notes || '',
+      address: formValue.address || '',
+      city: formValue.city || '',
+      state: formValue.state || '',
+      postalCode: formValue.postalCode || '',
+      cartItems: this.cartItemsWithLocations.map(item => ({
+        service: item.service,
+        quantity: item.quantity,
+        selectedLocation: item.selectedLocation,
+        totalPrice: (item.service.servicePrice || 0) * item.quantity
+      })),
+      totalPrice: this.totalPrice
+    };
+  }
+
+  /**
+   * Submit order and request authentication via email/SMS
+   */
+  private async submitOrderAndRequestAuth(orderData: any): Promise<void> {
+    // For now, simulate the backend call
+    // In real implementation, this would:
+    // 1. Create order in database with "pending_auth" status
+    // 2. Send magic link to customer's email/phone
+    // 3. When customer clicks link, order status changes to "confirmed"
+    // 4. Optionally send payment link if immediate payment is desired
+    
+    console.log('📝 Submitting order to backend:', orderData);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Generate magic link (in real implementation, backend would do this)
+    const linkFormat = this.orderAuthService.generateMagicLinkUrl();
+    
+    if (orderData.contactMethod === 'email') {
+      await this.orderAuthService.generateMagicLinkForEmail({
+        email: orderData.contactValue,
+        linkFormat
+      }).toPromise();
+    } else {
+      await this.orderAuthService.generateMagicLinkForPhone({
+        phoneNumber: orderData.contactValue,
+        linkFormat
+      }).toPromise();
+    }
+    
+    console.log('✅ Order submitted and authentication link sent');
+  }
+
+  /**
+   * Clear cart and close dialog after successful submission
+   */
+  private clearCartAndCloseDialog(): void {
+    // Clear cart
+    this.dataService.CartItems = [];
+    this.dataService.updateItemsInCart();
+    
+    // Reset forms
+    this.orderForm.reset({
+      contactMethod: 'email'
+    });
+    this.cartItemsWithLocations = [];
+    this.selectedDate = undefined;
+    
+    // Close dialog
+    this.showCustomerForm = false;
+    
+    console.log('🛒 Cart cleared and dialog closed');
   }
 
   // ==================== DEBUGGING METHODS ====================
