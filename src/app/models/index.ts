@@ -44,6 +44,7 @@ export * from './BusinessRegistration';
 export * from './BusinessSchedule';
 export * from './BussinessBasicInfo';
 export * from './Order';
+export * from './OrderAuth';
 export * from './Payment';
 export * from './ServicesForBusiness';
 export * from './user'; 

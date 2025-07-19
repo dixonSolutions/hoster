@@ -281,9 +281,10 @@ export class DataServiceService {
   }
 
   // ==================== ORDER MANAGEMENT OPERATIONS ====================
-
+  
   /**
-   * Create a new order
+   * Create a new order (DEPRECATED - Use OrderAuthService for new magic link authentication)
+   * @deprecated Use OrderAuthService.createS2COrder or OrderAuthService.createC2SOrder instead
    */
   createOrder(orderData: CreateOrderRequest): Observable<OrderResponse> {
     const headers = this.getAuthHeaders();
@@ -294,6 +295,38 @@ export class DataServiceService {
     ).pipe(
       catchError(this.handleError)
     );
+  }
+
+  /**
+   * Check if new Order Authentication system should be used
+   * @returns true if magic link authentication is available
+   */
+  shouldUseOrderAuth(): boolean {
+    // Check if we're in an environment that supports the new auth system
+    return typeof window !== 'undefined' && 
+           !!window.location.origin && 
+           !this.isLegacyMode();
+  }
+
+  /**
+   * Check if we're in legacy mode (fallback to old system)
+   */
+  private isLegacyMode(): boolean {
+    // Can be configured via environment or feature flags
+    return false; // For now, always use new system when available
+  }
+
+  /**
+   * Get order authentication recommendation
+   * @returns recommendation for which authentication system to use
+   */
+  getOrderAuthRecommendation(): 'magic-link' | 'legacy' | 'either' {
+    if (this.shouldUseOrderAuth()) {
+      return 'magic-link';
+    }
+    
+    // If OrderAuth is not available, fall back to legacy
+    return 'legacy';
   }
 
   /**
