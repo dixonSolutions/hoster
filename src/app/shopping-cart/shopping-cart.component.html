@@ -375,6 +375,41 @@
           </div>
         </div>
 
+        <!-- Payment Preference -->
+        <div class="payment-preference-section">
+          <h5><i class="pi pi-credit-card"></i> Payment Preference</h5>
+          
+          <div class="payment-options">
+            <div class="payment-option">
+              <p-radioButton 
+                inputId="payByLink" 
+                value="payment_link"
+                formControlName="paymentMethod">
+              </p-radioButton>
+              <label for="payByLink" class="payment-option-label">
+                <div class="payment-option-info">
+                  <strong>Pay by Payment Link</strong>
+                  <small>We'll send you a secure payment link to pay online immediately</small>
+                </div>
+              </label>
+            </div>
+            
+            <div class="payment-option">
+              <p-radioButton 
+                inputId="payOnSite" 
+                value="pay_on_site"
+                formControlName="paymentMethod">
+              </p-radioButton>
+              <label for="payOnSite" class="payment-option-label">
+                <div class="payment-option-info">
+                  <strong>Pay On-Site</strong>
+                  <small>Pay when you receive the service (cash, card, or other methods)</small>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <!-- Order Notes -->
         <div class="form-row">
           <p-floatlabel>

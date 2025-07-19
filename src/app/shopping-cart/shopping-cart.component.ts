@@ -25,6 +25,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { DialogModule } from 'primeng/dialog';
@@ -83,6 +84,7 @@ interface AuthStep {
     ButtonModule,
     TableModule,
     InputTextModule,
+    InputTextarea,
     InputNumberModule,
     CalendarModule,
     DialogModule,
@@ -187,6 +189,7 @@ export class ShoppingCartComponent implements OnInit{
       name: ['', [Validators.required]],
       contactMethod: ['email', [Validators.required]],
       contactValue: ['', [Validators.required]],
+      paymentMethod: ['payment_link', [Validators.required]], // Default to payment link
       notes: ['']
     });
 
@@ -1599,11 +1602,16 @@ export class ShoppingCartComponent implements OnInit{
       // Send order to backend and request authentication
       await this.submitOrderAndRequestAuth(orderData);
       
-      // Show success message
+      // Show success message based on payment preference
+      const paymentMethod = orderData.paymentMethod;
+      const successMessage = paymentMethod === 'payment_link' 
+        ? 'An authentication link has been sent to your contact method. Click to confirm your order and receive a payment link.'
+        : 'An authentication link has been sent to your contact method. Click to confirm your order (payment on-site).';
+      
       this.messageService.add({
         severity: 'success',
         summary: 'Order Submitted Successfully!',
-        detail: 'An authentication link has been sent to your contact method. Click the link to confirm your order.',
+        detail: successMessage,
         life: 8000
       });
 
@@ -1648,6 +1656,7 @@ export class ShoppingCartComponent implements OnInit{
       customerName: formValue.name,
       contactMethod: formValue.contactMethod,
       contactValue: formValue.contactValue,
+      paymentMethod: formValue.paymentMethod, // 'payment_link' or 'pay_on_site'
       serviceDate: this.selectedDate,
       notes: formValue.notes || '',
       address: formValue.address || '',
@@ -1708,7 +1717,8 @@ export class ShoppingCartComponent implements OnInit{
     
     // Reset forms
     this.orderForm.reset({
-      contactMethod: 'email'
+      contactMethod: 'email',
+      paymentMethod: 'payment_link'
     });
     this.cartItemsWithLocations = [];
     this.selectedDate = undefined;

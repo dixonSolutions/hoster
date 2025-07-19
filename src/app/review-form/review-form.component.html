@@ -65,8 +65,8 @@
       <!-- Description Textarea -->
       <div class="form-field">
         <p-floatlabel>
-          <input  
-            pInputText 
+          <textarea 
+            pInputTextarea 
             id="reviewDescription" 
             [(ngModel)]="reviewForm.description" 
             name="description"
@@ -74,7 +74,7 @@
             [maxlength]="1000"
             placeholder="Share your experience... (optional)"
             styleClass="form-textarea">
-    
+          </textarea>
           <label for="reviewDescription">Your Review (Optional)</label>
         </p-floatlabel>
         <small class="character-count">{{ getCharacterCount(reviewForm.description) }}/1000</small>
