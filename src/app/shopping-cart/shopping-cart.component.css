@@ -1420,6 +1420,10 @@ body > div:last-child:not([class*="app"]):not([id]):not([class*="ng"]) {
   font-size: 1rem;
 }
 
+.location-name.customer i {
+  color: #28a745;
+}
+
 .location-address {
   color: #6c757d;
   font-size: 0.85rem;
@@ -1776,5 +1780,605 @@ body > div:last-child:not([class*="app"]):not([id]):not([class*="ng"]) {
   
   .payment-option-info small {
     font-size: 0.8rem;
+  }
+}
+
+/* Location Selection Enhancements */
+.location-selection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e1e7ff;
+  position: relative;
+}
+
+/* Required selection indicator */
+.location-selection.required::before {
+  content: '⚠️ Location Selection Required';
+  position: absolute;
+  top: -10px;
+  right: 0;
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #ffeaa7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.location-label {
+  display: block;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+/* Multiple locations warning */
+.location-label.multiple-locations::after {
+  content: ' (Choose One)';
+  color: #dc3545;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.8rem;
+}
+
+.location-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.location-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.location-option:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+/* Selected location styling */
+.location-option.selected {
+  border-color: #667eea;
+  background: #f8f9ff;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.location-option.selected::after {
+  content: '✓ Selected';
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  background: #667eea;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Business location indicator */
+.location-option.business-location::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: -2px;
+  width: 4px;
+  height: calc(100% - 16px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+/* Customer location indicator */
+.location-option.customer-location::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: -2px;
+  width: 4px;
+  height: calc(100% - 16px);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 2px;
+}
+
+.location-option-label {
+  flex: 1;
+  cursor: pointer;
+  margin: 0;
+  padding-left: 6px;
+}
+
+.location-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 4px;
+}
+
+.location-name i {
+  color: #667eea;
+  font-size: 1rem;
+}
+
+.location-name.customer i {
+  color: #28a745;
+}
+
+.location-address {
+  color: #6c757d;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  margin-left: 24px;
+}
+
+/* Service item styling enhancements for multiple locations */
+.service-item-card.requires-location-selection {
+  border-left: 4px solid #dc3545;
+  background: #fff8f8;
+  animation: subtle-pulse 2s infinite;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { 
+    border-left-color: #dc3545; 
+    background: #fff8f8;
+  }
+  50% { 
+    border-left-color: #ff6b7d; 
+    background: #fff5f5;
+  }
+}
+
+.service-item-card.location-selected {
+  border-left: 4px solid #28a745;
+  background: #f8fff8;
+}
+
+/* Radio button enhancements for location selection */
+:host ::ng-deep .location-option .p-radiobutton .p-radiobutton-box {
+  border: 2px solid #dee2e6 !important;
+  background: white !important;
+  transition: all 0.3s ease !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+:host ::ng-deep .location-option .p-radiobutton .p-radiobutton-box.p-highlight {
+  border-color: #667eea !important;
+  background: #667eea !important;
+}
+
+:host ::ng-deep .location-option:hover .p-radiobutton .p-radiobutton-box {
+  border-color: #667eea !important;
+}
+
+:host ::ng-deep .location-option .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  background: white !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+/* Submit button state when locations not selected */
+:host ::ng-deep .modern-dialog-footer .p-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .location-options {
+    gap: 0.5rem;
+  }
+  
+  .location-option {
+    padding: 0.6rem;
+  }
+  
+  .location-name {
+    font-size: 0.9rem;
+  }
+  
+  .location-address {
+    font-size: 0.8rem;
+  }
+  
+  .location-label.multiple-locations::after {
+    display: block;
+    margin-top: 2px;
+  }
+}
+
+/* Multiple customer areas styling */
+.location-label.multiple-customer-areas::after {
+  content: ' (Choose Your Area)';
+  color: #dc3545;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.8rem;
+}
+
+.location-option.customer-area {
+  border-left: 4px solid #28a745;
+}
+
+.location-option.customer-area::before {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.location-option.customer-area .location-name {
+  color: #155724;
+  font-weight: 600;
+}
+
+.location-option.customer-area .location-address {
+  color: #155724;
+  opacity: 0.8;
+}
+
+/* Multiple areas warning */
+.service-item-card.multiple-areas-required {
+  border-left: 4px solid #ffc107;
+  background: #fff8e1;
+}
+
+.service-item-card.multiple-areas-required::after {
+  content: '⚠️ Choose Area';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ffc107;
+  color: #212529;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Enhanced Location Selection Interface */
+.location-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.location-title i {
+  color: #3b82f6;
+  font-size: 1.2rem;
+}
+
+.required-indicator {
+  color: #ef4444;
+  font-weight: bold;
+  font-size: 1.2rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.location-instruction {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+  padding: 0.5rem;
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+}
+
+.location-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.location-option-wrapper {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.location-option-wrapper.selected {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+}
+
+.location-option-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.location-option-content:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+}
+
+.location-option-wrapper.selected .location-option-content {
+  border-color: #10b981;
+  background: #ecfdf5;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.location-option-wrapper.selected .location-option-content::after {
+  content: '✓ SELECTED';
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.location-label-content {
+  flex: 1;
+  cursor: pointer;
+}
+
+.location-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.location-icon {
+  font-size: 1.4rem;
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
+.location-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem;
+  flex: 1;
+}
+
+.location-address {
+  color: #6b7280;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-left: 2rem;
+}
+
+/* Service type styling */
+.location-option-content.customer-type {
+  border-left: 5px solid #10b981;
+}
+
+.location-option-content.business-type {
+  border-left: 5px solid #3b82f6;
+}
+
+.location-option-content.customer-type .location-icon {
+  color: #10b981;
+}
+
+.location-option-content.business-type .location-icon {
+  color: #3b82f6;
+}
+
+.location-option-content.customer-type:hover {
+  border-left-color: #059669;
+  background: #f0fdf4;
+}
+
+.location-option-content.business-type:hover {
+  border-left-color: #2563eb;
+  background: #f0f9ff;
+}
+
+/* Service type chips */
+::ng-deep .mobile-service-chip {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  font-size: 0.7rem !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .visit-location-chip {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+  font-size: 0.7rem !important;
+  padding: 0.2rem 0.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* Enhanced Radio button styling */
+::ng-deep .location-radio .p-radiobutton {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.125rem;
+}
+
+::ng-deep .location-radio .p-radiobutton .p-radiobutton-box {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border: 3px solid #d1d5db !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  background: white !important;
+}
+
+::ng-deep .location-radio .p-radiobutton .p-radiobutton-box:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+  transform: scale(1.1) !important;
+}
+
+::ng-deep .location-radio .p-radiobutton.p-radiobutton-checked .p-radiobutton-box {
+  border-color: #10b981 !important;
+  background: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2) !important;
+}
+
+::ng-deep .location-radio .p-radiobutton.p-radiobutton-checked .p-radiobutton-box .p-radiobutton-icon {
+  width: 0.6rem !important;
+  height: 0.6rem !important;
+  background: white !important;
+  border-radius: 50% !important;
+  transform: none !important;
+}
+
+/* Warning message styling */
+::ng-deep .location-options-container .p-message {
+  margin-top: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #f59e0b;
+}
+
+::ng-deep .location-options-container .p-message .p-message-wrapper {
+  padding: 1rem;
+}
+
+::ng-deep .location-options-container .p-message .p-message-icon {
+  font-size: 1.2rem;
+}
+
+/* Location type sections */
+.location-type-section {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.location-type-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.location-type-title i {
+  font-size: 1.1rem;
+}
+
+/* Dropdown styling */
+::ng-deep .location-dropdown {
+  width: 100%;
+}
+
+::ng-deep .customer-dropdown .p-dropdown {
+  border-color: #10b981;
+}
+
+::ng-deep .business-dropdown .p-dropdown {
+  border-color: #3b82f6;
+}
+
+::ng-deep .location-dropdown .p-dropdown {
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  min-height: 3rem;
+}
+
+::ng-deep .location-dropdown .p-dropdown:hover {
+  border-color: #6b7280;
+}
+
+::ng-deep .location-dropdown .p-dropdown.p-focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dropdown-location-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.dropdown-location-item i {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.location-details {
+  flex: 1;
+}
+
+.location-details .location-name {
+  font-weight: 600;
+  color: #1f2937;
+  display: block;
+}
+
+.location-details .location-address {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .location-option-content {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+  
+  .location-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .location-address {
+    margin-left: 0;
+  }
+  
+  .location-option-wrapper.selected .location-option-content::after {
+    position: static;
+    align-self: flex-start;
+    margin-top: 0.5rem;
   }
 }

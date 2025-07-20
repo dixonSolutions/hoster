@@ -65,6 +65,8 @@ interface OrderData {
 
 interface CartItemWithLocation extends CartItem {
   selectedLocation?: ServiceLocation;
+  selectedCustomerLocation?: ServiceLocation;
+  selectedBusinessLocation?: ServiceLocation;
 }
 
 interface AuthStep {
@@ -114,6 +116,9 @@ export class ShoppingCartComponent implements OnInit{
   public orderAuthService = inject(OrderAuthService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+
+  // Make OrderType available in template
+  OrderType = OrderType;
   
   customerForm: FormGroup;
   authForm: FormGroup;
@@ -153,8 +158,14 @@ export class ShoppingCartComponent implements OnInit{
   
   // Location selection properties
   businessPlaces: BusinessPlaces[] = [];
+  businessAddresses: any[] = []; // Store specific addresses from business registration
+  areaSpecifications: any[] = []; // Store area specifications for customer locations
+  servicePlaceAssignments: any[] = []; // Store service to place assignments
   servicesWithLocations: ServiceWithLocations[] = [];
   cartItemsWithLocations: CartItemWithLocation[] = [];
+  
+  // Cached location data to avoid repeated calculations
+  private locationCache: Map<string, { customerLocations: ServiceLocation[], businessLocations: ServiceLocation[] }> = new Map();
   
   // Auth type selection
   authTypes = [
@@ -395,6 +406,20 @@ export class ShoppingCartComponent implements OnInit{
     if (cachedBusinessData) {
       this.businessServices = cachedBusinessData.services;
       this.businessInfo = cachedBusinessData.basicInfo;
+        this.businessAddresses = cachedBusinessData.specificAddresses || [];
+        this.areaSpecifications = cachedBusinessData.areaSpecifications || [];
+        this.servicePlaceAssignments = cachedBusinessData.servicePlaceAssignments || [];
+        
+        // Clear location cache when cached data is used
+        this.locationCache.clear();
+        
+        console.log('Using cached business data:', {
+          services: this.businessServices.length,
+          addresses: this.businessAddresses.length,
+          areas: this.areaSpecifications.length,
+          assignments: this.servicePlaceAssignments.length
+        });
+      
       // Load available days if we have business ID
       if (this.businessInfo?.businessID) {
         this.loadAvailableDays(this.businessInfo.businessID);
@@ -408,8 +433,21 @@ export class ShoppingCartComponent implements OnInit{
       next: (data) => {
         this.businessServices = data.services;
         this.businessInfo = data.basicInfo;
+        this.businessAddresses = data.specificAddresses || [];
+        this.areaSpecifications = data.areaSpecifications || [];
+        this.servicePlaceAssignments = data.servicePlaceAssignments || [];
         this.isLoadingBusinessData = false;
-        console.log('Business data loaded:', data);
+        
+        // Clear location cache when new data is loaded
+        this.locationCache.clear();
+        
+        console.log('Business data loaded:', {
+          services: data.services.length,
+          addresses: this.businessAddresses.length,
+          areas: this.areaSpecifications.length,
+          assignments: this.servicePlaceAssignments.length,
+          basicInfo: data.basicInfo
+        });
         
         // Load available days after business data is loaded
         if (this.businessInfo?.businessID) {
@@ -938,10 +976,13 @@ export class ShoppingCartComponent implements OnInit{
    * Initialize cart with smart location defaults
    */
   initializeCartWithLocations(): void {
+    // Pre-compute location data for all services to avoid repeated calculations
+    this.precomputeAllLocationData();
+    
     this.cartItemsWithLocations = this.dataService.CartItems.map(item => {
       const cartItemWithLocation: CartItemWithLocation = {
-        ...item,
-        selectedLocation: undefined
+      ...item,
+      selectedLocation: undefined
       };
       
       // Auto-select smart default location
@@ -950,7 +991,31 @@ export class ShoppingCartComponent implements OnInit{
       return cartItemWithLocation;
     });
     
+    // Initialize form fields based on selected locations with delay to ensure proper DOM rendering
+    setTimeout(() => {
+      this.updateFormFieldsBasedOnSelections();
+    }, 100);
+    
     console.log('🛒 Initialized cart with smart location defaults:', this.cartItemsWithLocations);
+  }
+
+  /**
+   * Pre-compute location data for all services in cart to avoid repeated calculations
+   */
+  private precomputeAllLocationData(): void {
+    console.log('🔄 Pre-computing location data for all cart services...');
+    
+    const uniqueServiceIds = new Set(
+      this.dataService.CartItems.map(item => item.service.serviceID).filter(id => id)
+    );
+    
+    uniqueServiceIds.forEach(serviceId => {
+      if (serviceId) {
+        this.getLocationsForService(serviceId);
+      }
+    });
+    
+    console.log(`✅ Pre-computed location data for ${uniqueServiceIds.size} unique services`);
   }
 
   /**
@@ -1388,9 +1453,11 @@ export class ShoppingCartComponent implements OnInit{
     cartItem.selectedLocation = location;
     
     // Check if any S2C locations are selected and add address fields if needed
+    // Use setTimeout to ensure DOM updates are processed
+    setTimeout(() => {
     this.updateFormFieldsBasedOnSelections();
-    
     this.validateLocationSelections();
+    }, 0);
   }
 
   /**
@@ -1403,28 +1470,28 @@ export class ShoppingCartComponent implements OnInit{
 
     console.log('🔍 Checking if address fields needed:', {
       hasS2CServices,
-      currentAddressControl: !!this.customerForm.get('address')
+      currentAddressControl: !!this.orderForm.get('address')
     });
 
-    if (hasS2CServices && !this.customerForm.get('address')) {
+    if (hasS2CServices && !this.orderForm.get('address')) {
       console.log('➕ Adding address fields to form');
       this.addAddressFieldsToForm();
-    } else if (!hasS2CServices && this.customerForm.get('address')) {
+    } else if (!hasS2CServices && this.orderForm.get('address')) {
       console.log('➖ Removing address fields from form');
       this.removeAddressFieldsFromForm();
     }
   }
 
   /**
-   * Add address fields to customer form when S2C services are selected
+   * Add address fields to order form when S2C services are selected
    */
   private addAddressFieldsToForm(): void {
-    if (!this.customerForm.get('address')) {
-      this.customerForm.addControl('address', this.fb.control('', [Validators.required]));
-      this.customerForm.addControl('city', this.fb.control('', [Validators.required]));
-      this.customerForm.addControl('state', this.fb.control('', [Validators.required]));
-      this.customerForm.addControl('postalCode', this.fb.control('', [Validators.required]));
-      this.customerForm.addControl('country', this.fb.control('Australia', [Validators.required]));
+    if (!this.orderForm.get('address')) {
+      this.orderForm.addControl('address', this.fb.control('', [Validators.required]));
+      this.orderForm.addControl('city', this.fb.control('', [Validators.required]));
+      this.orderForm.addControl('state', this.fb.control('', [Validators.required]));
+      this.orderForm.addControl('postalCode', this.fb.control('', [Validators.required]));
+      this.orderForm.addControl('country', this.fb.control('Australia', [Validators.required]));
       
       // Load saved address data if available
       const savedAddress = this.cookieService.get('customerAddress');
@@ -1433,7 +1500,7 @@ export class ShoppingCartComponent implements OnInit{
       const savedPostalCode = this.cookieService.get('customerPostalCode');
       
       if (savedAddress && savedCity && savedState && savedPostalCode) {
-        this.customerForm.patchValue({
+        this.orderForm.patchValue({
           address: savedAddress,
           city: savedCity,
           state: savedState,
@@ -1444,13 +1511,13 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
-   * Remove address fields from customer form when no S2C services are selected
+   * Remove address fields from order form when no S2C services are selected
    */
   private removeAddressFieldsFromForm(): void {
     const addressFields = ['address', 'city', 'state', 'postalCode', 'country'];
     addressFields.forEach(field => {
-      if (this.customerForm.get(field)) {
-        this.customerForm.removeControl(field);
+      if (this.orderForm.get(field)) {
+        this.orderForm.removeControl(field);
       }
     });
   }
@@ -1462,88 +1529,176 @@ export class ShoppingCartComponent implements OnInit{
     return this.cartItemsWithLocations.every(item => !!item.selectedLocation);
   }
 
-  /**
-   * Get available locations for a service based on actual business data
+    /**
+   * Get available locations for a service with caching to prevent repeated calculations
    */
-  getLocationsForService(serviceId: string): ServiceLocation[] {
+  getLocationsForService(serviceId: string): { customerLocations: ServiceLocation[], businessLocations: ServiceLocation[] } {
+    // Check cache first
+    if (this.locationCache.has(serviceId)) {
+      return this.locationCache.get(serviceId)!;
+    }
+    
     try {
-      console.log('📍 Getting locations for service:', serviceId);
+      console.log('📍 Computing locations for service (first time):', serviceId);
       
-      const locations: ServiceLocation[] = [];
+      // Find service place assignments with flexible ID matching
+      let serviceAssignments = this.servicePlaceAssignments.filter(
+        assignment => assignment.serviceID === serviceId
+      );
       
-      // Always add customer location option (S2C - Service to Customer)
-      locations.push({
-        id: 'customer-location',
-        name: 'At Your Location',
-        type: OrderType.S2C,
-        address: 'Service provided at your address'
-      });
-      
-      // Add business locations if available (C2S - Customer to Service)
-      if (this.businessPlaces && this.businessPlaces.length > 0) {
-        this.businessPlaces.forEach(place => {
-          locations.push({
-            id: `business-${place.placeID}`,
-            name: place.place_name,
-            type: OrderType.C2S,
-            placeID: place.placeID,
-            address: `${place.place_address}, ${place.place_city}, ${place.place_state}`
-          });
+      // If no exact match, try flexible matching (with/without SRV_ prefix)
+      if (serviceAssignments.length === 0) {
+        console.log('🔍 No exact match, trying flexible ID matching...');
+        
+        // Try matching without SRV_ prefix
+        const serviceIdWithoutPrefix = serviceId.replace(/^SRV_/, '');
+        const serviceIdWithPrefix = serviceId.startsWith('SRV_') ? serviceId : `SRV_${serviceId}`;
+        
+        serviceAssignments = this.servicePlaceAssignments.filter(assignment => {
+          const assignmentIdWithoutPrefix = assignment.serviceID.replace(/^SRV_/, '');
+          const assignmentIdWithPrefix = assignment.serviceID.startsWith('SRV_') ? assignment.serviceID : `SRV_${assignment.serviceID}`;
+          
+          return assignment.serviceID === serviceIdWithPrefix ||
+                 assignment.serviceID === serviceIdWithoutPrefix ||
+                 assignmentIdWithoutPrefix === serviceIdWithoutPrefix ||
+                 assignmentIdWithPrefix === serviceIdWithPrefix;
         });
-      } else {
-        // Add default business location if no specific places are configured
-        locations.push({
-          id: 'business-main',
-          name: 'Business Location',
-          type: OrderType.C2S,
-          placeID: 'default-business-location',
-          address: this.businessInfo?.businessName || 'Business premises'
-        });
+        
+        if (serviceAssignments.length > 0) {
+          console.log('✅ Found match with flexible ID matching');
+        }
       }
       
-      console.log('✅ Available locations for service:', locations);
-      return locations;
+      // If still no match, try fallback matching strategies
+      if (serviceAssignments.length === 0) {
+        console.log('🔍 No ID match, trying fallback matching strategies...');
+        
+        const currentService = this.businessServices.find(s => s.serviceID === serviceId);
+        if (currentService) {
+          console.log('📝 Service name available for potential matching:', currentService.serviceName);
+          
+          // Strategy 1: If there's only one service and one assignment, match them
+          if (this.businessServices.length === 1 && this.servicePlaceAssignments.length === 1) {
+            console.log('🎯 Single service + single assignment detected, matching them');
+            serviceAssignments = [...this.servicePlaceAssignments];
+          }
+          // Strategy 2: Try to match by service index (same position in arrays)
+          else {
+            const serviceIndex = this.businessServices.findIndex(s => s.serviceID === serviceId);
+            if (serviceIndex >= 0 && serviceIndex < this.servicePlaceAssignments.length) {
+              console.log(`🎯 Trying to match by index position: ${serviceIndex}`);
+              serviceAssignments = [this.servicePlaceAssignments[serviceIndex]];
+            }
+          }
+          
+          if (serviceAssignments.length > 0) {
+            console.log('✅ Found match using fallback strategy');
+          }
+        }
+      }
+      
+      console.log(`🔗 Found ${serviceAssignments.length} place assignments for service ${serviceId}`);
+      
+      // Debug: show all assignment IDs vs current service ID
+      if (serviceAssignments.length === 0) {
+        console.log('🚨 No assignments found. All assignment serviceIDs:', 
+          this.servicePlaceAssignments.map(a => a.serviceID));
+        console.log('🔍 Looking for serviceID:', serviceId);
+        console.log('🔍 Available services:', this.businessServices.map(s => ({ id: s.serviceID, name: s.serviceName })));
+      }
+      
+      const customerLocations: ServiceLocation[] = [];
+      const businessLocations: ServiceLocation[] = [];
+      
+      // Process ONLY assigned places
+      serviceAssignments.forEach(assignment => {
+        console.log(`🔗 Processing assignment: ${assignment.placeID}`);
+        
+        // Check if this placeID corresponds to an area specification (customer location)
+        const area = this.areaSpecifications.find(area => area.placeID === assignment.placeID);
+        if (area) {
+          console.log(`✅ Found customer area: ${area.city}, ${area.state}`);
+          customerLocations.push({
+            id: `customer-${area.placeID}`,
+            name: this.formatAreaName(area),
+            type: OrderType.S2C,
+            placeID: area.placeID,
+            address: this.formatAreaDescription(area)
+          });
+        }
+        
+        // Check if this placeID corresponds to a specific address (business location)
+        const address = this.businessAddresses.find(addr => addr.placeID === assignment.placeID);
+        if (address) {
+          console.log(`✅ Found business address: ${address.streetAddress}, ${address.city}`);
+          businessLocations.push({
+            id: `business-${address.placeID}`,
+            name: `${address.city || address.streetAddress}`,
+            type: OrderType.C2S,
+            placeID: address.placeID,
+            address: `${address.streetAddress}, ${address.city}, ${address.state} ${address.postalCode}`
+          });
+        }
+      });
+      
+      const result = { customerLocations, businessLocations };
+      
+      console.log(`📦 Cached result for ${serviceId}: ${customerLocations.length} customer, ${businessLocations.length} business`);
+      
+      // Cache the result
+      this.locationCache.set(serviceId, result);
+      
+      return result;
       
     } catch (error) {
       console.error('❌ Error in getLocationsForService:', error);
-      // Return safe default to prevent template errors
-      return [
-        {
-          id: 'customer-location',
-          name: 'At Your Location',
-          type: OrderType.S2C,
-          address: 'Service at your location'
-        }
-      ];
+      const emptyResult = { customerLocations: [], businessLocations: [] };
+      this.locationCache.set(serviceId, emptyResult);
+      return emptyResult;
     }
   }
 
   /**
-   * Auto-select default location for a service (smart defaults)
+   * Format area name for display
+   */
+  private formatAreaName(area: any): string {
+    const parts = [];
+    if (area.city) parts.push(area.city);
+    if (area.state) parts.push(area.state);
+    if (area.postalCode) parts.push(area.postalCode);
+    if (area.country && area.country !== 'Australia') parts.push(area.country);
+    
+    return parts.join(', ') || 'Service Area';
+  }
+
+  /**
+   * Format area description for display
+   */
+  private formatAreaDescription(area: any): string {
+    const parts = [];
+    if (area.city) parts.push(`City: ${area.city}`);
+    if (area.state) parts.push(`State: ${area.state}`);
+    if (area.postalCode) parts.push(`Postal Code: ${area.postalCode}`);
+    if (area.country) parts.push(`Country: ${area.country}`);
+    
+    return parts.join(', ') || 'Service available in your area';
+  }
+
+  /**
+   * Auto-select default location for a service (never auto-select - always require user choice)
    */
   private autoSelectDefaultLocation(cartItem: CartItemWithLocation): void {
-    const locations = this.getLocationsForService(cartItem.service.serviceID || '');
+    const locationData = this.getLocationsForService(cartItem.service.serviceID || '');
+    const { customerLocations, businessLocations } = locationData;
     
-    if (locations.length > 0) {
-      // Smart default: prefer customer location for mobile services, business location for in-store services
-      const serviceName = cartItem.service.serviceName?.toLowerCase() || '';
-      const isLikelyMobileService = 
-        serviceName.includes('delivery') || 
-        serviceName.includes('home') || 
-        serviceName.includes('mobile') ||
-        serviceName.includes('cleaning') ||
-        serviceName.includes('installation');
-      
-      if (isLikelyMobileService) {
-        // Default to customer location for likely mobile services
-        cartItem.selectedLocation = locations.find(loc => loc.type === OrderType.S2C) || locations[0];
-      } else {
-        // Default to business location for likely in-store services
-        cartItem.selectedLocation = locations.find(loc => loc.type === OrderType.C2S) || locations[0];
-      }
-      
-      console.log(`🎯 Auto-selected location for ${cartItem.service.serviceName}:`, cartItem.selectedLocation);
-    }
+    console.log(`🎯 Auto-selection for "${cartItem.service.serviceName}":`, {
+      customerLocations: customerLocations.length,
+      businessLocations: businessLocations.length
+    });
+    
+    // Never auto-select - always require explicit user choice
+    cartItem.selectedLocation = undefined;
+    console.log(`⚠️ No auto-selection for "${cartItem.service.serviceName}" - user must choose explicitly`);
   }
 
   // ==================== NEW SIMPLIFIED ORDER METHODS ====================
@@ -1574,10 +1729,72 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
+   * Check if a service has any locations available
+   */
+  hasLocationsForService(serviceId: string): boolean {
+    const locationData = this.getLocationsForService(serviceId);
+    return locationData.customerLocations.length > 0 || locationData.businessLocations.length > 0;
+  }
+
+  /**
+   * Get customer locations for a service
+   */
+  getCustomerLocationsForService(serviceId: string): ServiceLocation[] {
+    const locationData = this.getLocationsForService(serviceId);
+    return locationData.customerLocations;
+  }
+
+  /**
+   * Get business locations for a service
+   */
+  getBusinessLocationsForService(serviceId: string): ServiceLocation[] {
+    const locationData = this.getLocationsForService(serviceId);
+    return locationData.businessLocations;
+  }
+
+  /**
+   * Handle customer location selection
+   */
+  onCustomerLocationSelected(cartItem: CartItemWithLocation, location: ServiceLocation): void {
+    cartItem.selectedCustomerLocation = location;
+    cartItem.selectedBusinessLocation = undefined; // Clear other type
+    cartItem.selectedLocation = location;
+    console.log('📍 Customer location selected:', location.name);
+  }
+
+  /**
+   * Handle business location selection
+   */
+  onBusinessLocationSelected(cartItem: CartItemWithLocation, location: ServiceLocation): void {
+    cartItem.selectedBusinessLocation = location;
+    cartItem.selectedCustomerLocation = undefined; // Clear other type
+    cartItem.selectedLocation = location;
+    console.log('📍 Business location selected:', location.name);
+  }
+
+  /**
+   * Check if a service has multiple customer areas requiring selection
+   */
+  hasMultipleCustomerAreas(serviceId: string): boolean {
+    const locationData = this.getLocationsForService(serviceId);
+    return locationData.customerLocations.length > 1;
+  }
+
+  /**
    * Check if all cart items have locations selected
    */
   allLocationsSelected(): boolean {
-    return this.cartItemsWithLocations.every(item => !!item.selectedLocation);
+    const allSelected = this.cartItemsWithLocations.every(item => !!item.selectedLocation);
+    
+    if (!allSelected) {
+      const unselectedServices = this.cartItemsWithLocations
+        .filter(item => !item.selectedLocation)
+        .map(item => item.service.serviceName);
+        
+      console.log('⚠️ Some services missing location selection:', unselectedServices);
+    }
+    
+    return allSelected;
   }
 
   /**
@@ -1585,11 +1802,26 @@ export class ShoppingCartComponent implements OnInit{
    */
   async submitOrderSimplified(): Promise<void> {
     if (!this.orderForm.valid || !this.selectedDate || !this.allLocationsSelected()) {
+      // Provide specific feedback about what's missing
+      const missingFields = [];
+      if (!this.orderForm.valid) {
+        missingFields.push('required customer information');
+      }
+      if (!this.selectedDate) {
+        missingFields.push('service date');
+      }
+      if (!this.allLocationsSelected()) {
+        const unselectedServices = this.cartItemsWithLocations
+          .filter(item => !item.selectedLocation)
+          .map(item => item.service.serviceName);
+        missingFields.push(`location selection for: ${unselectedServices.join(', ')}`);
+      }
+
       this.messageService.add({
         severity: 'warn',
         summary: 'Incomplete Order',
-        detail: 'Please fill in all required fields and select locations for all services.',
-        life: 5000
+        detail: `Please complete: ${missingFields.join('; ')}.`,
+        life: 7000
       });
       return;
     }

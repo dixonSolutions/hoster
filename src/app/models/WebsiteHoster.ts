@@ -11,6 +11,8 @@ export interface BusinessRegistrationDto {
   services: ServiceDto[];
   specificAddresses: SpecificAddressDto[];
   areaSpecifications: AreaSpecificationDto[];
+  unifiedPlaces: any[];
+  servicePlaceAssignments: ServicePlaceAssignmentDto[];
   staff: StaffMemberDto[];
 }
 
@@ -57,4 +59,11 @@ export interface StaffMemberDto {
   lastName?: string;
   role: string;
   isActive: boolean;
+}
+
+export interface ServicePlaceAssignmentDto {
+  businessID: string;
+  serviceID: string;
+  placeID: string;
+  serviceType: string;
 } 

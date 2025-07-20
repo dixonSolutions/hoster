@@ -227,7 +227,10 @@
       <!-- Service Items with Location Selection -->
       <div class="service-items">
         <div *ngFor="let cartItem of cartItemsWithLocations; let i = index; trackBy: trackCartItem" 
-             class="service-item-card">
+             class="service-item-card"
+             [class.requires-location-selection]="!cartItem.selectedLocation"
+             [class.location-selected]="cartItem.selectedLocation"
+             [class.multiple-areas-required]="!cartItem.selectedLocation && hasMultipleCustomerAreas(cartItem.service.serviceID || '')">
           <div class="service-info">
             <div class="service-header">
               <h5>{{ cartItem.service.serviceName }}</h5>
@@ -239,28 +242,72 @@
           </div>
           
           <!-- Location Selection -->
-          <div class="location-selection">
-            <label class="location-label">Service Location:</label>
-            <div class="location-options">
-              <div *ngFor="let location of getLocationsForService(cartItem.service.serviceID || ''); let j = index; trackBy: trackLocation" 
-                   class="location-option">
-                <p-radioButton 
-                  [value]="location" 
-                  [(ngModel)]="cartItem.selectedLocation" 
-                  [name]="'location-' + i"
-                  [inputId]="'location-' + i + '-' + j"
-                  (onClick)="onLocationSelected(cartItem, location)">
-                </p-radioButton>
-                <label [for]="'location-' + i + '-' + j" class="location-option-label">
-                  <div class="location-name">
-                    <i class="pi" [class.pi-home]="location.type === 'service-to-customer'" 
-                       [class.pi-building]="location.type === 'customer-to-service'"></i>
-                    {{ location.name }}
+          <div class="location-selection" 
+               [class.required]="!cartItem.selectedLocation"
+               *ngIf="hasLocationsForService(cartItem.service.serviceID || '')">
+            <h5 class="location-title">
+              <i class="pi pi-map-marker"></i>
+              Choose Service Location:
+              <span *ngIf="!cartItem.selectedLocation" class="required-indicator">*</span>
+            </h5>
+            
+            <!-- Customer Location Type -->
+            <div *ngIf="getCustomerLocationsForService(cartItem.service.serviceID || '').length > 0" 
+                 class="location-type-section">
+              <h6 class="location-type-title">
+                <i class="pi pi-home"></i> At Your Location
+              </h6>
+              <p-dropdown 
+                [options]="getCustomerLocationsForService(cartItem.service.serviceID || '')"
+                [(ngModel)]="cartItem.selectedCustomerLocation"
+                optionLabel="name"
+                optionValue="self"
+                placeholder="Select your area"
+                styleClass="location-dropdown customer-dropdown"
+                (onChange)="onCustomerLocationSelected(cartItem, $event.value)">
+                <ng-template pTemplate="item" let-location>
+                  <div class="dropdown-location-item">
+                    <i class="pi pi-home"></i>
+                    <div class="location-details">
+                      <span class="location-name">{{ location.name }}</span>
+                      <small class="location-address">{{ location.address }}</small>
+                    </div>
                   </div>
-                  <small class="location-address">{{ location.address }}</small>
-                </label>
-              </div>
+                </ng-template>
+              </p-dropdown>
             </div>
+            
+            <!-- Business Location Type -->
+            <div *ngIf="getBusinessLocationsForService(cartItem.service.serviceID || '').length > 0" 
+                 class="location-type-section">
+              <h6 class="location-type-title">
+                <i class="pi pi-building"></i> Visit Business Location
+              </h6>
+              <p-dropdown 
+                [options]="getBusinessLocationsForService(cartItem.service.serviceID || '')"
+                [(ngModel)]="cartItem.selectedBusinessLocation"
+                optionLabel="name"
+                optionValue="self"
+                placeholder="Select business location"
+                styleClass="location-dropdown business-dropdown"
+                (onChange)="onBusinessLocationSelected(cartItem, $event.value)">
+                <ng-template pTemplate="item" let-location>
+                  <div class="dropdown-location-item">
+                    <i class="pi pi-building"></i>
+                    <div class="location-details">
+                      <span class="location-name">{{ location.name }}</span>
+                      <small class="location-address">{{ location.address }}</small>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-dropdown>
+            </div>
+            
+            <!-- Warning message if no selection -->
+            <p-message *ngIf="!cartItem.selectedLocation" 
+                       severity="warn" 
+                       text="Please select a location to continue">
+            </p-message>
           </div>
         </div>
       </div>
