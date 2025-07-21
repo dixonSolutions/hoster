@@ -7,6 +7,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { WebsiteHosterService } from '../services/website-hoster.service';
 import { ServiceDto, BusinessBasicInfoDto } from '../models/WebsiteHoster';
 import { OrderAuthService } from '../services/order-auth.service';
+import { AnonymousOrderService } from '../services/anonymous-order.service';
 import { BusinessPlaces } from '../models/BusinessPlaces';
 import { 
   OrderType, 
@@ -19,6 +20,12 @@ import {
   ServiceSelection,
   AuthToken
 } from '../models/OrderAuth';
+import {
+  PaymentPreference,
+  AnonymousOrderResponse,
+  AnonymousOrderItem,
+  OrderFormData
+} from '../models/AnonymousOrder';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
@@ -114,6 +121,7 @@ export class ShoppingCartComponent implements OnInit{
   public dataService = inject(DataServiceService);
   public websiteHosterService = inject(WebsiteHosterService);
   public orderAuthService = inject(OrderAuthService);
+  public anonymousOrderService = inject(AnonymousOrderService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
@@ -195,12 +203,12 @@ export class ShoppingCartComponent implements OnInit{
       name: ['', [Validators.required]]
     });
 
-    // Simplified order form for new flow
+    // Simplified order form for new flow with anonymous order support
     this.orderForm = this.fb.group({
       name: ['', [Validators.required]],
       contactMethod: ['email', [Validators.required]],
       contactValue: ['', [Validators.required]],
-      paymentMethod: ['payment_link', [Validators.required]], // Default to payment link
+      paymentPreference: ['pay_now', [Validators.required]], // Default to pay now
       notes: ['']
     });
 
@@ -704,6 +712,9 @@ export class ShoppingCartComponent implements OnInit{
       
       // Load saved data from cookies for the new form
       this.loadSavedDataToOrderForm();
+      
+      // Validate location selections before showing form
+      this.validateAndRefreshLocationSelections();
       
       // Open the new simplified dialog
       this.showCustomerForm = true;
@@ -1685,7 +1696,7 @@ export class ShoppingCartComponent implements OnInit{
   }
 
   /**
-   * Auto-select default location for a service (never auto-select - always require user choice)
+   * Auto-select default location for a service (auto-select if only one option available)
    */
   private autoSelectDefaultLocation(cartItem: CartItemWithLocation): void {
     const locationData = this.getLocationsForService(cartItem.service.serviceID || '');
@@ -1696,9 +1707,26 @@ export class ShoppingCartComponent implements OnInit{
       businessLocations: businessLocations.length
     });
     
-    // Never auto-select - always require explicit user choice
-    cartItem.selectedLocation = undefined;
-    console.log(`⚠️ No auto-selection for "${cartItem.service.serviceName}" - user must choose explicitly`);
+    const totalLocations = customerLocations.length + businessLocations.length;
+    
+    // Auto-select if there's only one location option
+    if (totalLocations === 1) {
+      const singleLocation = customerLocations.length > 0 ? customerLocations[0] : businessLocations[0];
+      cartItem.selectedLocation = singleLocation;
+      
+      // Also set the appropriate specific location for UI binding
+      if (customerLocations.length > 0) {
+        cartItem.selectedCustomerLocation = singleLocation;
+      } else {
+        cartItem.selectedBusinessLocation = singleLocation;
+      }
+      
+      console.log(`✅ Auto-selected single location for "${cartItem.service.serviceName}": ${singleLocation.name}`);
+    } else {
+      // Multiple options - require user choice
+      cartItem.selectedLocation = undefined;
+      console.log(`⚠️ Multiple options for "${cartItem.service.serviceName}" - user must choose explicitly`);
+    }
   }
 
   // ==================== NEW SIMPLIFIED ORDER METHODS ====================
@@ -1835,10 +1863,10 @@ export class ShoppingCartComponent implements OnInit{
       await this.submitOrderAndRequestAuth(orderData);
       
       // Show success message based on payment preference
-      const paymentMethod = orderData.paymentMethod;
-      const successMessage = paymentMethod === 'payment_link' 
-        ? 'An authentication link has been sent to your contact method. Click to confirm your order and receive a payment link.'
-        : 'An authentication link has been sent to your contact method. Click to confirm your order (payment on-site).';
+      const paymentPreference = orderData.paymentPreference;
+      const successMessage = paymentPreference === 'pay_now' 
+        ? 'Your order has been submitted! A payment link has been sent to your contact method.'
+        : 'Your order has been submitted! A confirmation link has been sent to your contact method. Click to confirm and receive your payment link when ready.';
       
       this.messageService.add({
         severity: 'success',
@@ -1888,7 +1916,7 @@ export class ShoppingCartComponent implements OnInit{
       customerName: formValue.name,
       contactMethod: formValue.contactMethod,
       contactValue: formValue.contactValue,
-      paymentMethod: formValue.paymentMethod, // 'payment_link' or 'pay_on_site'
+      paymentPreference: formValue.paymentPreference, // 'pay_now' or 'pay_later'
       serviceDate: this.selectedDate,
       notes: formValue.notes || '',
       address: formValue.address || '',
@@ -1990,4 +2018,261 @@ export class ShoppingCartComponent implements OnInit{
     this.authToken = null;
     this.currentAuthStep = { step: 'auth', title: 'Authentication' };
   }
+
+  /**
+   * Get workflow message for payment preference display
+   */
+  getWorkflowMessage(): string {
+    const paymentPreference = this.orderForm.get('paymentPreference')?.value as PaymentPreference;
+    const contactMethod = this.orderForm.get('contactMethod')?.value;
+    
+    if (!paymentPreference) {
+      return '';
+    }
+
+    const validation = this.anonymousOrderService.validateEmailOrPhone(
+      this.orderForm.get('contactValue')?.value || ''
+    );
+    
+    return this.anonymousOrderService.getWorkflowMessage(
+      paymentPreference,
+      validation.type === 'email' ? 'email' : 'phone'
+    );
+  }
+
+  // ==================== ANONYMOUS ORDER SUBMISSION ====================
+
+  /**
+   * Submit order using the new anonymous order system
+   */
+  async submitOrderAnonymous(): Promise<void> {
+    console.log('🛒 Starting anonymous order submission...');
+    this.isSubmittingOrder = true;
+
+    try {
+      // Build form data
+      const formValue = this.orderForm.value;
+      const formData: OrderFormData = {
+        customerName: formValue.name,
+        emailOrPhone: formValue.contactValue,
+        paymentPreference: formValue.paymentPreference,
+        serviceDate: this.selectedDate!,
+        notes: formValue.notes,
+        address: formValue.address,
+        city: formValue.city,
+        state: formValue.state,
+        postalCode: formValue.postalCode,
+        country: formValue.country || 'Australia'
+      };
+
+      // Validate form data
+      const hasS2CServices = this.hasServiceToCustomerOrders();
+      const validationErrors = this.anonymousOrderService.validateOrderForm(formData, hasS2CServices);
+      
+      if (validationErrors.length > 0) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Validation Error',
+          detail: validationErrors.join(', '),
+          life: 5000
+        });
+        return;
+      }
+
+      // Convert cart items to anonymous order format
+      const orderItems: AnonymousOrderItem[] = this.cartItemsWithLocations.map(cartItem => ({
+        service: {
+          serviceID: cartItem.service.serviceID || '',
+          businessID: cartItem.service.businessID || this.businessInfo?.businessID || '',
+          serviceName: cartItem.service.serviceName || '',
+          servicePrice: cartItem.service.servicePrice || 0,
+          servicePriceCurrencyUnit: cartItem.service.servicePriceCurrencyUnit || 'AUD'
+        },
+        quantity: cartItem.quantity,
+        selectedLocation: cartItem.selectedLocation ? {
+          type: cartItem.selectedLocation.type === OrderType.S2C ? 'S2C' : 'C2S',
+          placeID: cartItem.selectedLocation.placeID
+        } : undefined
+      }));
+
+      // Group orders by type and submit
+      const s2cItems = orderItems.filter(item => item.selectedLocation?.type === 'S2C');
+      const c2sItems = orderItems.filter(item => item.selectedLocation?.type === 'C2S');
+
+      const orderPromises: Promise<AnonymousOrderResponse>[] = [];
+
+      // Submit S2C orders
+      if (s2cItems.length > 0) {
+        const s2cRequest = this.anonymousOrderService.buildS2COrderRequest(
+          formData,
+          s2cItems,
+          this.calculateTotalForItems(s2cItems)
+        );
+        orderPromises.push(this.anonymousOrderService.createS2COrder(s2cRequest).toPromise() as Promise<AnonymousOrderResponse>);
+      }
+
+      // Submit C2S orders (group by place)
+      const c2sOrdersByPlace = this.groupAnonymousC2SOrdersByPlace(c2sItems);
+      for (const placeId in c2sOrdersByPlace) {
+        const c2sRequest = this.anonymousOrderService.buildC2SOrderRequest(
+          formData,
+          c2sOrdersByPlace[placeId],
+          this.calculateTotalForItems(c2sOrdersByPlace[placeId]),
+          placeId
+        );
+        orderPromises.push(this.anonymousOrderService.createC2SOrder(c2sRequest).toPromise() as Promise<AnonymousOrderResponse>);
+      }
+
+      // Execute all order submissions
+      console.log(`📋 Submitting ${orderPromises.length} anonymous order(s)...`);
+      const responses = await Promise.all(orderPromises);
+
+      // Handle successful submissions
+      this.handleAnonymousOrderSuccess(responses, formData.paymentPreference);
+
+    } catch (error: any) {
+      console.error('❌ Anonymous order submission failed:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Order Submission Failed',
+        detail: error.message || 'There was an error submitting your order. Please try again.',
+        life: 5000
+      });
+    } finally {
+      this.isSubmittingOrder = false;
+    }
+  }
+
+  /**
+   * Handle successful anonymous order submissions
+   */
+  private handleAnonymousOrderSuccess(responses: AnonymousOrderResponse[], paymentPreference: PaymentPreference): void {
+    console.log('✅ Anonymous orders submitted successfully:', responses);
+
+    // Save customer data
+    this.saveAnonymousCustomerData();
+
+    // Show success message
+    const successMessage = paymentPreference === 'pay_now' 
+      ? 'Your order has been submitted! A payment link has been sent to your contact method.'
+      : 'Your order has been submitted! A confirmation link has been sent to your contact method. Click to confirm and receive your payment link when ready.';
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Order Submitted Successfully!',
+      detail: successMessage,
+      life: 8000
+    });
+
+    // Clear cart and close dialog
+    this.clearAnonymousCartAndCloseDialog();
+  }
+
+  /**
+   * Group C2S order items by place ID for anonymous orders
+   */
+  private groupAnonymousC2SOrdersByPlace(c2sItems: AnonymousOrderItem[]): { [placeId: string]: AnonymousOrderItem[] } {
+    return c2sItems.reduce((groups, item) => {
+      const placeId = item.selectedLocation?.placeID || 'default';
+      if (!groups[placeId]) {
+        groups[placeId] = [];
+      }
+      groups[placeId].push(item);
+      return groups;
+    }, {} as { [placeId: string]: AnonymousOrderItem[] });
+  }
+
+  /**
+   * Calculate total cost for a set of order items
+   */
+  private calculateTotalForItems(items: AnonymousOrderItem[]): number {
+    return items.reduce((total, item) => {
+      return total + (item.service.servicePrice * item.quantity);
+    }, 0);
+  }
+
+  /**
+   * Save customer data for future use (anonymous order version)
+   */
+  private saveAnonymousCustomerData(): void {
+    const formValue = this.orderForm.value;
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + 1);
+
+    this.cookieService.set('customerName', formValue.name, expires, '/');
+    
+    if (formValue.contactMethod === 'email') {
+      this.cookieService.set('customerEmail', formValue.contactValue, expires, '/');
+    } else {
+      this.cookieService.set('customerPhone', formValue.contactValue, expires, '/');
+    }
+
+    // Save address data if provided
+    if (formValue.address) {
+      this.cookieService.set('customerAddress', formValue.address, expires, '/');
+      this.cookieService.set('customerCity', formValue.city, expires, '/');
+      this.cookieService.set('customerState', formValue.state, expires, '/');
+      this.cookieService.set('customerPostalCode', formValue.postalCode, expires, '/');
+    }
+  }
+
+  /**
+   * Clear cart and close order dialog (anonymous order version)
+   */
+  private clearAnonymousCartAndCloseDialog(): void {
+    this.dataService.CartItems = [];
+    this.dataService.updateItemsInCart();
+    this.showCustomerForm = false;
+    this.orderForm.reset({
+      contactMethod: 'email',
+      paymentPreference: 'pay_now'
+    });
+    this.selectedDate = undefined;
+    this.cartItemsWithLocations = [];
+  }
+
+  /**
+   * Validate and refresh location selections
+   */
+  validateAndRefreshLocationSelections(): void {
+    console.log('🔍 Validating location selections...');
+    
+    this.cartItemsWithLocations.forEach(item => {
+      // If no location is selected, try auto-selection again
+      if (!item.selectedLocation) {
+        this.autoSelectDefaultLocation(item);
+      }
+    });
+    
+    // Update form fields after validation
+    this.updateFormFieldsBasedOnSelections();
+    
+    console.log('✅ Location validation completed');
+  }
+
+  /**
+   * Debug method to check location selection status
+   */
+  debugLocationSelections(): void {
+    console.log('🔍 DEBUG: Location Selection Status');
+    console.log('Cart items with locations:', this.cartItemsWithLocations);
+    
+    this.cartItemsWithLocations.forEach((item, index) => {
+      const locationData = this.getLocationsForService(item.service.serviceID || '');
+      console.log(`Item ${index + 1}: ${item.service.serviceName}`, {
+        hasSelectedLocation: !!item.selectedLocation,
+        selectedLocation: item.selectedLocation,
+        selectedCustomerLocation: item.selectedCustomerLocation,
+        selectedBusinessLocation: item.selectedBusinessLocation,
+        availableCustomerLocations: locationData.customerLocations.length,
+        availableBusinessLocations: locationData.businessLocations.length,
+        allLocationsCount: locationData.customerLocations.length + locationData.businessLocations.length
+      });
+    });
+    
+    console.log('All locations selected?', this.allLocationsSelected());
+    console.log('Form valid?', this.orderForm.valid);
+    console.log('Selected date?', !!this.selectedDate);
+  }
+
 }

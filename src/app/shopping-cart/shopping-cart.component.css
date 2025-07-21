@@ -2382,3 +2382,59 @@ body > div:last-child:not([class*="app"]):not([id]):not([class*="ng"]) {
     margin-top: 0.5rem;
   }
 }
+
+/* Existing styles... */
+
+/* Payment Workflow Information Styles */
+.payment-workflow-info {
+  margin-top: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  border-left: 4px solid #28a745;
+}
+
+.workflow-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.workflow-message i {
+  color: #28a745;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.payment-preference-section .payment-options {
+  margin-bottom: 1rem;
+}
+
+.payment-option {
+  margin-bottom: 0.75rem;
+}
+
+.payment-option-label {
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.payment-option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.payment-option-info strong {
+  color: #212529;
+  font-weight: 600;
+}
+
+.payment-option-info small {
+  color: #6c757d;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}

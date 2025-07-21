@@ -47,4 +47,5 @@ export * from './Order';
 export * from './OrderAuth';
 export * from './Payment';
 export * from './ServicesForBusiness';
-export * from './user'; 
+export * from './user';
+export * from './AnonymousOrder'; 

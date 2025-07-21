@@ -261,7 +261,6 @@
                 [options]="getCustomerLocationsForService(cartItem.service.serviceID || '')"
                 [(ngModel)]="cartItem.selectedCustomerLocation"
                 optionLabel="name"
-                optionValue="self"
                 placeholder="Select your area"
                 styleClass="location-dropdown customer-dropdown"
                 (onChange)="onCustomerLocationSelected(cartItem, $event.value)">
@@ -287,7 +286,6 @@
                 [options]="getBusinessLocationsForService(cartItem.service.serviceID || '')"
                 [(ngModel)]="cartItem.selectedBusinessLocation"
                 optionLabel="name"
-                optionValue="self"
                 placeholder="Select business location"
                 styleClass="location-dropdown business-dropdown"
                 (onChange)="onBusinessLocationSelected(cartItem, $event.value)">
@@ -429,30 +427,38 @@
           <div class="payment-options">
             <div class="payment-option">
               <p-radioButton 
-                inputId="payByLink" 
-                value="payment_link"
-                formControlName="paymentMethod">
+                inputId="payNow" 
+                value="pay_now"
+                formControlName="paymentPreference">
               </p-radioButton>
-              <label for="payByLink" class="payment-option-label">
+              <label for="payNow" class="payment-option-label">
                 <div class="payment-option-info">
-                  <strong>Pay by Payment Link</strong>
-                  <small>We'll send you a secure payment link to pay online immediately</small>
+                  <strong>Pay Now</strong>
+                  <small>Receive payment link immediately and pay right away</small>
                 </div>
               </label>
             </div>
             
             <div class="payment-option">
               <p-radioButton 
-                inputId="payOnSite" 
-                value="pay_on_site"
-                formControlName="paymentMethod">
+                inputId="payLater" 
+                value="pay_later"
+                formControlName="paymentPreference">
               </p-radioButton>
-              <label for="payOnSite" class="payment-option-label">
+              <label for="payLater" class="payment-option-label">
                 <div class="payment-option-info">
-                  <strong>Pay On-Site</strong>
-                  <small>Pay when you receive the service (cash, card, or other methods)</small>
+                  <strong>Pay Later</strong>
+                  <small>Confirm your order first, then receive payment link when ready</small>
                 </div>
               </label>
+            </div>
+          </div>
+          
+          <!-- Workflow Information -->
+          <div class="payment-workflow-info" *ngIf="orderForm.get('paymentPreference')?.value">
+            <div class="workflow-message">
+              <i class="pi pi-info-circle"></i>
+              <span>{{ getWorkflowMessage() }}</span>
             </div>
           </div>
         </div>
@@ -486,7 +492,7 @@
       <p-button 
         label="Submit Order" 
         icon="pi pi-check" 
-        (onClick)="submitOrderSimplified()" 
+        (onClick)="submitOrderAnonymous()" 
         styleClass="p-button-success p-button-lg"
         [disabled]="!orderForm.valid || !selectedDate || !allLocationsSelected()"
         [loading]="isSubmittingOrder">
