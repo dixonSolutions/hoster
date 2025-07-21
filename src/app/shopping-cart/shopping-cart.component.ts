@@ -209,7 +209,13 @@ export class ShoppingCartComponent implements OnInit{
       contactMethod: ['email', [Validators.required]],
       contactValue: ['', [Validators.required]],
       paymentPreference: ['pay_now', [Validators.required]], // Default to pay now
-      notes: ['']
+      notes: [''],
+      // Add address fields initially (will be made required conditionally)
+      address: [''],
+      city: [''],
+      state: [''],
+      postalCode: [''],
+      country: ['Australia']
     });
 
     // Subscribe to auth token changes
@@ -1484,54 +1490,50 @@ export class ShoppingCartComponent implements OnInit{
       currentAddressControl: !!this.orderForm.get('address')
     });
 
-    if (hasS2CServices && !this.orderForm.get('address')) {
-      console.log('➕ Adding address fields to form');
+    if (hasS2CServices) {
+      console.log('🏠 S2C services detected - address fields needed');
       this.addAddressFieldsToForm();
-    } else if (!hasS2CServices && this.orderForm.get('address')) {
-      console.log('➖ Removing address fields from form');
-      this.removeAddressFieldsFromForm();
+    } else {
+      console.log('🏢 Only C2S services - no address fields needed');
+      this.removeAddressFieldValidators();
     }
   }
 
   /**
-   * Add address fields to order form when S2C services are selected
+   * Add required validators to address fields when S2C services are selected
    */
   private addAddressFieldsToForm(): void {
-    if (!this.orderForm.get('address')) {
-      this.orderForm.addControl('address', this.fb.control('', [Validators.required]));
-      this.orderForm.addControl('city', this.fb.control('', [Validators.required]));
-      this.orderForm.addControl('state', this.fb.control('', [Validators.required]));
-      this.orderForm.addControl('postalCode', this.fb.control('', [Validators.required]));
-      this.orderForm.addControl('country', this.fb.control('Australia', [Validators.required]));
-      
-      // Load saved address data if available
-      const savedAddress = this.cookieService.get('customerAddress');
-      const savedCity = this.cookieService.get('customerCity');
-      const savedState = this.cookieService.get('customerState');
-      const savedPostalCode = this.cookieService.get('customerPostalCode');
-      
-      if (savedAddress && savedCity && savedState && savedPostalCode) {
-        this.orderForm.patchValue({
-          address: savedAddress,
-          city: savedCity,
-          state: savedState,
-          postalCode: savedPostalCode
-        });
-      }
+    // Add required validators to existing address fields
+    this.orderForm.get('address')?.setValidators([Validators.required]);
+    this.orderForm.get('city')?.setValidators([Validators.required]);
+    this.orderForm.get('state')?.setValidators([Validators.required]);
+    this.orderForm.get('postalCode')?.setValidators([Validators.required]);
+    this.orderForm.get('country')?.setValidators([Validators.required]);
+    
+    // Update validity after adding validators
+    this.orderForm.get('address')?.updateValueAndValidity();
+    this.orderForm.get('city')?.updateValueAndValidity();
+    this.orderForm.get('state')?.updateValueAndValidity();
+    this.orderForm.get('postalCode')?.updateValueAndValidity();
+    this.orderForm.get('country')?.updateValueAndValidity();
+    
+    // Load saved address data if available
+    const savedAddress = this.cookieService.get('customerAddress');
+    const savedCity = this.cookieService.get('customerCity');
+    const savedState = this.cookieService.get('customerState');
+    const savedPostalCode = this.cookieService.get('customerPostalCode');
+    
+    if (savedAddress && savedCity && savedState && savedPostalCode) {
+      this.orderForm.patchValue({
+        address: savedAddress,
+        city: savedCity,
+        state: savedState,
+        postalCode: savedPostalCode
+      });
     }
   }
 
-  /**
-   * Remove address fields from order form when no S2C services are selected
-   */
-  private removeAddressFieldsFromForm(): void {
-    const addressFields = ['address', 'city', 'state', 'postalCode', 'country'];
-    addressFields.forEach(field => {
-      if (this.orderForm.get(field)) {
-        this.orderForm.removeControl(field);
-      }
-    });
-  }
+  // Method removed - address fields are now always present in form, only validators are added/removed
 
   /**
    * Validate that all cart items have location selections
@@ -1897,18 +1899,12 @@ export class ShoppingCartComponent implements OnInit{
   private buildOrderData(): any {
     const formValue = this.orderForm.value;
     
-    // Add address fields if needed
-    if (this.hasServiceToCustomerOrders()) {
-      const addressFields = ['address', 'city', 'state', 'postalCode'];
-      addressFields.forEach(field => {
-        if (!this.orderForm.get(field)) {
-          this.orderForm.addControl(field, this.fb.control('', [Validators.required]));
-        }
-      });
-      
-      // Re-validate with address fields
-      if (!this.orderForm.valid) {
-        throw new Error('Address information is required for home/mobile services');
+    // Validate form for required fields
+    if (!this.orderForm.valid) {
+      if (this.hasServiceToCustomerOrders()) {
+        throw new Error('Please fill in all required fields including address information for home/mobile services');
+      } else {
+        throw new Error('Please fill in all required fields');
       }
     }
 
@@ -2273,6 +2269,27 @@ export class ShoppingCartComponent implements OnInit{
     console.log('All locations selected?', this.allLocationsSelected());
     console.log('Form valid?', this.orderForm.valid);
     console.log('Selected date?', !!this.selectedDate);
+  }
+
+  /**
+   * Remove required validators from address fields when not needed
+   */
+  private removeAddressFieldValidators(): void {
+    // Remove required validators from address fields
+    this.orderForm.get('address')?.clearValidators();
+    this.orderForm.get('city')?.clearValidators();
+    this.orderForm.get('state')?.clearValidators();
+    this.orderForm.get('postalCode')?.clearValidators();
+    this.orderForm.get('country')?.clearValidators();
+    
+    // Update validity after removing validators
+    this.orderForm.get('address')?.updateValueAndValidity();
+    this.orderForm.get('city')?.updateValueAndValidity();
+    this.orderForm.get('state')?.updateValueAndValidity();
+    this.orderForm.get('postalCode')?.updateValueAndValidity();
+    this.orderForm.get('country')?.updateValueAndValidity();
+    
+    console.log('🏠 Address field validators removed - not needed for current selection');
   }
 
 }
