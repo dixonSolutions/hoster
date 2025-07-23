@@ -7,17 +7,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Clean, modern toolbar styling */
+/* Clean, modern toolbar styling - Use app-container approach */
 .topbar-toolbar {
-  background: #ffffff !important;
-  border-radius: 2rem !important;
-  padding: 0.5rem 1.5rem !important;
+  background: #ffffff;
+  border-radius: 2rem;
+  padding: 0.5rem 1rem; /* Slightly reduced */
   min-height: 56px;
   display: flex;
   align-items: center;
   border: 1px solid #e0e0e0;
   color: #333333;
   transition: all 0.3s ease;
+  max-width: 1200px; /* Use app-container max-width */
+  margin: 0 auto; /* Center the toolbar */
 }
 
 .topbar-left {
@@ -30,15 +32,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: transparent !important;
+  background: transparent;
 }
 
 .logo-image {
   object-fit: contain;
   transition: all 0.3s ease;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
 .logo-image:hover {
@@ -53,7 +55,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
-  background: transparent !important;
+  background: transparent;
 }
 
 .topbar-title {
@@ -62,7 +64,7 @@
   letter-spacing: 0.5px;
   margin-left: 0.5rem;
   color: #333333;
-  background: transparent !important;
+  background: transparent;
 }
 
 .topbar-center {
@@ -80,34 +82,34 @@
 }
 
 .nav-btn {
-  background: #ffffff !important;
-  border: 1px solid #e9ecef !important;
-  border-radius: 8px !important;
-  transition: all 0.2s ease !important;
-  padding: 0.5rem 1rem !important;
-  font-weight: 500 !important;
-  color: #495057 !important;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  color: #495057;
   /* Ensure buttons are visible */
-  opacity: 1 !important;
-  visibility: visible !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  opacity: 1;
+  visibility: visible;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .nav-btn:hover {
-  background: #f8f9fa !important;
-  border-color: #2196F3 !important;
+  background: #f8f9fa;
+  border-color: #2196F3;
   transform: translateY(-1px);
-  color: #2196F3 !important;
-  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+  color: #2196F3;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
 }
 
 .active-nav {
-  background: #ffffff !important;
-  border: 1px solid #2196F3 !important;
-  border-bottom: 2px solid #2196F3 !important;
-  font-weight: 600 !important;
-  color: #2196F3 !important;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15) !important;
+  background: #ffffff;
+  border: 1px solid #2196F3;
+  border-bottom: 2px solid #2196F3;
+  font-weight: 600;
+  color: #2196F3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
 }
 
 .topbar-actions {
@@ -147,12 +149,12 @@
 }
 
 .search-input {
-  border: none !important;
-  background: transparent !important;
-  outline: none !important;
+  border: none;
+  background: transparent;
+  outline: none;
   font-size: 1rem;
   width: 140px;
-  box-shadow: none !important;
+  box-shadow: none;
   color: #495057;
 }
 
@@ -162,36 +164,36 @@
 }
 
 .cart-btn {
-  background: #ffffff !important;
-  border: 1px solid #e9ecef !important;
-  border-radius: 8px !important;
-  transition: all 0.2s ease !important;
-  width: 56px !important;
-  height: 40px !important;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: 56px;
+  height: 40px;
   margin: 0 0.25rem;
-  color: #495057 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  color: #495057;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .cart-btn:hover {
-  background: #f8f9fa !important;
-  border-color: #2196F3 !important;
-  color: #2196F3 !important;
+  background: #f8f9fa;
+  border-color: #2196F3;
+  color: #2196F3;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
 }
 
 .cart-btn.active-nav {
-  background: #ffffff !important;
-  border: 1px solid #2196F3 !important;
-  border-bottom: 2px solid #2196F3 !important;
-  color: #2196F3 !important;
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15) !important;
+  background: #ffffff;
+  border: 1px solid #2196F3;
+  border-bottom: 2px solid #2196F3;
+  color: #2196F3;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
 }
 
 .p-badge-danger {
-  background: #dc3545 !important;
-  color: #fff !important;
+  background: #dc3545;
+  color: #fff;
   box-shadow: 0 1px 3px rgba(220, 53, 69, 0.3);
   font-size: 0.75rem;
   min-width: 1.2rem;
@@ -201,12 +203,12 @@
 .theme-dropdown {
   min-width: 120px;
   margin-left: 0.5rem;
-  border-radius: 8px !important;
-  background: #ffffff !important;
-  color: #495057 !important;
-  border: 1px solid #e9ecef !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  transition: all 0.2s ease !important;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #495057;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 /* Ensure all text and icons are properly colored */
@@ -216,86 +218,74 @@
 
 .topbar-toolbar .p-button-icon,
 .topbar-toolbar .pi {
-  font-size: 1.1rem !important;
-  color: #495057 !important;
+  font-size: 1.1rem;
+  color: #495057;
 }
 
 /* Override any dark PrimeNG defaults */
 .p-toolbar {
-  background: #ffffff !important;
-  border: none !important;
-  color: #495057 !important;
+  background: #ffffff;
+  border: none;
+  color: #495057;
 }
 
 .p-button-text {
-  background: transparent !important;
-  color: #495057 !important;
+  background: transparent;
+  color: #495057;
 }
 
-/* Theme Dropdown Enhancements */
+/* Theme Dropdown Enhancements - Reduced !important usage */
 ::ng-deep .theme-dropdown .p-select {
-  border: 1px solid #e9ecef !important;
-  background: #ffffff !important;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e9ecef;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 ::ng-deep .theme-dropdown .p-select:not(.p-disabled):hover {
-  border-color: #2196F3 !important;
-  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+  border-color: #2196F3;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
 }
 
 ::ng-deep .theme-dropdown .p-select.p-focus {
-  border-color: #2196F3 !important;
-  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
 }
 
-/* Input styling overrides */
+/* Input styling overrides - Reduced !important usage */
 ::ng-deep .p-inputtext {
-  background: #ffffff !important;
-  border: 1px solid #e9ecef !important;
-  color: #495057 !important;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  color: #495057;
 }
 
 ::ng-deep .p-inputtext:hover {
-  border-color: #2196F3 !important;
+  border-color: #2196F3;
 }
 
 ::ng-deep .p-inputtext:focus {
-  border-color: #2196F3 !important;
-  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2) !important;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.2);
 }
 
-@media (max-width: 768px) {
-  .topbar-title { 
-    font-size: 1.1rem; 
-  }
-  
-  .search-wrapper { 
-    min-width: 120px; 
-  }
-  
-  .website-navigation, .fallback-navigation {
-    gap: 0.25rem;
-  }
-  
-  .nav-btn {
-    padding: 0.4rem 0.8rem !important;
-    font-size: 0.9rem !important;
-  }
-  
-  .theme-dropdown { 
-    min-width: 80px; 
-  }
-  
-  .cart-btn { 
-    width: 44px !important; 
-  }
-}
-
+/* Responsive Design - Updated with standardized breakpoints */
 @media (max-width: 480px) {
+  .topbar-container {
+    padding: 0.25rem 0;
+  }
+  
+  .topbar-toolbar {
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+  }
+  
   .topbar-title { 
     font-size: 1rem; 
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+    max-width: 120px;
   }
   
   .search-wrapper { 
@@ -311,34 +301,23 @@
   }
   
   .nav-btn {
-    padding: 0.3rem 0.6rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .cart-btn { 
+    width: 40px;
+    height: 36px;
+  }
+  
+  .topbar-actions {
+    gap: 0.5rem;
   }
 }
 
-/* Responsive Design - Mobile Sidebar */
-@media (max-width: 900px) {
-  .desktop-only {
-    display: none !important;
-  }
-  
-  .hamburger-btn {
-    background: #ffffff !important;
-    border: 1px solid #e9ecef !important;
-    border-radius: 8px !important;
-    color: #495057 !important;
-    font-size: 1.2rem !important;
-    padding: 0.5rem !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  }
-  
-  .hamburger-btn:hover {
-    background: #f8f9fa !important;
-    border-color: #2196F3 !important;
-    color: #2196F3 !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1) !important;
+@media (min-width: 481px) and (max-width: 768px) {
+  .topbar-toolbar {
+    padding: 0.375rem 0.75rem;
   }
   
   .topbar-title { 
@@ -351,118 +330,176 @@
   }
   
   .search-wrapper { 
-    display: none !important; 
+    min-width: 160px;
+    margin-right: 0.75rem;
+  }
+  
+  .website-navigation, .fallback-navigation {
+    gap: 0.25rem;
+  }
+  
+  .nav-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
   }
   
   .theme-dropdown { 
-    display: none !important; 
+    min-width: 100px; 
   }
   
   .cart-btn { 
-    width: 44px !important; 
+    width: 48px;
+    height: 38px;
   }
 }
 
-/* Comprehensive PrimeNG Sidebar Overrides - White Theme */
+/* Responsive Design - Mobile Sidebar */
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none;
+  }
+  
+  .hamburger-btn {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    color: #495057;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .hamburger-btn:hover {
+    background: #f8f9fa;
+    border-color: #2196F3;
+    color: #2196F3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+  }
+  
+  .topbar-title { 
+    font-size: 1.1rem; 
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+    max-width: 150px;
+  }
+  
+  .search-wrapper { 
+    display: none; 
+  }
+  
+  .theme-dropdown { 
+    display: none; 
+  }
+  
+  .cart-btn { 
+    width: 44px; 
+  }
+}
+
+/* Comprehensive PrimeNG Sidebar Overrides - White Theme - Reduced !important usage */
 ::ng-deep .p-sidebar {
-  background: #ffffff !important;
-  border: none !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 ::ng-deep .p-sidebar-content {
-  background: #ffffff !important;
-  color: #333333 !important;
+  background: #ffffff;
+  color: #333333;
 }
 
 ::ng-deep .p-sidebar-header {
-  background: #ffffff !important;
-  color: #333333 !important;
-  border-bottom: 1px solid #e9ecef !important;
+  background: #ffffff;
+  color: #333333;
+  border-bottom: 1px solid #e9ecef;
 }
 
 ::ng-deep .p-sidebar-left {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 ::ng-deep .p-sidebar-right {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 ::ng-deep .p-sidebar-top {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 ::ng-deep .p-sidebar-bottom {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 ::ng-deep .p-sidebar-mask {
-  background-color: rgba(0, 0, 0, 0.3) !important;
-  backdrop-filter: blur(4px) !important;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
 }
 
 /* Force white backgrounds on specific sidebar elements only */
 ::ng-deep .p-sidebar .p-sidebar-content {
-  background-color: #ffffff !important;
+  background-color: #ffffff;
 }
 
 ::ng-deep .p-sidebar .p-sidebar-header {
-  background-color: #ffffff !important;
+  background-color: #ffffff;
 }
 
 /* Override PrimeNG theme defaults only for sidebar components */
 ::ng-deep .mobile-sidebar .p-component {
-  background: transparent !important;
+  background: transparent;
 }
 
 ::ng-deep .mobile-sidebar .p-divider {
-  background: transparent !important;
+  background: transparent;
 }
 
 ::ng-deep .mobile-sidebar .p-select {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 ::ng-deep .mobile-sidebar .p-inputtext {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 /* Mobile Sidebar Styles - Complete White Theme */
 ::ng-deep .mobile-sidebar {
-  width: 280px !important;
-  max-width: 90vw !important;
-  background: #ffffff !important;
+  width: 280px;
+  max-width: 90vw;
+  background: #ffffff;
 }
 
 ::ng-deep .mobile-sidebar .p-sidebar {
-  background: #ffffff !important;
-  border: none !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
 }
 
 ::ng-deep .mobile-sidebar .p-sidebar-content {
-  padding: 0 !important;
-  background: #ffffff !important;
-  border: none !important;
+  padding: 0;
+  background: #ffffff;
+  border: none;
 }
 
 ::ng-deep .mobile-sidebar .p-sidebar-header {
-  background: #ffffff !important;
-  color: #333333 !important;
-  padding: 1.5rem !important;
-  border-bottom: 1px solid #e9ecef !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff;
+  color: #333333;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 ::ng-deep .mobile-sidebar .p-sidebar-close-icon {
-  color: #6c757d !important;
-  font-size: 1.2rem !important;
-  transition: color 0.2s ease !important;
+  color: #6c757d;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
 }
 
 ::ng-deep .mobile-sidebar .p-sidebar-close-icon:hover {
-  color: #2196F3 !important;
+  color: #2196F3;
 }
 
 /* Additional sidebar wrapper overrides */
@@ -714,3 +751,4 @@
 }
 
 /* Additional responsive adjustments */
+

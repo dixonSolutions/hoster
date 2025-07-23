@@ -9,6 +9,7 @@ import { ServiceDto, BusinessBasicInfoDto } from '../models/WebsiteHoster';
 import { OrderAuthService } from '../services/order-auth.service';
 import { AnonymousOrderService } from '../services/anonymous-order.service';
 import { BusinessPlaces } from '../models/BusinessPlaces';
+import { PasswordModule } from 'primeng/password';
 import { 
   OrderType, 
   ServiceWithLocations, 
@@ -88,6 +89,7 @@ interface AuthStep {
     CommonModule, 
     ReactiveFormsModule,
     FormsModule,
+    PasswordModule,
     // PrimeNG Modules
     CardModule,
     ButtonModule,
@@ -135,6 +137,7 @@ export class ShoppingCartComponent implements OnInit{
   selectedDate: Date | undefined = undefined;
   minDate!: Date;
   isSubmittingOrder = false;
+  
 
 // Result: "https://organisely.app" or "http://localhost:4200"
   
@@ -163,6 +166,7 @@ export class ShoppingCartComponent implements OnInit{
   isAuthenticated = false;
   authToken: AuthToken | null = null;
   isRequestingMagicLink = false;
+  value = null;
   
   // Location selection properties
   businessPlaces: BusinessPlaces[] = [];
@@ -192,6 +196,7 @@ export class ShoppingCartComponent implements OnInit{
     private cookieService: CookieService,
     private cdr: ChangeDetectorRef
   ) {
+    const value = '';
     // Authentication form
     this.authForm = this.fb.group({
       authType: ['email', [Validators.required]],

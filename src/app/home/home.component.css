@@ -1,61 +1,70 @@
 body, html {
-  background: #fff !important;
+  background: #fff;
 }
 
+/* Use standardized container approach */
 .services-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  padding: 2rem 0 0 0;
+  padding: 1rem 0 0 0; /* Reduced from 2rem */
   max-width: 700px;
   margin: 0 auto;
 }
 
+/* Ensure services grid uses app-container for consistency */
+.services-container {
+  max-width: 800px; /* Use app-container-narrow equivalent */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
 ::ng-deep .p-card, .service-pcard {
-  background: #fff !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 0.75rem !important;
-  box-shadow: 0 2px 8px rgba(60,60,100,0.06) !important;
-  padding: 1.2rem 1.2rem 0.8rem 1.2rem !important;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(60,60,100,0.06);
+  padding: 1rem 1rem 0.75rem 1rem; /* Slightly reduced */
   margin-bottom: 1.5rem;
   transition: box-shadow 0.2s, transform 0.2s;
 }
+
 ::ng-deep .p-card:hover, .service-pcard:hover {
-  box-shadow: 0 6px 18px rgba(60,60,100,0.10) !important;
+  box-shadow: 0 6px 18px rgba(60,60,100,0.10);
   transform: translateY(-2px) scale(1.01);
 }
 
 /* Reviews Dialog Styling */
 ::ng-deep .reviews-dialog {
-  border-radius: 16px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2) !important;
-  overflow: hidden !important;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 ::ng-deep .reviews-dialog .p-dialog-header {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
-  color: white !important;
-  border-radius: 16px 16px 0 0 !important;
-  padding: 1.5rem 2rem !important;
-  border-bottom: none !important;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  padding: 1.5rem 2rem;
+  border-bottom: none;
 }
 
 ::ng-deep .reviews-dialog .p-dialog-title {
-  font-size: 1.4rem !important;
-  font-weight: 600 !important;
-  color: white !important;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: white;
 }
 
 ::ng-deep .reviews-dialog .p-dialog-header-icon {
-  color: white !important;
+  color: white;
 }
 
 ::ng-deep .reviews-dialog .p-dialog-content {
-  padding: 0 !important;
-  background: white !important;
-  border-radius: 0 0 16px 16px !important;
-  max-height: 70vh !important;
-  overflow-y: auto !important;
+  padding: 0;
+  background: white;
+  border-radius: 0 0 16px 16px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .service-title {
@@ -64,12 +73,14 @@ body, html {
   color: #222;
   margin-bottom: 0.15rem;
 }
+
 .service-description {
   color: #555;
   font-size: 1.02rem;
   margin-bottom: 0.5rem;
   display: block;
 }
+
 .service-details {
   background: #f8fafc;
   border-radius: 0.5rem;
@@ -79,10 +90,12 @@ body, html {
   font-size: 1rem;
   border: 1px solid #ececec;
 }
+
 .service-details b {
   font-weight: 600;
   color: #222;
 }
+
 .service-actions {
   display: flex;
   gap: 1rem;
@@ -99,37 +112,42 @@ body, html {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-/* Contact Info Box refined */
+/* Contact Info Box refined - Use standardized container */
 .contact-info-box {
   background: #fafbfc;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   box-shadow: 0 1px 4px rgba(60,60,100,0.04);
   margin: 1.5rem auto 0 auto;
-  max-width: 700px;
-  padding: 1.2rem 1.2rem 1.2rem 1.2rem;
+  max-width: 800px; /* Consistent with app-container-narrow */
+  padding: 1rem 1rem 1rem 1rem; /* Reduced from 1.2rem */
 }
+
 .contact-info-heading {
   font-size: 1.08rem;
   font-weight: 700;
   color: #222;
   margin-bottom: 0.7rem;
 }
+
 .contact-details {
   padding: 0.2rem 0 0 0;
   color: #333;
   font-size: 1.02rem;
 }
+
 .contact-detail {
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
 .contact-detail i {
   color: #1976d2;
   font-size: 1.1rem;
 }
+
 .contact-address-list {
   margin: 0.3rem 0 0 2rem;
   padding: 0;
@@ -137,9 +155,31 @@ body, html {
   color: #444;
 }
 
-@media (max-width: 800px) {
-  .services-grid, .contact-info-box {
-    max-width: 98vw;
-    padding: 0.7rem;
+/* Responsive design using standardized breakpoints */
+@media (max-width: 480px) {
+  .services-grid {
+    padding: 0.5rem;
+  }
+  
+  .services-container {
+    padding: 0 0.5rem;
+  }
+  
+  .contact-info-box {
+    padding: 0.75rem;
+  }
+  
+  ::ng-deep .p-card, .service-pcard {
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .services-container {
+    padding: 0 0.75rem;
+  }
+  
+  .services-grid {
+    padding: 0.75rem 0 0 0;
   }
 }

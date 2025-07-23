@@ -1,98 +1,183 @@
 /* You can add global styles to this file, and also import other style files */
 @import "primeicons/primeicons.css";
 
+/* ===== STANDARDIZED LAYOUT SYSTEM ===== */
+/* Container system for consistent layouts */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.app-container-narrow {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.app-container-wide {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Standardized spacing utilities */
+.spacing-xs { padding: 0.25rem; }
+.spacing-sm { padding: 0.5rem; }
+.spacing-md { padding: 1rem; }
+.spacing-lg { padding: 1.5rem; }
+.spacing-xl { padding: 2rem; }
+
+.spacing-x-xs { padding-left: 0.25rem; padding-right: 0.25rem; }
+.spacing-x-sm { padding-left: 0.5rem; padding-right: 0.5rem; }
+.spacing-x-md { padding-left: 1rem; padding-right: 1rem; }
+.spacing-x-lg { padding-left: 1.5rem; padding-right: 1.5rem; }
+.spacing-x-xl { padding-left: 2rem; padding-right: 2rem; }
+
+.spacing-y-xs { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.spacing-y-sm { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.spacing-y-md { padding-top: 1rem; padding-bottom: 1rem; }
+.spacing-y-lg { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.spacing-y-xl { padding-top: 2rem; padding-bottom: 2rem; }
+
+/* Margin utilities */
+.margin-xs { margin: 0.25rem; }
+.margin-sm { margin: 0.5rem; }
+.margin-md { margin: 1rem; }
+.margin-lg { margin: 1.5rem; }
+.margin-xl { margin: 2rem; }
+
+.margin-x-xs { margin-left: 0.25rem; margin-right: 0.25rem; }
+.margin-x-sm { margin-left: 0.5rem; margin-right: 0.5rem; }
+.margin-x-md { margin-left: 1rem; margin-right: 1rem; }
+.margin-x-lg { margin-left: 1.5rem; margin-right: 1.5rem; }
+.margin-x-xl { margin-left: 2rem; margin-right: 2rem; }
+
+.margin-y-xs { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+.margin-y-sm { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.margin-y-md { margin-top: 1rem; margin-bottom: 1rem; }
+.margin-y-lg { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.margin-y-xl { margin-top: 2rem; margin-bottom: 2rem; }
+
+/* Standardized responsive breakpoints */
+@media (max-width: 480px) {
+  .app-container,
+  .app-container-narrow,
+  .app-container-wide {
+    padding: 0 0.5rem;
+  }
+  
+  .spacing-responsive { padding: 0.5rem; }
+  .spacing-x-responsive { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .spacing-y-responsive { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .app-container,
+  .app-container-narrow,
+  .app-container-wide {
+    padding: 0 0.75rem;
+  }
+  
+  .spacing-responsive { padding: 0.75rem; }
+  .spacing-x-responsive { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .spacing-y-responsive { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+}
+
+@media (min-width: 769px) {
+  .spacing-responsive { padding: 1rem; }
+  .spacing-x-responsive { padding-left: 1rem; padding-right: 1rem; }
+  .spacing-y-responsive { padding-top: 1rem; padding-bottom: 1rem; }
+}
+
+/* ===== EXISTING STYLES (Modified to reduce !important usage) ===== */
+
 /* Clean modern shopping cart style overrides */
 .p-datatable .p-datatable-thead > tr > th {
-  background: #f8f9fa !important;
-  color: #495057 !important;
-  font-weight: 600 !important;
-  padding: 1rem !important;
-  border-bottom: 2px solid #dee2e6 !important;
-  font-size: 0.875rem !important;
-  text-transform: uppercase !important;
-  text-align: center !important;
-  letter-spacing: 0.5px !important;
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .p-datatable .p-datatable-tbody > tr > td {
-  padding: 1rem !important;
-  border-bottom: 1px solid #dee2e6 !important;
-  background: #ffffff !important;
-  vertical-align: middle !important;
-  text-align: center !important;
-  color: #495057 !important;
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  background: #ffffff;
+  vertical-align: middle;
+  text-align: center;
+  color: #495057;
 }
 
 .p-datatable .p-datatable-tbody > tr:hover {
-  background: #f8f9fa !important;
+  background: #f8f9fa;
 }
 
 .p-panel .p-panel-header {
-  background: #f8f9fa !important;
-  color: #495057 !important;
-  font-weight: 600 !important;
-  padding: 1rem 1.5rem !important;
-  border-bottom: 1px solid #dee2e6 !important;
-  font-size: 1.1rem !important;
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 1.1rem;
 }
 
 .p-panel .p-panel-content {
-  background: #ffffff !important;
-  color: #495057 !important;
-  padding: 1rem !important;
+  background: #ffffff;
+  color: #495057;
+  padding: 1rem;
 }
 
 .p-panel .p-panel-content-wrapper {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 .p-card .p-card-header {
-  background: #f8f9fa !important;
-  color: #495057 !important;
-  padding: 1.5rem !important;
-  font-size: 1.3rem !important;
-  font-weight: 600 !important;
-  border-bottom: 1px solid #dee2e6 !important;
-  text-align: center !important;
+  background: #f8f9fa;
+  color: #495057;
+  padding: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-bottom: 1px solid #dee2e6;
+  text-align: center;
 }
 
 .p-card .p-card-content {
-  background: #ffffff !important;
-  color: #495057 !important;
+  background: #ffffff;
+  color: #495057;
 }
 
 /* Fix any remaining dark/black backgrounds */
 .p-component {
-  background: #ffffff !important;
+  background: #ffffff;
 }
 
 /* Date picker and form controls */
 .p-inputtext {
-  background: #ffffff !important;
-  color: #495057 !important;
-  border: 1px solid #dee2e6 !important;
+  background: #ffffff;
+  color: #495057;
+  border: 1px solid #dee2e6;
 }
 
 /* Override any dark panel content areas */
 [class*="p-panel"] {
-  background: #ffffff !important;
-  color: #495057 !important;
+  background: #ffffff;
+  color: #495057;
 }
 
 /* Ensure all PrimeNG components have light background */
 [class*="p-"]:not(.p-button):not(.p-chip) {
-  background-color: #ffffff !important;
-  color: #495057 !important;
+  background-color: #ffffff;
+  color: #495057;
 }
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
-   
-        /* You can use other color formats too: */
-        /* background-color: lightblue; */
-        /* background-color: rgb(240, 248, 255); */
-        /* background-color: hsl(210, 100%, 98%); */
-      }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* Theme: Rose & Red */
 body[data-theme='rose-red'] {
@@ -145,11 +230,11 @@ body {
 }
 
 .mat-toolbar {
-  background: var(--toolbar-bg, #ffffff) !important;
-  color: var(--toolbar-fg, #333333) !important;
+  background: var(--toolbar-bg, #ffffff);
+  color: var(--toolbar-fg, #333333);
 }
 
-/* PrimeNG Dialog Global Overrides - More Aggressive */
+/* PrimeNG Dialog Global Overrides - Reduced !important usage */
 .p-dialog-mask,
 .p-component-overlay,
 .p-overlay,
@@ -160,24 +245,24 @@ div[data-pc-section="mask"],
 div[class*="p-dialog-mask"],
 div[class*="p-overlay"],
 div[class*="p-component-overlay"] {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  background: rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(2px) !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
 }
 
 /* Force override any white backgrounds */
 .p-dialog-mask *,
 .p-component-overlay *,
 .p-overlay * {
-  background-color: transparent !important;
-  background: transparent !important;
+  background-color: transparent;
+  background: transparent;
 }
 
 /* Prevent body from getting white background */
 body.p-overflow-hidden,
 body[class*="p-overflow"] {
-  background-color: inherit !important;
-  background: inherit !important;
+  background-color: inherit;
+  background: inherit;
 }
 
 /* Target all possible PrimeNG overlay elements */
@@ -185,22 +270,22 @@ body[class*="p-overflow"] {
 [class*="mask"]:not(.p-dialog):not(.p-button):not(.p-input),
 [data-pc-section="mask"],
 [data-pc-name="dialog"] [data-pc-section="mask"] {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  background: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Ultra aggressive approach - target any div that might be an overlay */
 body > div:not([class*="app"]):not([id]):not([data-testid]) {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  background: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Specific PrimeNG version targeting */
 .p-dialog-wrapper,
 .p-dialog-container,
 .p-dialog-overlay {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  background: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 /* Remove any white from the entire overlay system */
@@ -208,8 +293,8 @@ body > div:not([class*="app"]):not([id]):not([data-testid]) {
 * + [class*="dialog"],
 * + [class*="overlay"],
 * + [class*="mask"] {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  background: rgba(0, 0, 0, 0.5) !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .p-dialog {

@@ -6,11 +6,24 @@
   font-family: 'Inter', 'Roboto', 'Open Sans', sans-serif;
 }
 
-/* Container */
+/* Use standardized container system */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+/* Responsive container adjustments */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    padding: 0 0.75rem;
+  }
 }
 
 /* Loading Container */
@@ -58,7 +71,7 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-/* Hero Section */
+/* Hero Section - Reduced padding */
 .hero-section {
   position: relative;
   min-height: 100vh;
@@ -87,7 +100,7 @@
 .hero-content .container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 2rem;
   align-items: center;
 }
 
@@ -172,15 +185,15 @@
   font-size: 1.2rem;
 }
 
-/* Statistics Section */
+/* Statistics Section - Reduced padding */
 .stats-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
 .stats-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .stats-header h2 {
@@ -195,7 +208,7 @@
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 .service-chip {
@@ -216,8 +229,8 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .stat-item {
@@ -258,23 +271,23 @@
   font-weight: 500;
 }
 
-/* Services Section */
+/* Services Section - Reduced padding */
 .services-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: white;
 }
 
 .service-filter {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .services-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .service-card-grid-item {
@@ -386,9 +399,9 @@
   transform: translateY(0);
 }
 
-/* Timeline Section */
+/* Timeline Section - Reduced padding */
 .timeline-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
@@ -429,9 +442,9 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Galleria Section */
+/* Galleria Section - Reduced padding */
 .galleria-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: white;
 }
 
@@ -470,9 +483,9 @@
   margin: 0;
 }
 
-/* Testimonials Section */
+/* Testimonials Section - Reduced padding */
 .testimonials-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
@@ -484,7 +497,7 @@
 .testimonial-card {
   background: white;
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   margin: 0 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   height: 100%;
@@ -533,9 +546,9 @@
   font-size: 0.9rem;
 }
 
-/* FAQ Section */
+/* FAQ Section - Reduced padding */
 .faq-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: white;
 }
 
@@ -566,9 +579,9 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Resources Section */
+/* Resources Section - Reduced padding */
 .resources-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
@@ -603,16 +616,16 @@
   background: #f8fafc;
 }
 
-/* Contact Section */
+/* Contact Section - Reduced padding */
 .contact-section {
-  padding: 4rem 0;
+  padding: 2rem 0;
   background: white;
 }
 
 .contact-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
+  gap: 2rem;
   align-items: start;
 }
 
@@ -631,14 +644,14 @@
   font-size: 1.1rem;
   color: #64748b;
   line-height: 1.6;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .contact-details {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .contact-item {
@@ -739,9 +752,9 @@
   text-align: center;
 }
 
-/* Newsletter Section */
+/* Newsletter Section - Reduced padding */
 .newsletter-section {
-  padding: 3rem 0;
+  padding: 1.5rem 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
@@ -750,7 +763,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -788,11 +801,28 @@
   padding: 1rem 1.5rem;
 }
 
-/* Responsive Design */
+/* Responsive Design - Updated breakpoints */
 @media (max-width: 768px) {
+  /* Reduced section padding for mobile */
+  .stats-section,
+  .services-section,
+  .timeline-section,
+  .galleria-section,
+  .testimonials-section,
+  .faq-section,
+  .resources-section,
+  .contact-section {
+    padding: 1.5rem 0;
+  }
+  
+  .newsletter-section {
+    padding: 1rem 0;
+  }
+
   .hero-content .container {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 1.5rem;
   }
 
   .hero-title {
@@ -805,6 +835,7 @@
 
   .contact-content {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .form-grid {
@@ -814,14 +845,17 @@
   .newsletter-content {
     flex-direction: column;
     text-align: center;
+    gap: 1rem;
   }
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .services-card-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .hero-actions {
@@ -831,11 +865,37 @@
   .contact-actions {
     justify-content: center;
   }
+  
+  .contact-details {
+    gap: 0.75rem;
+  }
+  
+  .testimonial-card {
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
 }
 
 @media (max-width: 480px) {
+  /* Further reduced padding for small mobile */
+  .stats-section,
+  .services-section,
+  .timeline-section,
+  .galleria-section,
+  .testimonials-section,
+  .faq-section,
+  .resources-section,
+  .contact-section {
+    padding: 1rem 0;
+  }
+  
+  .newsletter-section {
+    padding: 0.75rem 0;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .hero-title {
@@ -844,6 +904,18 @@
 
   .section-header h2 {
     font-size: 1.8rem;
+  }
+  
+  .contact-item {
+    padding: 0.75rem;
+  }
+  
+  .testimonial-card {
+    padding: 0.75rem;
+  }
+  
+  .timeline-content {
+    padding: 0.75rem;
   }
 }
 
