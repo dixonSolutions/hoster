@@ -120,12 +120,26 @@
           [style]="{ 'color': websiteNavigation?.textColor || '#333333' }"
         />
         
+        <!-- Theme Toggle Button -->
+        <p-button 
+          *ngIf="!isMobile"
+          [icon]="getThemeIcon()" 
+          class="theme-toggle-btn" 
+          (onClick)="toggleTheme()" 
+          [pTooltip]="getThemeTooltip()"
+          tooltipPosition="bottom"
+          text 
+          plain 
+          [style]="{ 'color': websiteNavigation?.textColor || '#333333' }"
+        />
+        
+        <!-- Color Theme Dropdown (keeping existing functionality) -->
         <p-select 
           *ngIf="!isMobile"
           [options]="themeOptions" 
           [(ngModel)]="selectedTheme" 
           optionLabel="name" 
-          placeholder="Theme" 
+          placeholder="Colors" 
           styleClass="theme-dropdown" 
           (onChange)="selectTheme($event.value)" 
           [showClear]="true" 
@@ -253,20 +267,44 @@
 
         <p-divider></p-divider>
 
-        <!-- Theme Selection (Mobile) -->
+        <!-- Theme Controls (Mobile) -->
         <div class="sidebar-theme">
-          <h3 class="sidebar-section-title">Theme</h3>
-          <p-select 
-            [options]="themeOptions" 
-            [(ngModel)]="selectedTheme" 
-            optionLabel="name" 
-            placeholder="Select Theme" 
-            styleClass="sidebar-theme-select" 
-            (onChange)="selectTheme($event.value)" 
-            [showClear]="true" 
-            (onClear)="clearTheme()"
-          >
-          </p-select>
+          <h3 class="sidebar-section-title">Appearance</h3>
+          
+          <!-- Dark/Light Mode Toggle -->
+          <div class="theme-toggle-container">
+            <div class="theme-toggle-row">
+              <span class="theme-toggle-label">
+                <i [class]="getThemeIcon()"></i>
+                {{ isDarkMode() ? 'Dark Mode' : 'Light Mode' }}
+              </span>
+              <p-button 
+                [icon]="getThemeIcon()" 
+                class="sidebar-theme-toggle" 
+                (onClick)="toggleTheme()" 
+                [pTooltip]="getThemeTooltip()"
+                tooltipPosition="left"
+                text 
+                plain
+              />
+            </div>
+          </div>
+          
+          <!-- Color Theme Selection -->
+          <div class="color-theme-container">
+            <label class="color-theme-label">Color Theme</label>
+            <p-select 
+              [options]="themeOptions" 
+              [(ngModel)]="selectedTheme" 
+              optionLabel="name" 
+              placeholder="Select Colors" 
+              styleClass="sidebar-theme-select" 
+              (onChange)="selectTheme($event.value)" 
+              [showClear]="true" 
+              (onClear)="clearTheme()"
+            >
+            </p-select>
+          </div>
         </div>
 
         <!-- Search (Mobile) -->

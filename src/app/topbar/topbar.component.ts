@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataServiceService } from '../data-service.service';
+import { ThemeService, ThemeMode } from '../services/theme.service';
 
 // PrimeNG imports
 import { ToolbarModule } from 'primeng/toolbar';
@@ -17,6 +18,7 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
 import { SidebarModule } from 'primeng/sidebar';
 import { MenuModule } from 'primeng/menu';
 import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface ThemeOption {
   name: string;
@@ -57,7 +59,8 @@ interface WebsiteNavigation {
     AvatarGroupModule,
     SidebarModule,
     MenuModule,
-    DividerModule
+    DividerModule,
+    TooltipModule
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.css'
@@ -70,6 +73,10 @@ export class TopbarComponent implements OnInit, OnChanges, OnDestroy {
   sidebarVisible: boolean = false;
   isMobile: boolean = false;
 
+  // Theme properties
+  currentTheme: ThemeMode = 'light';
+  
+  // Color theme options (keeping existing color themes separate from dark/light mode)
   themeOptions: ThemeOption[] = [
     { name: 'Rose & Red', value: 'rose-red', badgeColor: '#e57373' },
     { name: 'Azure & Blue', value: 'azure-blue', badgeColor: '#90caf9' },
@@ -89,7 +96,8 @@ export class TopbarComponent implements OnInit, OnChanges, OnDestroy {
     private router: Router, 
     private route: ActivatedRoute,
     private dialog: MatDialog, 
-    public dataService: DataServiceService
+    public dataService: DataServiceService,
+    private themeService: ThemeService
   ) {
     // Listen to route changes to update active section
     this.router.events.subscribe(event => {
@@ -104,6 +112,11 @@ export class TopbarComponent implements OnInit, OnChanges, OnDestroy {
     this.setActiveSectionFromUrl(this.router.url);
     this.parseWebsiteData();
     this.checkScreenSize();
+    
+    // Subscribe to theme changes
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+    });
     
     // Listen to window resize events
     window.addEventListener('resize', this.onResize.bind(this));
@@ -371,5 +384,22 @@ export class TopbarComponent implements OnInit, OnChanges, OnDestroy {
 
   toggleSidebar() {
     this.sidebarVisible = !this.sidebarVisible;
+  }
+
+  // Theme methods
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
+  isDarkMode(): boolean {
+    return this.currentTheme === 'dark';
+  }
+
+  getThemeIcon(): string {
+    return this.isDarkMode() ? 'pi pi-sun' : 'pi pi-moon';
+  }
+
+  getThemeTooltip(): string {
+    return this.isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode';
   }
 }

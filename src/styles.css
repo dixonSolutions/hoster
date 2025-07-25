@@ -224,6 +224,83 @@ body[data-theme='cyan-orange'] {
   --toolbar-fg: #333333;
 }
 
+/* Dark theme variables */
+[data-theme="dark"] {
+  --primary-bg: #1a1a1a;
+  --primary-fg: #ffffff;
+  --accent: #64b5f6;
+  --toolbar-bg: #2d2d2d;
+  --toolbar-fg: #ffffff;
+}
+
+/* Base theme styles for both light and dark */
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark theme specific overrides for custom components */
+[data-theme="dark"] {
+  /* Shopping cart and other custom components */
+  .business-services-section,
+  .cart-container,
+  .empty-cart {
+    background: var(--primary-bg);
+    color: var(--primary-fg);
+  }
+  
+  /* Card backgrounds */
+  .business-info-card,
+  .service-card,
+  .cart-card,
+  .empty-cart-card {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+  }
+  
+  /* Text colors */
+  .business-description,
+  .service-description,
+  .service-name {
+    color: var(--primary-fg) !important;
+  }
+  
+  /* Input fields and form controls */
+  .search-input,
+  input[type="text"],
+  textarea {
+    background: #2d2d2d !important;
+    color: var(--primary-fg) !important;
+    border-color: #404040 !important;
+  }
+  
+  /* Tables */
+  .custom-cart-table {
+    background: #2d2d2d !important;
+  }
+  
+  .custom-cart-table th,
+  .custom-cart-table td {
+    background: #2d2d2d !important;
+    color: var(--primary-fg) !important;
+    border-color: #404040 !important;
+  }
+  
+  /* Panels and dialogs */
+  .cart-summary-panel,
+  .modern-order-dialog {
+    background: #2d2d2d !important;
+    border-color: #404040 !important;
+  }
+  
+  /* Loading and message components */
+  .loading-container,
+  .loading-text {
+    color: var(--primary-fg) !important;
+  }
+}
+
 body {
   background: var(--primary-bg, #ffffff);
   color: var(--primary-fg, #333333);
