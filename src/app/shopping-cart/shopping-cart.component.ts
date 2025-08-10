@@ -36,7 +36,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 import { ChipModule } from 'primeng/chip';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
@@ -98,7 +100,9 @@ interface AuthStep {
     InputTextarea,
     InputNumberModule,
     CalendarModule,
+    DatePickerModule,
     DialogModule,
+    SelectModule,
     ChipModule,
     TagModule,
     DividerModule,
@@ -135,7 +139,14 @@ export class ShoppingCartComponent implements OnInit{
   orderForm: FormGroup;
   showCustomerForm = false;
   selectedDate: Date | undefined = undefined;
+  selectedDateTime: Date | undefined = undefined;
   minDate!: Date;
+  // Day-specific time bounds applied to the DatePicker when a date is selected
+  computedMinDate: Date | null = null;
+  computedMaxDate: Date | null = null;
+  // Global bounds calculated from bookingDaysAhead
+  globalMinDate: Date | null = null;
+  globalMaxDate: Date | null = null;
   isSubmittingOrder = false;
   
 
@@ -151,6 +162,14 @@ export class ShoppingCartComponent implements OnInit{
   availableDays: Date[] = [];
   isLoadingAvailableDays = false;
   disabledDates: Date[] = [];
+  
+  // Enhanced availability properties
+  orderValidationError: import('../models').OrderValidationError | null = null;
+  enhancedAvailability: import('../models').BusinessAvailabilityResponse | null = null;
+  availableTimeSlots: import('../models').TimeSlot[] = [];
+  currentSelectedDateSlots: import('../models').TimeSlot[] = [];
+  // Dynamic minute step derived from total estimated service time
+  stepMinute: number = 30;
   
   // Reviews dialog properties
   showReviewsDialog = false;
@@ -258,6 +277,7 @@ export class ShoppingCartComponent implements OnInit{
     this.minDate.setDate(this.minDate.getDate() + 1);
     
     this.loadBusinessData();
+    this.recalcStepFromCart();
     this.loadSavedCustomerData();
     this.initializeCartWithLocations();
     
@@ -497,8 +517,12 @@ export class ShoppingCartComponent implements OnInit{
         // If a selected date is no longer available, clear it
         if (this.selectedDate && !this.isDateAvailable(this.selectedDate)) {
           this.selectedDate = undefined;
+          this.selectedDateTime = undefined;
           this.dataService.openSnackBar(this, 5000, 'Your previously selected date is no longer available. Please select a new date.', 'OK');
         }
+        
+        // Load enhanced availability data
+        this.loadEnhancedAvailability(businessId);
       },
       error: (error) => {
         console.error('Error loading available days:', error);
@@ -1918,7 +1942,7 @@ export class ShoppingCartComponent implements OnInit{
       contactMethod: formValue.contactMethod,
       contactValue: formValue.contactValue,
       paymentPreference: formValue.paymentPreference, // 'pay_now' or 'pay_later'
-      serviceDate: this.selectedDate,
+      serviceDate: this.selectedDateTime || this.selectedDate,
       notes: formValue.notes || '',
       address: formValue.address || '',
       city: formValue.city || '',
@@ -2041,6 +2065,349 @@ export class ShoppingCartComponent implements OnInit{
     );
   }
 
+  // ==================== ENHANCED AVAILABILITY METHODS ====================
+
+  /**
+   * Load enhanced availability data with business hours
+   */
+  private loadEnhancedAvailability(businessId: string): void {
+    this.websiteHosterService.getBusinessAvailability(businessId).subscribe({
+      next: (availability) => {
+        this.enhancedAvailability = availability;
+        console.log('Enhanced availability loaded:', availability);
+        
+        // Update available days based on the new API response
+        this.updateAvailableDaysFromEnhancedAPI(availability);
+        
+        // Update disabled dates for the date picker
+        this.updateDisabledDatesFromEnhancedAPI(availability);
+
+        // Set global min/max based on bookingDaysAhead
+        const today = new Date();
+        const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+        const endLimit = new Date(startOfToday);
+        endLimit.setDate(endLimit.getDate() + availability.bookingDaysAhead);
+        endLimit.setHours(23, 59, 59, 999);
+        this.globalMinDate = startOfToday;
+        this.globalMaxDate = endLimit;
+      },
+      error: (error) => {
+        console.warn('Enhanced availability not available, using legacy format:', error);
+        // Fallback to legacy functionality
+      }
+    });
+  }
+
+  /**
+   * Update available days from enhanced API response
+   */
+  private updateAvailableDaysFromEnhancedAPI(availability: import('../models').BusinessAvailabilityResponse): void {
+    this.availableDays = availability.availableDays
+      .filter(day => day.isAvailable)
+      .map(day => new Date(day.date));
+    
+    console.log(`Updated available days from enhanced API: ${this.availableDays.length} days`);
+  }
+
+  /**
+   * Update disabled dates from enhanced API response
+   */
+  private updateDisabledDatesFromEnhancedAPI(availability: import('../models').BusinessAvailabilityResponse): void {
+    const allDates: Date[] = [];
+    const today = new Date();
+    const futureLimit = new Date();
+    futureLimit.setDate(today.getDate() + availability.bookingDaysAhead);
+    
+    // Generate all dates in the range
+    for (let d = new Date(today); d <= futureLimit; d.setDate(d.getDate() + 1)) {
+      allDates.push(new Date(d));
+    }
+    
+    // Find available dates
+    const availableDateStrings = availability.availableDays
+      .filter(day => day.isAvailable)
+      .map(day => day.date);
+    
+    // Mark unavailable dates as disabled
+    this.disabledDates = allDates.filter(date => {
+      const dateString = date.toISOString().split('T')[0];
+      return !availableDateStrings.includes(dateString);
+    });
+    
+    console.log(`Updated disabled dates: ${this.disabledDates.length} dates blocked`);
+  }
+
+  /**
+   * Handle date/time selection from enhanced picker
+   */
+  onDateTimeSelected(date: Date): void {
+    // Treat as date-only selection
+    this.selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    this.clearValidationError();
+    
+    // Update available time slots and min/max for the selected date
+    this.updateTimeSlotForSelectedDate(this.selectedDate);
+    this.selectedDateTime = new Date(date);
+    
+    console.log('Selected date:', this.selectedDate);
+  }
+
+  /**
+   * Respond to any model change (date or time) to keep constraints in sync
+   */
+  onDateTimeModelChange(date: Date): void {
+    if (!date) return;
+    this.onDateTimeSelected(date);
+  }
+
+  /**
+   * Update available time slots for the selected date
+   */
+  private updateTimeSlotForSelectedDate(date: Date): void {
+    if (!this.enhancedAvailability) return;
+    
+    const dateString = date.toISOString().split('T')[0];
+    const dayData = this.enhancedAvailability.availableDays.find(day => day.date === dateString);
+    
+    if (dayData && dayData.isAvailable) {
+      this.currentSelectedDateSlots = dayData.availableTimeSlots;
+      // Ensure selected time remains within bounds
+      if (this.selectedDateTime) {
+        const t = `${String(this.selectedDateTime.getHours()).padStart(2,'0')}:${String(this.selectedDateTime.getMinutes()).padStart(2,'0')}`;
+        if (!this.isTimeWithinAvailableSlots(t, this.currentSelectedDateSlots) && this.currentSelectedDateSlots.length > 0) {
+          const firstSlot = this.currentSelectedDateSlots[0];
+          const [h, m] = firstSlot.startTime.split(':').map(n => parseInt(n, 10));
+          this.selectedDateTime.setHours(h, m, 0, 0);
+        }
+      }
+      // Compute min/max for the selected day to restrict time picker UI
+      if (dayData.availableTimeSlots.length > 0) {
+        const earliest = dayData.availableTimeSlots[0].startTime;
+        const latest = dayData.availableTimeSlots[dayData.availableTimeSlots.length - 1].endTime;
+        const [minH, minM] = earliest.split(':').map(n => parseInt(n, 10));
+        const [maxH, maxM] = latest.split(':').map(n => parseInt(n, 10));
+        const minDateForDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), minH, minM, 0, 0);
+        const maxDateForDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), maxH, maxM, 0, 0);
+        this.computedMinDate = minDateForDay;
+        this.computedMaxDate = maxDateForDay;
+      } else {
+        this.computedMinDate = null;
+        this.computedMaxDate = null;
+      }
+      
+      // Also compute per-day min/max bounds for potential UI use
+      if (dayData.availableTimeSlots.length > 0) {
+        const earliest = dayData.availableTimeSlots[0].startTime;
+        const latest = dayData.availableTimeSlots[dayData.availableTimeSlots.length - 1].endTime;
+        const [minH, minM] = earliest.split(':').map(n => parseInt(n, 10));
+        const [maxH, maxM] = latest.split(':').map(n => parseInt(n, 10));
+        this.computedMinDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), minH, minM, 0, 0);
+        this.computedMaxDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), maxH, maxM, 0, 0);
+      } else {
+        this.computedMinDate = null;
+        this.computedMaxDate = null;
+      }
+    } else {
+      this.currentSelectedDateSlots = [];
+      this.computedMinDate = null;
+      this.computedMaxDate = null;
+      this.selectedDateTime = undefined;
+    }
+  }
+
+  /**
+   * Check if a time is within available time slots
+   */
+  private isTimeWithinAvailableSlots(time: string, slots: import('../models').TimeSlot[]): boolean {
+    // exact match window
+    if (slots.some(slot => time >= slot.startTime && time <= slot.endTime)) return true;
+    // allow within any merged window
+    const merged = this.mergeTimeSlots(slots);
+    return merged.some(slot => time >= slot.startTime && time <= slot.endTime);
+  }
+
+  /**
+   * Merge overlapping/adjacent time slots to create continuous bounds
+   */
+  private mergeTimeSlots(slots: import('../models').TimeSlot[]): import('../models').TimeSlot[] {
+    if (!slots || slots.length === 0) return [] as any;
+    const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const result: import('../models').TimeSlot[] = [] as any;
+    let current = { ...sorted[0] } as any;
+
+    for (let i = 1; i < sorted.length; i++) {
+      const next = sorted[i];
+      // if overlapping or adjacent (e.g., 09:00-10:00 and 10:00-11:00)
+      if (current.endTime >= next.startTime) {
+        current.endTime = current.endTime >= next.endTime ? current.endTime : next.endTime;
+        current.totalHours = 0; // not used for display
+      } else {
+        result.push({ ...current });
+        current = { ...next } as any;
+      }
+    }
+    result.push(current);
+    return result as any;
+  }
+
+  /**
+   * Recalculate minute step (stepMinute) based on total estimated duration of cart services
+   * The picker will advance by this step for more meaningful time selection.
+   */
+  private recalcStepFromCart(): void {
+    try {
+      // Example heuristic: if total duration is <= 30 -> 15m steps, <= 60 -> 30m, >60 -> 60m
+      const totalMinutes = this.calculateCartEstimatedMinutes();
+      if (totalMinutes <= 30) this.stepMinute = 15;
+      else if (totalMinutes <= 60) this.stepMinute = 30;
+      else if (totalMinutes <= 120) this.stepMinute = 30; // keep reasonable granularity
+      else this.stepMinute = 60;
+    } catch {
+      this.stepMinute = 30;
+    }
+  }
+
+  private calculateCartEstimatedMinutes(): number {
+    // Walk through cart items and sum their estimated durations if present
+    // Fallback to 30 minutes per service when not available
+    let total = 0;
+    for (const cart of this.cartItemsWithLocations) {
+      const est = (cart.service as any)?.estimatedMinutes ?? 30;
+      total += est * (cart.quantity || 1);
+    }
+    return total;
+  }
+
+  /**
+   * Format business hours for display
+   */
+  getFormattedBusinessHours(): string {
+    if (!this.enhancedAvailability) return 'Hours not available';
+    
+    // Get today's day name
+    const today = new Date();
+    const todayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+    
+    // Find today's availability
+    const todayData = this.enhancedAvailability.availableDays.find(day => 
+      day.dayOfWeek === todayName
+    );
+    
+    if (!todayData || !todayData.isAvailable || todayData.availableTimeSlots.length === 0) {
+      return 'Closed today';
+    }
+    
+    // Get the primary time slot (first one)
+    const primarySlot = todayData.availableTimeSlots[0];
+    return `${this.formatTime(primarySlot.startTime)} - ${this.formatTime(primarySlot.endTime)}`;
+  }
+
+  /**
+   * Format time for display (convert 24h to readable format)
+   * Handles both "HH:mm" and "HH:mm:ss" formats
+   */
+  formatTime(time24: string): string {
+    const timeParts = time24.split(':');
+    const hours = timeParts[0];
+    const minutes = timeParts[1] || '00';
+    
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  }
+
+  /**
+   * Format suggested date for display
+   */
+  formatSuggestedDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  }
+
+  /**
+   * Select a suggested date
+   */
+  selectSuggestedDate(dateString: string): void {
+    const date = new Date(dateString);
+    
+    // Set to business opening time based on enhanced availability data
+    if (this.enhancedAvailability) {
+      const dayData = this.enhancedAvailability.availableDays.find(day => day.date === dateString);
+      
+      if (dayData && dayData.isAvailable && dayData.availableTimeSlots.length > 0) {
+        // Use the first available time slot
+        const firstSlot = dayData.availableTimeSlots[0];
+        const [hours, minutes] = firstSlot.startTime.split(':');
+        date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      } else {
+        date.setHours(9, 0, 0, 0); // Default to 9 AM
+      }
+    } else {
+      date.setHours(9, 0, 0, 0); // Default to 9 AM
+    }
+    
+    this.selectedDateTime = date;
+    this.selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    this.clearValidationError();
+    
+    // Update time slots for the newly selected date
+    this.updateTimeSlotForSelectedDate(date);
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Date Selected',
+      detail: `Selected ${this.formatSuggestedDate(dateString)} at ${this.formatTime(date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0'))}`,
+      life: 3000
+    });
+  }
+
+  /**
+   * Clear validation error
+   */
+  private clearValidationError(): void {
+    this.orderValidationError = null;
+  }
+
+  /**
+   * Handle enhanced validation error (for future API integration)
+   * This method will be used when the API returns structured validation errors
+   */
+  private handleEnhancedValidationError(error: import('../models').OrderValidationError): void {
+    this.orderValidationError = error;
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Invalid Date Selected',
+      detail: error.Message,
+      life: 6000
+    });
+  }
+
+  /**
+   * Simulate enhanced validation error for testing
+   * Remove this method once the API supports enhanced validation
+   */
+  simulateValidationError(): void {
+    const mockError: import('../models').OrderValidationError = {
+      Success: false,
+      Message: "Business is not available on the selected date. Please choose from the suggested alternatives.",
+      ErrorCode: "INVALID_DELIVERY_DATE",
+      SuggestedDates: [
+        new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+        new Date(Date.now() + 172800000).toISOString().split('T')[0], // Day after tomorrow
+        new Date(Date.now() + 259200000).toISOString().split('T')[0], // 3 days from now
+        new Date(Date.now() + 345600000).toISOString().split('T')[0], // 4 days from now
+        new Date(Date.now() + 432000000).toISOString().split('T')[0]  // 5 days from now
+      ]
+    };
+    
+    this.handleEnhancedValidationError(mockError);
+  }
+
   // ==================== ANONYMOUS ORDER SUBMISSION ====================
 
   /**
@@ -2057,7 +2424,7 @@ export class ShoppingCartComponent implements OnInit{
         customerName: formValue.name,
         emailOrPhone: formValue.contactValue,
         paymentPreference: formValue.paymentPreference,
-        serviceDate: this.selectedDate!,
+        serviceDate: this.selectedDateTime || this.selectedDate!,
         notes: formValue.notes,
         address: formValue.address,
         city: formValue.city,
@@ -2124,12 +2491,48 @@ export class ShoppingCartComponent implements OnInit{
         orderPromises.push(this.anonymousOrderService.createC2SOrder(c2sRequest).toPromise() as Promise<AnonymousOrderResponse>);
       }
 
-      // Execute all order submissions
+      // Execute all order submissions with enhanced error handling
       console.log(`📋 Submitting ${orderPromises.length} anonymous order(s)...`);
-      const responses = await Promise.all(orderPromises);
+      
+      try {
+        const responses = await Promise.all(orderPromises);
+        
+        // Check for validation errors in responses
+        // Look for error responses that might contain validation information
+        const potentialValidationErrors = responses.filter(response => 
+          response.Status?.toLowerCase().includes('error') || 
+          response.Message?.toLowerCase().includes('not available') ||
+          response.Message?.toLowerCase().includes('invalid')
+        );
+        
+        if (potentialValidationErrors.length > 0) {
+          // For now, show the error message from the API response
+          // Future enhancement: when API supports enhanced validation, this will be updated
+          const errorResponse = potentialValidationErrors[0];
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Booking Error',
+            detail: errorResponse.Message || 'The selected date/time is not available.',
+            life: 6000
+          });
+          
+          // Clear the validation error since we're not getting structured validation yet
+          this.orderValidationError = null;
+          return;
+        }
 
-      // Handle successful submissions
-      this.handleAnonymousOrderSuccess(responses, formData.paymentPreference);
+        // Handle successful submissions
+        this.handleAnonymousOrderSuccess(responses, formData.paymentPreference);
+      } catch (error: any) {
+        // Handle network or other errors
+        console.error('Order submission failed:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Order Failed',
+          detail: 'Unable to submit order. Please try again.',
+          life: 5000
+        });
+      }
 
     } catch (error: any) {
       console.error('❌ Anonymous order submission failed:', error);

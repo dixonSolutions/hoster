@@ -171,19 +171,70 @@
                  </p>
                </div>
                
-               <!-- Simple Calendar with Disabled Dates -->
+               <!-- Enhanced Date Time Picker with 24-hour support -->
                <div class="calendar-container">
-                 <p-calendar 
-                   [(ngModel)]="selectedDate" 
-                   [minDate]="minDate" 
+                 <p-datepicker 
+                   inputId="calendar-24h"
+                   [(ngModel)]="selectedDateTime"
+                   (ngModelChange)="onDateTimeModelChange($event)"
+                   [minDate]="globalMinDate || minDate"
+                   [maxDate]="globalMaxDate"
                    [disabledDates]="disabledDates"
                    dateFormat="mm/dd/yy" 
-                   placeholder="Choose an available date"
-                   styleClass="simple-date-picker"
+                   [showTime]="true"
+                   [hourFormat]="'24'"
+                   [timeOnly]="false"
+                   [stepMinute]="stepMinute"
+                   placeholder="Choose date and time"
+                   styleClass="enhanced-date-picker"
                    [showIcon]="true"
                    [readonlyInput]="true"
-                   [disabled]="isLoadingAvailableDays || availableDays.length === 0">
-                 </p-calendar>
+                   [disabled]="isLoadingAvailableDays || availableDays.length === 0"
+                   (onSelect)="onDateTimeSelected($event)"
+                   stepMinute="30">
+                 </p-datepicker>
+                 
+                 <!-- Business Hours Info -->
+                 <div *ngIf="enhancedAvailability" class="business-hours-info">
+                   <p><i class="pi pi-clock"></i> Business Hours: {{ getFormattedBusinessHours() }}</p>
+                   <p *ngIf="enhancedAvailability.summary.isCurrentlyOpen" class="currently-open">
+                     <i class="pi pi-check-circle"></i> Currently Open
+                   </p>
+                   <p *ngIf="!enhancedAvailability.summary.isCurrentlyOpen" class="currently-closed">
+                     <i class="pi pi-times-circle"></i> Currently Closed
+                   </p>
+                 </div>
+                 
+                 <!-- Available Time Slots for Selected Date -->
+                <div *ngIf="currentSelectedDateSlots.length > 0" class="time-slots-info">
+                  <h5><i class="pi pi-clock"></i> Available Times for Selected Date:</h5>
+                  <div class="time-slots-grid">
+                    <p-chip 
+                      *ngFor="let slot of currentSelectedDateSlots"
+                      [label]="formatTime(slot.startTime) + ' - ' + formatTime(slot.endTime)"
+                      styleClass="time-slot-chip">
+                    </p-chip>
+                  </div>
+                </div>
+                 
+                 <!-- Validation Error with Suggested Dates -->
+                 <div *ngIf="orderValidationError" class="validation-error-container">
+                   <p-message severity="warn" [text]="orderValidationError.Message"></p-message>
+                   
+                   <div *ngIf="orderValidationError?.SuggestedDates && orderValidationError.SuggestedDates.length > 0" class="suggested-dates">
+                     <h5><i class="pi pi-calendar"></i> Suggested Available Dates:</h5>
+                     <div class="suggested-dates-grid">
+                       <p-button 
+                         *ngFor="let suggestedDate of orderValidationError.SuggestedDates.slice(0, 5)"
+                         [label]="formatSuggestedDate(suggestedDate)"
+                         icon="pi pi-calendar-plus"
+                         (onClick)="selectSuggestedDate(suggestedDate)"
+                         styleClass="p-button-outlined p-button-sm suggested-date-btn"
+                         severity="info">
+                       </p-button>
+                     </div>
+                   </div>
+                 </div>
                </div>
     </div>
           <p-button 
@@ -192,7 +243,7 @@
             (onClick)="openOrderForm()" 
             styleClass="checkout-btn p-button-lg"
             severity="success"
-            [disabled]="!selectedDate || dataService.CartItems.length === 0">
+            [disabled]="!selectedDateTime || dataService.CartItems.length === 0">
           </p-button>
         </p-panel>
   </div>
@@ -322,7 +373,7 @@
         </div>
         <div class="total-row">
           <span>Service Date:</span>
-          <p-chip [label]="(selectedDate | date:'MMM d, yyyy') || 'No date selected'" styleClass="date-chip"></p-chip>
+          <p-chip [label]="(selectedDateTime | date:'MMM d, yyyy HH:mm') || 'No date selected'" styleClass="date-chip"></p-chip>
         </div>
       </div>
     </div>
@@ -494,7 +545,7 @@
         icon="pi pi-check" 
         (onClick)="submitOrderAnonymous()" 
         styleClass="p-button-success p-button-lg"
-        [disabled]="!orderForm.valid || !selectedDate || !allLocationsSelected()"
+        [disabled]="!orderForm.valid || !selectedDateTime || !allLocationsSelected()"
         [loading]="isSubmittingOrder">
       </p-button>
     </div>

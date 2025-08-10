@@ -137,8 +137,8 @@ export class AnonymousOrderService {
     return {
       EmailOrPhone: formData.emailOrPhone,
       OrderID: this.generateOrderId(), // placeholder
-      OrderDate: new Date().toISOString(),
-      RequestedDeliveryDate: formData.serviceDate.toISOString(),
+      OrderDate: this.formatDateTimeFor24HourAPI(new Date()),
+      RequestedDeliveryDate: this.formatDateTimeFor24HourAPI(formData.serviceDate),
       Cost: totalCost,
       Currency: items[0]?.service.servicePriceCurrencyUnit || 'AUD',
       AddressCountry: formData.country || 'Australia',
@@ -170,8 +170,8 @@ export class AnonymousOrderService {
     return {
       EmailOrPhone: formData.emailOrPhone,
       OrderID: this.generateOrderId(), // placeholder
-      OrderDate: new Date().toISOString(),
-      RequestedDeliveryDate: formData.serviceDate.toISOString(),
+      OrderDate: this.formatDateTimeFor24HourAPI(new Date()),
+      RequestedDeliveryDate: this.formatDateTimeFor24HourAPI(formData.serviceDate),
       Cost: totalCost,
       Currency: items[0]?.service.servicePriceCurrencyUnit || 'AUD',
       PlaceID: placeID,
@@ -332,5 +332,24 @@ export class AnonymousOrderService {
     } else {
       return `A confirmation link will be sent to your ${method}. Click to confirm your order, then you can pay when ready.`;
     }
+  }
+
+  /**
+   * Format date and time for 24-hour API format
+   * Supports both "2025-08-11T09:00:00Z" and "2025-08-11 09:00:00" formats
+   */
+  formatDateTimeFor24HourAPI(date: Date): string {
+    // Get the date part in YYYY-MM-DD format
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    // Get the time part in HH:mm:ss format (24-hour)
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    // Return in ISO format with Z timezone indicator
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
   }
 } 

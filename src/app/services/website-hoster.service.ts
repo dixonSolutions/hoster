@@ -115,6 +115,41 @@ export class WebsiteHosterService {
   }
 
   /**
+   * Get enhanced business availability with 24-hour format support
+   * @param businessId - The business ID
+   * @returns Observable of enhanced availability data
+   */
+  getBusinessAvailability(businessId: string): Observable<import('../models').BusinessAvailabilityResponse> {
+    // Use the actual API endpoint URL structure
+    const availabilityUrl = `https://servicefuzzapi-atf8b4dqawc8dsa9.australiaeast-01.azurewebsites.net/api/WebsiteHoster/business/${encodeURIComponent(businessId)}/availability`;
+    
+    return this.http.get<import('../models').BusinessAvailabilityResponse>(availabilityUrl).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Format date and time for 24-hour API format
+   * @param date - Date object
+   * @param time - Optional time string (HH:mm format)
+   * @returns Formatted datetime string
+   */
+  formatDateTime(date: Date, time?: string): string {
+    const isoDate = date.toISOString().split('T')[0]; // Get YYYY-MM-DD
+    const timeComponent = time || '09:00:00'; // Default to 9 AM if no time specified
+    return `${isoDate}T${timeComponent}Z`;
+  }
+
+  /**
+   * Format date for simple date-only API calls
+   * @param date - Date object
+   * @returns Formatted date string (YYYY-MM-DD)
+   */
+  formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  /**
    * Clear available days cache for specific business
    * @param businessId - The business ID to clear from cache
    */
